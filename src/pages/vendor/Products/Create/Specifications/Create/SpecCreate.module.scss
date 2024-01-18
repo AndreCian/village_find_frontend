@@ -1,0 +1,57 @@
+.root {
+  .container {
+    @apply space-y-4;
+
+    .thumbnail {
+      @apply flex items-center gap-x-2;
+
+      .arrow {
+        @apply h-3 w-3;
+      }
+
+      span {
+        @apply font-bold;
+      }
+    }
+
+    .header {
+      @apply flex justify-between;
+
+      h1 {
+        @apply font-normal;
+
+        span {
+          @apply font-bold;
+        }
+      }
+
+      .button {
+        @apply rounded-full bg-dark px-12 py-2 text-white;
+      }
+    }
+
+    .form {
+      @apply flex gap-x-4;
+
+      .control {
+        @apply space-y-2;
+      }
+
+      .values {
+        @apply w-full self-end rounded-full bg-primary;
+      }
+    }
+
+    .buttonBar {
+      @apply flex justify-end gap-x-4 pt-6;
+
+      .button {
+        @apply rounded-full border border-primary px-9 py-3 text-xs;
+      }
+
+      .updateBtn {
+        @apply bg-dark text-white;
+      }
+    }
+  }
+}

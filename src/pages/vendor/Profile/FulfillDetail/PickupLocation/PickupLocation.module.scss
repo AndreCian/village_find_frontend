@@ -1,0 +1,21 @@
+.root {
+}
+
+.status {
+  @apply w-fit min-w-0;
+}
+
+.actionPanel {
+}
+
+.actionButton {
+  @apply rounded-full bg-dark px-12 py-2 text-white;
+}
+
+.actionCell {
+  @apply flex items-center gap-x-6;
+
+  span {
+    @apply flex h-10 w-10 items-center justify-center rounded-full border border-primary bg-warning;
+  }
+}

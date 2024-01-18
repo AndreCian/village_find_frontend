@@ -1,0 +1,21 @@
+.root {
+  @apply flex flex-wrap gap-x-4;
+
+  .control {
+    @apply mb-5;
+
+    p {
+      @apply mb-2;
+    }
+  }
+
+  .download {
+    p {
+      @apply text-white;
+    }
+
+    .downloadButton {
+      @apply w-24;
+    }
+  }
+}

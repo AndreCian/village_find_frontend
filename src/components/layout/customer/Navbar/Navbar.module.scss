@@ -1,0 +1,15 @@
+.root {
+  @apply hidden h-10 w-full shrink-0 bg-white shadow-md sm:block;
+
+  .container {
+    @apply h-full;
+
+    .navbar {
+      @apply flex h-full gap-x-8;
+
+      li {
+        @apply flex cursor-pointer items-center gap-x-1;
+      }
+    }
+  }
+}

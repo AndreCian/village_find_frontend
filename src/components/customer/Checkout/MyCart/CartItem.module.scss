@@ -1,0 +1,295 @@
+.root {
+  @apply space-y-10 rounded-md border-1 border-success px-5 py-8;
+
+  .header {
+    @apply flex gap-x-10;
+
+    .vendor {
+      @apply flex items-center gap-x-2;
+
+      & > img {
+        @apply aspect-square w-10 rounded-md;
+      }
+
+      .order {
+        .name {
+          @apply text-[16px] font-bold leading-[25px];
+        }
+
+        .orderId {
+          @apply text-[16px] leading-[25px];
+
+          span {
+            @apply text-light;
+          }
+        }
+      }
+    }
+
+    .delivery,
+    .subtotal {
+      .title {
+        @apply text-[16px] font-bold leading-[25px];
+      }
+
+      .body {
+        @apply text-[16px] leading-[25px];
+      }
+    }
+
+    .subtotal {
+      @apply hidden xl:block;
+    }
+  }
+
+  .products {
+    @apply space-y-8 pl-10;
+
+    .product {
+      @apply flex justify-between;
+
+      .main {
+        @apply flex gap-x-5;
+
+        .imageBar {
+          @apply flex shrink-0 flex-col gap-y-8;
+
+          & > img {
+            @apply aspect-square w-24 self-start rounded-md;
+          }
+
+          .quantity {
+            @apply flex w-[100px] items-center overflow-hidden rounded-md border-1 border-primary xl:hidden;
+
+            span {
+              @apply flex aspect-square w-8 shrink-0 cursor-pointer items-center justify-center;
+            }
+
+            p {
+              @apply grow text-center;
+            }
+
+            .minus {
+              @apply border-r-1 border-r-primary bg-primary;
+            }
+
+            .plus {
+              @apply border-l-1 border-l-primary bg-success;
+            }
+          }
+        }
+
+        .majorInfo {
+          @apply flex flex-col gap-y-2;
+
+          .heading {
+            @apply space-y-1;
+
+            .title {
+              @apply text-[16px] font-bold leading-[25px];
+            }
+
+            .pricePerUnit {
+              @apply text-[10px] leading-[16px];
+            }
+          }
+
+          .price {
+            @apply xl:hidden;
+
+            .title {
+              @apply text-[14px] font-medium leading-[20px];
+            }
+
+            .body {
+              @apply text-[18px] font-bold leading-[24px];
+            }
+          }
+
+          .shipping {
+            @apply space-y-4;
+
+            .gift {
+              @apply space-y-4;
+
+              .heading {
+                @apply space-y-2;
+
+                .title {
+                  @apply text-[13px] font-bold leading-[18px];
+                }
+
+                .body {
+                  @apply flex gap-x-4;
+
+                  .giftBtn {
+                    @apply flex w-[120px] items-center justify-between border-1 border-primary bg-warning px-2 py-1 pl-4;
+
+                    .label {
+                      @apply text-[11px] font-normal leading-[16px];
+                    }
+
+                    span {
+                      @apply flex aspect-square w-6 items-center justify-center rounded-full border-1 border-primary bg-info;
+
+                      img {
+                        @apply aspect-square w-3;
+                      }
+                    }
+                  }
+
+                  .subscSelect {
+                    @apply w-[125px] min-w-0;
+
+                    div {
+                      font-family: AvenirNextLTPro-Regular !important;
+                      @apply text-[13px] font-medium leading-[18px];
+                    }
+
+                    & > div:nth-child(1) {
+                      @apply px-2 py-2 font-avenir;
+                    }
+
+                    & > div:nth-child(2) {
+                      @apply mt-0 overflow-hidden rounded-t-none border-t-0 px-0 py-0;
+
+                      span {
+                        @apply w-full px-2 py-0.5 text-left font-avenir hover:rounded-none hover:bg-primary hover:font-normal;
+                      }
+                    }
+                  }
+                }
+              }
+            }
+
+            .extra {
+              @apply flex flex-col gap-x-2;
+
+              .style {
+                @apply flex gap-x-2;
+
+                p {
+                  @apply text-[13px] leading-[18px];
+
+                  span {
+                    @apply font-bold;
+                  }
+                }
+              }
+
+              .personalization {
+                @apply max-w-[230px] space-y-1;
+
+                p {
+                  @apply text-[13px] leading-[18px];
+                }
+
+                .title {
+                  @apply font-bold;
+                }
+
+                span {
+                  @apply cursor-pointer text-[10px] leading-[12px] text-light underline;
+                }
+              }
+            }
+          }
+
+          .subscription {
+            @apply flex flex-col gap-y-4;
+
+            .head {
+              @apply text-[13px] font-bold leading-[18px];
+            }
+
+            .body {
+              @apply space-y-2;
+
+              .text {
+                @apply flex gap-x-0.5 text-[11px] leading-[16px];
+
+                p {
+                }
+
+                span {
+                  @apply font-bold;
+                }
+              }
+
+              .duration p,
+              .frequency p {
+                @apply underline;
+              }
+            }
+          }
+        }
+      }
+
+      .action {
+        @apply hidden flex-col items-end gap-y-10 py-3.5 xl:flex;
+
+        .removeBtn {
+          @apply flex cursor-pointer items-center gap-x-2 text-[13px] font-medium leading-[18px] tracking-normal;
+
+          span {
+            @apply flex aspect-square w-5 items-center justify-center rounded-full border-1 border-primary bg-warning;
+
+            img {
+              @apply aspect-square w-3;
+            }
+          }
+        }
+
+        .pricing {
+          @apply flex items-center gap-x-6;
+
+          .quantity {
+            @apply flex w-[120px] items-center overflow-hidden rounded-md border-1 border-primary;
+
+            span {
+              @apply flex aspect-square w-9 shrink-0 cursor-pointer items-center justify-center;
+            }
+
+            p {
+              @apply grow text-center;
+            }
+
+            .minus {
+              @apply border-r-1 border-r-primary bg-primary;
+            }
+
+            .plus {
+              @apply border-l-1 border-l-primary bg-success;
+            }
+          }
+
+          .price {
+            .title {
+              @apply text-[13px] font-bold leading-[18px];
+            }
+
+            .text {
+              @apply text-[16px] font-medium leading-[25px];
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .footer {
+    @apply space-y-4;
+
+    .title {
+      @apply text-[13px] font-bold leading-[18px];
+    }
+
+    .buttons {
+      @apply flex gap-x-4;
+
+      .button {
+        @apply w-[110px] rounded-md border-1 border-primary bg-white px-0 py-5 text-[11px] font-medium font-normal leading-[16px] tracking-normal text-black;
+      }
+    }
+  }
+}

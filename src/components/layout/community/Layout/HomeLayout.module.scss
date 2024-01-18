@@ -1,0 +1,33 @@
+.root {
+  @apply flex h-full;
+
+  .sidebar {
+    @apply flex w-[300px] shrink-0 flex-col gap-y-6 border-r-1 border-gray-300 p-3;
+
+    .logo {
+      @apply flex flex-col items-center gap-y-2 text-center;
+
+      img {
+        @apply rounded-md;
+      }
+
+      p {
+        @apply text-[24px] leading-[32px];
+      }
+    }
+
+    .navbar {
+      .navitem {
+        @apply cursor-pointer rounded-md px-4 py-2;
+      }
+
+      .active {
+        @apply bg-blue-500 text-white;
+      }
+    }
+  }
+
+  .content {
+    @apply w-full overflow-y-auto;
+  }
+}

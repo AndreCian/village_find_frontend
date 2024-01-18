@@ -1,0 +1,122 @@
+.root {
+  @apply space-y-4;
+
+  .blog {
+    @apply bg-gradient-to-r from-[#4A236A] to-[#251235];
+
+    .container {
+      @apply flex w-full items-center gap-x-8 lg:w-2/3;
+
+      .magicPanel {
+        @apply flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-success;
+
+        .magicIcon {
+          @apply h-8 w-8;
+        }
+      }
+
+      .desc {
+        @apply text-xs;
+
+        & * {
+          @apply text-white;
+        }
+
+        h2 {
+          @apply mb-1 text-base font-bold;
+        }
+
+        p {
+          @apply mb-4;
+        }
+
+        span {
+          @apply underline decoration-white;
+        }
+      }
+    }
+  }
+
+  .information {
+    .container {
+      @apply space-y-4;
+
+      .thumbnail {
+        @apply flex items-center gap-x-2;
+
+        .arrow {
+          @apply h-3 w-3;
+        }
+
+        span {
+          @apply font-bold;
+        }
+      }
+
+      .variant {
+        p {
+          @apply mb-8;
+          span {
+            @apply font-bold;
+          }
+        }
+
+        .paytype {
+          .radioPanel {
+            @apply min-w-[200px] rounded-full px-4 py-2;
+
+            .radio {
+              @apply flex items-center gap-x-2;
+
+              * {
+                @apply m-0;
+              }
+            }
+          }
+
+          .active {
+            @apply bg-success;
+
+            span {
+              @apply text-white;
+            }
+
+            p {
+              @apply text-white;
+            }
+          }
+        }
+      }
+
+      .form {
+        @apply space-y-4;
+
+        .control {
+          @apply space-y-2;
+
+          .categories {
+            & > div:nth-child(1) {
+              @apply rounded-full border-none bg-primary;
+            }
+          }
+        }
+      }
+
+      .buttonBar {
+        @apply flex justify-end gap-x-4;
+
+        .button {
+          @apply rounded-full border border-primary bg-white px-9 py-3 text-xs;
+        }
+
+        .updateButton {
+          @apply border-none bg-dark text-white;
+        }
+      }
+    }
+  }
+}
+
+.adornment {
+  @apply flex h-8 w-8 items-center justify-center rounded-full bg-success;
+}

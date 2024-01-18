@@ -1,0 +1,42 @@
+.root {
+  @apply w-full overflow-x-auto;
+
+  .header {
+    @apply flex w-fit min-w-fit items-center rounded-full bg-primary text-base;
+
+    span {
+      @apply shrink-0 rounded-full px-5 py-4;
+    }
+
+    .exSpan {
+      @apply w-8;
+    }
+  }
+
+  .body {
+    @apply mb-8 flex w-fit flex-col;
+
+    .row {
+      @apply flex h-16 items-center;
+
+      & > div {
+        @apply w-40 shrink-0 px-5;
+
+        & * {
+        }
+      }
+
+      .expandIcon {
+        @apply w-10;
+
+        span {
+          @apply flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-info;
+        }
+      }
+    }
+  }
+}
+
+.divider {
+  @apply border-t-0.5 border-t-secondary;
+}

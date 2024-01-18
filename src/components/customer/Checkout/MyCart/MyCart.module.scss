@@ -1,0 +1,27 @@
+.root {
+  @apply space-y-10;
+
+  .cart {
+    @apply space-y-6;
+
+    .title {
+      @apply text-[20px] font-bold leading-[30px];
+    }
+
+    .cartItemList {
+      @apply space-y-10;
+    }
+  }
+
+  .button {
+    @apply w-full font-avenir text-[20px] leading-[27px];
+  }
+
+  .loginBtn {
+    @apply bg-dark font-normal text-white;
+  }
+
+  .checkoutBtn {
+    @apply rounded-md py-4 uppercase;
+  }
+}

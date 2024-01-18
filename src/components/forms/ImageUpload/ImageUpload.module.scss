@@ -1,0 +1,31 @@
+.root {
+  @apply h-max;
+
+  p {
+    @apply mb-4;
+  }
+
+  .body {
+    @apply mb-4;
+
+    .imgSelector {
+      @apply flex items-center gap-x-2;
+    }
+
+    .imgViewer {
+      @apply mt-6 rounded-md;
+    }
+  }
+}
+
+.rounded {
+  .imgSelector {
+    input {
+      @apply rounded-full border-none bg-primary;
+
+      button {
+        @apply rounded-full;
+      }
+    }
+  }
+}

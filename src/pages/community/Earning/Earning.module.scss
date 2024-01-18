@@ -1,0 +1,27 @@
+.root {
+  @apply flex w-full flex-col gap-y-4 px-12 py-8;
+
+  h1 {
+    @apply text-[20px] leading-[24px] text-green-500;
+  }
+
+  .input {
+    @apply max-w-[300px];
+
+    input {
+      @apply border-1 border-gray-400 focus:border-blue-500 focus:ring-3 focus:ring-blue-300;
+    }
+  }
+
+  .content {
+    @apply flex gap-x-2;
+
+    button {
+      @apply rounded-md p-2 active:ring-3 active:ring-blue-300;
+    }
+
+    .submit {
+      @apply bg-blue-600 text-white;
+    }
+  }
+}

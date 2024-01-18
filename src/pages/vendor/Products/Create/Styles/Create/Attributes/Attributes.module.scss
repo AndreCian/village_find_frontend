@@ -1,0 +1,17 @@
+.root {
+  .container {
+    @apply space-y-4;
+
+    .thumbnail {
+      @apply flex items-center gap-x-2;
+
+      .arrow {
+        @apply h-3 w-3;
+      }
+
+      span {
+        @apply font-bold;
+      }
+    }
+  }
+}

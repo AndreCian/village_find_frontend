@@ -1,0 +1,89 @@
+.root {
+  @apply relative min-w-0 select-none lg:min-w-[250px];
+
+  .selectBox {
+    @apply flex w-full items-center justify-between rounded-md border border-0.5 border-primary bg-white px-4 py-3 text-xs outline-none;
+
+    span {
+      @apply mr-4;
+    }
+  }
+
+  .viewBox {
+    @apply absolute z-50 mt-2 flex w-full flex-col rounded-md border-0.5 border-primary bg-white px-4 py-5 text-base shadow-lg;
+
+    span {
+      @apply select-none py-1 text-center hover:rounded-md hover:bg-secondary hover:font-bold;
+    }
+
+    .activeItem {
+      @apply rounded-md bg-secondary;
+    }
+  }
+}
+
+.borderNone {
+  .selectBox,
+  .viewBox {
+    @apply border-none;
+  }
+}
+
+.bgColorPrimary {
+  .selectBox,
+  .viewBox {
+    @apply bg-primary;
+  }
+}
+
+.bgColorDark {
+  .selectBox,
+  .viewBox {
+    @apply bg-dark;
+
+    & * {
+      @apply text-white;
+    }
+  }
+}
+
+.bgColorSecondary {
+  .selectBox,
+  .viewBox {
+    @apply bg-secondary;
+  }
+}
+
+.bgColorBlue {
+  .selectBox,
+  .viewBox {
+    @apply bg-blue-500;
+
+    span,
+    svg {
+      @apply text-white;
+    }
+  }
+}
+
+.bgColorRed {
+  .selectBox,
+  .viewBox {
+    @apply bg-warning;
+  }
+}
+
+.roundedFull {
+  .selectBox,
+  .viewBox span {
+    @apply rounded-full hover:rounded-full;
+  }
+
+  .viewBox {
+    @apply rounded-3xl;
+
+    .activeItem {
+      @apply rounded-full font-bold;
+    }
+  }
+}

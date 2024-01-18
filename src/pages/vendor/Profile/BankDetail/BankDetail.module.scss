@@ -1,0 +1,17 @@
+.root {
+  .container {
+    @apply flex flex-row-reverse;
+
+    .panel {
+      @apply space-y-12 pr-20;
+
+      p {
+        @apply mt-12 text-4xl font-bold;
+      }
+
+      button {
+        @apply rounded-full bg-dark px-16 py-3 text-xs text-white;
+      }
+    }
+  }
+}

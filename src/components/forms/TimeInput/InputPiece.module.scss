@@ -1,0 +1,7 @@
+.root {
+  @apply cursor-pointer text-base font-normal text-primary;
+}
+
+.focused {
+  @apply text-primary;
+}

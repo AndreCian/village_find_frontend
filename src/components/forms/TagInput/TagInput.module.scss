@@ -1,0 +1,11 @@
+.root {
+  @apply flex h-10 items-center gap-x-4 overflow-hidden rounded-full bg-primary px-4 py-2.5 text-xs;
+
+  p {
+    @apply flex shrink-0 items-center gap-x-1 rounded-full bg-dark px-4 py-0.5 text-xs text-white;
+  }
+
+  input {
+    @apply border-none bg-primary outline-none;
+  }
+}

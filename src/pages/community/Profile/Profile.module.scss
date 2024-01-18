@@ -1,0 +1,35 @@
+.root {
+  @apply flex w-full flex-col gap-y-4 px-12 py-8;
+
+  h1 {
+    @apply text-[32px] font-bold leading-[36px] text-blue-500;
+  }
+
+  .form {
+    @apply flex flex-col gap-y-8;
+
+    .control {
+      @apply space-y-2;
+
+      .input {
+        @apply w-full;
+
+        input {
+          @apply border-1 border-gray-400 focus:border-blue-500 focus:ring-3 focus:ring-blue-300;
+        }
+      }
+
+      .textarea {
+        @apply border-none p-0;
+
+        textarea {
+          @apply rounded-md border-1 border-gray-400 p-4 focus:border-blue-500 focus:ring-3 focus:ring-blue-300;
+        }
+      }
+    }
+  }
+
+  button {
+    @apply self-end rounded-md bg-blue-600 p-2.5 text-white active:ring-3 active:ring-blue-300;
+  }
+}

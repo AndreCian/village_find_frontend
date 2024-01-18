@@ -1,0 +1,17 @@
+.root {
+  .container {
+    @apply w-full space-y-12 lg:w-2/3;
+
+    & > p {
+      @apply text-xs;
+    }
+  }
+
+  .control {
+    @apply space-y-2;
+  }
+
+  .horizon {
+    @apply grid grid-cols-1 gap-x-4 lg:grid-cols-3;
+  }
+}

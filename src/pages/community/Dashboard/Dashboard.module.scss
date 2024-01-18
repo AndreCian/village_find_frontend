@@ -1,0 +1,28 @@
+.root {
+  @apply flex w-full flex-col gap-y-4 px-12 py-8;
+
+  h1 {
+    @apply text-[32px] font-bold leading-[36px] text-blue-500;
+  }
+
+  .divider {
+    @apply w-full border-b-1 border-gray-200;
+  }
+
+  .share {
+    @apply flex items-center text-[20px] leading-[24px];
+
+    span {
+      @apply mx-1 rounded-md bg-blue-500 p-1 text-[14px] leading-[18px] text-white;
+    }
+  }
+
+  .text {
+    @apply space-y-2;
+
+    .earning,
+    .vendors {
+      @apply font-bold text-green-500;
+    }
+  }
+}

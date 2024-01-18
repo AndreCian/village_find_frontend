@@ -1,0 +1,115 @@
+.root {
+  @apply flex flex-col items-center gap-y-20 py-24;
+
+  .head {
+    @apply text-center text-[20px] font-bold leading-[30px];
+  }
+
+  .reviewBar {
+    @apply grid w-full grid-cols-1 gap-4 xl:grid-cols-3;
+
+    .customer {
+      @apply space-y-2.5;
+
+      .rating {
+        @apply flex items-center gap-x-2;
+
+        p {
+          @apply text-[20px] font-bold leading-[30px] text-success;
+        }
+      }
+
+      .text {
+        @apply text-[16px] leading-[25px];
+      }
+    }
+
+    .total {
+      @apply border-b-0.5 border-t-0.5 border-primary py-4 xl:flex xl:flex-col xl:items-center xl:border-b-0 xl:border-l-0.5 xl:border-r-0.5 xl:border-t-0 xl:py-0;
+
+      .reviewItem {
+        @apply flex items-center gap-x-6;
+
+        .progress {
+          @apply relative h-2 w-24 rounded-full bg-GRay;
+
+          .loading {
+            @apply absolute left-0 top-0 h-full rounded-full bg-light p-0;
+          }
+        }
+      }
+    }
+
+    .button {
+      @apply xl:flex xl:items-center xl:justify-center;
+
+      .cancelBtn {
+        @apply w-[200px] px-10 py-3.5 text-[16px] font-normal leading-[25px];
+      }
+    }
+  }
+
+  .reviewList {
+    @apply flex w-full flex-col items-center gap-y-20;
+
+    .reviews {
+      @apply space-y-10 self-start;
+    }
+
+    .loadBtn {
+      @apply w-[180px] bg-dark py-1.5 text-[20px] leading-[30px] xl:bg-success;
+    }
+  }
+
+  .mightLike {
+    @apply space-y-8;
+
+    .title {
+      @apply text-[20px] font-bold leading-[30px];
+    }
+
+    .products {
+      @apply grid grid-cols-2 gap-4 xl:flex;
+    }
+  }
+
+  .shopCommunities {
+    @apply hidden space-y-8 xl:block;
+
+    .title {
+      @apply text-[20px] font-bold leading-[30px];
+    }
+
+    .communities {
+      @apply relative flex w-full gap-x-4 overflow-x-auto pb-2;
+
+      .shopvcom {
+        @apply flex w-[90%] shrink-0 gap-x-2 rounded-lg p-2 hover:shadow-md md:w-[50%] xl:w-[30%];
+
+        img {
+          @apply aspect-square h-full;
+        }
+
+        .vcomText {
+          @apply flex h-full flex-col gap-y-2 text-xs;
+
+          .name {
+            @apply text-sm font-bold;
+          }
+
+          .catLabel {
+            @apply font-bold;
+          }
+
+          .category {
+            @apply self-start rounded-md bg-warning p-2;
+          }
+        }
+      }
+
+      .nextIcon {
+        @apply absolute right-4 top-1/2 flex h-10 w-10 shrink-0 -translate-y-1/2 transform cursor-pointer items-center justify-center rounded-full bg-success;
+      }
+    }
+  }
+}

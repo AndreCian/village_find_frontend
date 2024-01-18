@@ -1,0 +1,57 @@
+.root {
+  .backButton {
+    @apply mb-12 rounded-full bg-dark px-6 py-2 text-white;
+  }
+
+  .communitySection {
+    @apply mb-6;
+
+    .container {
+      @apply mt-10 w-full lg:w-2/3;
+
+      .control {
+        @apply mb-6;
+
+        p {
+          @apply mb-4;
+        }
+      }
+    }
+
+    .buttonBar {
+      @apply mt-20 flex flex w-full justify-end gap-x-4;
+
+      button {
+        @apply float-right w-32 rounded-full px-9 py-2;
+      }
+
+      .cancelButton {
+        @apply border border-black bg-white;
+      }
+
+      .addButton {
+        @apply bg-dark text-white;
+      }
+    }
+  }
+
+  .statisSection {
+    @apply mb-6 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3;
+
+    .subStatis {
+      @apply flex w-full justify-between font-bold;
+    }
+  }
+}
+
+.statusSpan {
+  @apply flex w-20 justify-center rounded-sm py-1;
+}
+
+.paid {
+  @apply bg-info text-primary;
+}
+
+.unpaid {
+  @apply bg-dark text-white;
+}

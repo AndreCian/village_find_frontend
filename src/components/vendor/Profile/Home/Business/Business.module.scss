@@ -1,0 +1,15 @@
+.root {
+  .container {
+    @apply w-full lg:w-5/6;
+  }
+
+  .form {
+    @apply grid grid-cols-1 gap-x-8 gap-y-4 lg:grid-cols-2;
+
+    .control {
+      p {
+        @apply mb-2;
+      }
+    }
+  }
+}

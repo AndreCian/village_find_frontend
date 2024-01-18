@@ -1,0 +1,17 @@
+.root {
+  @apply space-y-4;
+
+  .customCount {
+    @apply flex w-fit items-center gap-x-8;
+
+    span {
+      @apply flex min-w-[150px] items-center justify-center rounded-full bg-info py-1 text-2xl font-bold text-success;
+    }
+  }
+
+  .customerTable {
+    .tableToolbar {
+      @apply ml-4;
+    }
+  }
+}

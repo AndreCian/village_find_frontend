@@ -1,0 +1,55 @@
+.root {
+  @apply w-full;
+
+  .container {
+    @apply space-y-12;
+
+    .header {
+      @apply flex flex-wrap gap-x-8 gap-y-4;
+
+      .control {
+        @apply w-48 shrink-0 space-y-2;
+      }
+
+      .buttonBar {
+        @apply flex grow items-end justify-end;
+
+        .button {
+          @apply rounded-full bg-dark px-12 py-3 text-white;
+        }
+      }
+    }
+  }
+}
+
+.select {
+  @apply w-full min-w-0;
+}
+
+.inventCell {
+  @apply flex gap-x-2;
+
+  .input {
+    @apply w-24;
+  }
+
+  .button {
+    @apply rounded-full bg-dark px-3 py-2.5 text-white;
+  }
+}
+
+.statusSelect {
+  @apply w-fit min-w-0;
+}
+
+.actionCell {
+  @apply flex gap-x-4;
+
+  .button {
+    @apply rounded-full bg-dark px-6 py-2 text-white;
+  }
+
+  span {
+    @apply flex h-10 w-10 items-center justify-center rounded-full border border-primary bg-warning;
+  }
+}
