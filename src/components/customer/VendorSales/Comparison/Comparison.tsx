@@ -67,7 +67,7 @@ const comparisonNames = {
 
 export function Comparison() {
   return (
-    <div className={styles.root}>
+    <div id="comparison" className={styles.root}>
       <img src="/assets/customer/sales/pattern.png" />
       <Container className={styles.container}>
         <h1>How do we compare?</h1>
@@ -92,7 +92,9 @@ export function Comparison() {
                     .map((key: string, index: number) => (
                       <li key={`comparison-control-${index}`}>
                         <div className={styles.firstline}>
-                          <p className={styles.title}>{comparisonNames[key]}</p>
+                          <p className={styles.title}>
+                            {(comparisonNames as any)[key]}
+                          </p>
                           <p className={styles.pricing}>
                             {typeof comparison[key] === 'object'
                               ? comparison[key].fee

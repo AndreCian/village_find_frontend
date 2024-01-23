@@ -3,16 +3,17 @@ import { useState } from 'react';
 import { Card } from '@/components/common';
 import { Input } from '@/components/forms';
 
-import { IBusinessInfo } from '@/stores/vendor/profile/homeStore';
+import { IBusiness } from '@/pages/vendor/Profile/Home';
 
 import styles from './Business.module.scss';
 
-export interface IBusiness {
-  data: IBusinessInfo;
+interface IBusinessProps {
+  data: IBusiness;
+  setData: (_: IBusiness) => void;
 }
 
-export function Business({ data }: IBusiness) {
-  const [business, setBusiness] = useState<IBusinessInfo>(data);
+export function Business({ data, setData }: IBusinessProps) {
+  const [business, setBusiness] = useState<IBusiness>(data);
 
   return (
     <Card title="Business Information" className={styles.root}>

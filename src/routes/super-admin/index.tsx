@@ -271,7 +271,7 @@ export const superAdminRoutes = [
     children: [
       {
         title: 'All Vendors',
-        path: 'home',
+        path: '',
         element: <Outlet />,
         leaf: true,
         children: [
@@ -282,7 +282,7 @@ export const superAdminRoutes = [
           },
           {
             title: 'Detail',
-            path: 'detail',
+            path: ':id',
             element: <VendorDetail />,
           },
         ],

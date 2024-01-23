@@ -1,19 +1,15 @@
 .root {
-  @apply flex w-full flex-col gap-y-4 px-12 py-8;
+  @apply flex w-full flex-col gap-y-4;
 
   h1 {
-    @apply text-[20px] leading-[24px] text-green-500;
+    @apply text-[32px] font-bold leading-[36px] text-dark;
   }
 
-  .input {
-    @apply max-w-[300px];
-
-    input {
-      @apply border-1 border-gray-400 focus:border-blue-500 focus:ring-3 focus:ring-blue-300;
-    }
+  input {
+    @apply rounded-md border-1 border-gray-400 px-2 py-1 text-[14px] leading-[18px] outline-none focus:border-blue-500 focus:ring-3 focus:ring-blue-300;
   }
 
-  .content {
+  .content {  
     @apply flex gap-x-2;
 
     button {

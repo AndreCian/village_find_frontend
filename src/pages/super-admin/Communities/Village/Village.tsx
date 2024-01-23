@@ -9,7 +9,7 @@ import { HttpService } from '@/services';
 
 import { IRange, ITableColumn } from '@/interfaces';
 
-import { formatDate, formatUsDate, formatNumber } from '@/utils';
+import { formatDate } from '@/utils';
 
 import styles from './Village.module.scss';
 
@@ -31,7 +31,6 @@ type StatusType = 'Active' | 'Blocked' | 'Paused' | 'Inactive';
 export interface ICommunityRow {
   name: string;
   organizer: string;
-  fulfillment: string;
   date: Date;
   total: number;
   status: StatusType;
@@ -57,15 +56,13 @@ export function VillageCommunity() {
     },
     {
       title: 'Village Organizer',
-      name: 'ownerName',
+      name: 'organizer',
       width: 150,
-    },
-    {
-      title: 'Fulfillment Type',
-      name: 'fulfillment',
-      width: 200,
       cell: (row: any) => (
-        <span className={styles.cell}>{row.fulfillment}</span>
+        <span>
+          {row.organizer &&
+            `${row.organizer.firstName} ${row.organizer.lastName}`}
+        </span>
       ),
     },
     {

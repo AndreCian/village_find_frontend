@@ -42,7 +42,7 @@ const initialReasons = [
 
 export function WhyFresher() {
   return (
-    <div className={styles.root}>
+    <div id="why-fresher-choice" className={styles.root}>
       <div className={styles.back}>
         <Container className={styles.container}>
           <h1>Why Fresher Choice?</h1>

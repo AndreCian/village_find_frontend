@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import clsx from 'clsx';
 
 import { FaChevronDown, FaChevronUp } from 'react-icons/fa6';
@@ -20,6 +20,7 @@ export interface ISelectProps {
   border?: BorderType;
   bgcolor?: BgColorType;
   className?: string;
+  disabled?: boolean;
 }
 
 export function Select({
@@ -31,6 +32,7 @@ export function Select({
   border = 'solid',
   bgcolor = 'white',
   className = '',
+  disabled = false,
 }: ISelectProps) {
   const selectRef = useRef<HTMLDivElement>(null);
   const [anchor, setAnchor] = useState<boolean>(false);
@@ -54,6 +56,7 @@ export function Select({
   );
 
   const onSelectOption = (option: string) => {
+    if (disabled) return;
     updateValue(option);
     setAnchor(false);
   };

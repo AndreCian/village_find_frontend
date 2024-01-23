@@ -1,5 +1,5 @@
 .root {
-  @apply relative min-w-0 select-none lg:min-w-[250px];
+  @apply relative  min-w-0 select-none lg:min-w-[250px];
 
   .selectBox {
     @apply flex w-full items-center justify-between rounded-md border border-0.5 border-primary bg-white px-4 py-3 text-xs outline-none;
@@ -10,7 +10,7 @@
   }
 
   .viewBox {
-    @apply absolute z-50 mt-2 flex w-full flex-col rounded-md border-0.5 border-primary bg-white px-4 py-5 text-base shadow-lg;
+    @apply absolute z-50 mt-2 flex w-full w-full flex-col rounded-md border-0.5 border-primary bg-white px-4 py-5 text-base shadow-lg;
 
     span {
       @apply select-none py-1 text-center hover:rounded-md hover:bg-secondary hover:font-bold;

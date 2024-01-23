@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 
-import { Container } from '@/components/layout/community';
+import { Container, Header } from '@/components/layout/community';
 
 import styles from './Home.module.scss';
 
@@ -9,6 +9,7 @@ export function Home() {
 
   return (
     <Container className={styles.root}>
+      <Header />
       <div className={styles.dashboard}>
         <img src="/assets/community/dashboard.jpg" />
         <div className={styles.content}>

@@ -4,3 +4,4 @@ export * from './Dashboard';
 export * from './Profile';
 export * from './Earning';
 export * from './Announcement';
+export * from './Events';

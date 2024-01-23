@@ -14,19 +14,19 @@ import styles from './GrowBusiness.module.scss';
 
 const initialSecNames = [
   {
-    path: '',
+    path: '#why-fresher-choice',
     title: 'Why Fresher Choice',
   },
   {
-    path: '',
+    path: '#why-community',
     title: 'Why community',
   },
   {
-    path: '',
+    path: '#comparison',
     title: 'Comparison',
   },
   {
-    path: '',
+    path: '#pricing',
     title: 'Pricing',
   },
 ];
@@ -86,7 +86,7 @@ export function GrowBusiness() {
             onClick={() => setSection(secName.title)}
             className={section === secName.title ? styles.active : ''}
           >
-            {secName.title}
+            <a href={secName.path}>{secName.title}</a>
           </li>
         ))}
       </ul>

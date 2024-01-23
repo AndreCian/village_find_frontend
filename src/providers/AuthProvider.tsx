@@ -2,18 +2,25 @@ import React, { useState } from 'react';
 
 type IRole = 'admin' | 'vendor' | 'customer' | 'community-organizer';
 
-interface ICommunityOrganizer {
+interface ICommunityProfile {
   code: string;
+  name: string;
   slug?: string;
-  logoUrl?: string;
-  imageUrl?: string;
+  images?: {
+    logoUrl?: string;
+    backgroundUrl?: string;
+  };
   shortDesc?: string;
   longDesc?: string;
+  announcement?: {
+    text?: string;
+    updated_at?: string;
+  };
 }
 
 interface IAccount {
   role: IRole;
-  profile: ICommunityOrganizer | any;
+  profile: ICommunityProfile | any;
 }
 
 interface IAuthContext {

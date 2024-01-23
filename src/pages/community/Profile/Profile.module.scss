@@ -1,8 +1,8 @@
 .root {
-  @apply flex w-full flex-col gap-y-4 px-12 py-8;
+  @apply flex w-full flex-col gap-y-10;
 
   h1 {
-    @apply text-[32px] font-bold leading-[36px] text-blue-500;
+    @apply text-[32px] font-bold leading-[36px] text-dark;
   }
 
   .form {
@@ -27,9 +27,9 @@
         }
       }
     }
-  }
 
-  button {
-    @apply self-end rounded-md bg-blue-600 p-2.5 text-white active:ring-3 active:ring-blue-300;
+    button {
+      @apply self-end rounded-md bg-blue-600 p-2.5 text-white active:ring-3 active:ring-blue-300;
+    }
   }
 }

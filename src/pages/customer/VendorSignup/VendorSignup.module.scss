@@ -34,7 +34,7 @@
   }
 
   .register {
-    @apply w-full max-w-screen-lg space-y-16;
+    @apply flex w-full max-w-screen-lg flex-col gap-y-8;
 
     .head {
       @apply flex flex-col gap-y-10;
@@ -77,14 +77,22 @@
         @apply space-y-12 px-[120px] py-12;
 
         .inputBox {
-          @apply flex items-center gap-x-6;
+          @apply space-y-2;
 
-          .input input {
-            @apply aspect-square w-[50px] shrink-0 border-1 border-[#BDBDBD] bg-lightgray text-[18px];
+          .form {
+            @apply flex items-center gap-x-6;
+
+            .input input {
+              @apply aspect-square w-[50px] shrink-0 border-1 border-[#BDBDBD] bg-lightgray text-[18px];
+            }
+
+            .submitBtn {
+              @apply font-corbel text-[20px] font-bold leading-[24px];
+            }
           }
 
-          .submitBtn {
-            @apply font-corbel text-[20px] font-bold leading-[24px];
+          .codeIssue {
+            @apply text-red-500;
           }
         }
 
@@ -242,7 +250,7 @@
       @apply max-w-[720px] space-y-2;
 
       .title {
-        @apply text-[20px] font-bold leading-[30px];
+        @apply cursor-pointer text-[20px] font-bold leading-[30px];
       }
 
       .description {

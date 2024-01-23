@@ -1,23 +1,27 @@
 .root {
-  @apply flex w-full flex-col gap-y-4 px-12 py-8;
+  @apply flex w-full flex-col gap-y-4;
 
   h1 {
-    @apply text-[32px] font-bold leading-[36px] text-blue-500;
+    @apply text-[32px] font-bold leading-[36px] text-dark;
   }
 
-  .control {
-    @apply space-y-2;
+  .card {
+    @apply flex flex-col gap-y-1;
 
-    .textarea {
-      @apply border-none p-0;
+    .control {
+      @apply space-y-2;
 
-      textarea {
-        @apply rounded-md border-1 border-gray-400 p-2.5 focus:border-blue-500 focus:ring-3 focus:ring-blue-300;
+      .textarea {
+        @apply border-none p-0;
+
+        textarea {
+          @apply rounded-md border-1 border-gray-400 p-2.5 focus:border-blue-500 focus:ring-3 focus:ring-blue-300;
+        }
       }
     }
-  }
 
-  button {
-    @apply self-end rounded-md bg-blue-600 p-2 text-white active:ring-3 active:ring-blue-300;
+    button {
+      @apply self-end rounded-md bg-blue-600 p-2 text-white active:ring-3 active:ring-blue-300;
+    }
   }
 }

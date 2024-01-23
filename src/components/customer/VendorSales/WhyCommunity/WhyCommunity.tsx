@@ -67,7 +67,7 @@ export function WhyCommunity() {
     useState<ICommunity[]>(initialCommunities);
 
   return (
-    <div className={styles.root}>
+    <div id="why-community" className={styles.root}>
       <Container className={styles.container}>
         <div className={styles.wrapper}>
           <h1>What is a vendor community?</h1>

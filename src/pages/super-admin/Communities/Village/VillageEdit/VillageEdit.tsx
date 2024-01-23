@@ -1,4 +1,4 @@
-import { ChangeEvent, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { enqueueSnackbar } from 'notistack';
 import clsx from 'clsx';
@@ -9,7 +9,7 @@ import { HttpService } from '@/services';
 
 import { ITableColumn } from '@/interfaces';
 
-import { formatDate } from '@/utils';
+import { formatDate, getBubbleObject } from '@/utils';
 
 import styles from './VillageEdit.module.scss';
 
@@ -20,6 +20,10 @@ export interface ICommunity {
   email: string;
   password: string;
   code: string;
+  organizer: {
+    firstName: string;
+    lastName: string;
+  };
 }
 
 export interface ICommission {
@@ -38,6 +42,10 @@ const initialCommunity: ICommunity = {
   email: '',
   password: '',
   code: '',
+  organizer: {
+    firstName: '',
+    lastName: '',
+  },
 };
 
 const initialStatis: IStatis = {
@@ -97,13 +105,9 @@ export function VillageEdit() {
   const [community, setCommunity] = useState<ICommunity>(initialCommunity);
   const [statis, setStatis] = useState<IStatis>(initialStatis);
 
-  const onCommunityChange =
-    (field: string) => (e: ChangeEvent<HTMLInputElement>) => {
-      setCommunity({
-        ...community,
-        [field]: e.target.value,
-      });
-    };
+  const onCommunityChange = (e: any) => {
+    setCommunity(getBubbleObject(e.target.name, community, e.target.value));
+  };
 
   const onUpdateClick = () => {
     if (!!communityId === false) return;
@@ -152,41 +156,79 @@ export function VillageEdit() {
       <Card title="Village Community" className={styles.communitySection}>
         <div className={styles.container}>
           <div className={styles.control}>
-            <p className={styles.label}>Village Name</p>
-            <Input
-              placeholder="Village Name"
-              value={community.name}
-              updateValue={onCommunityChange('name')}
-            />
+            <p className={styles.label}>Associated with an existing vendor</p>
+            <Input placeholder="Search Vendor Name, Email, Phone" />
           </div>
-          <div className={styles.control}>
-            <p className={styles.label}>Email</p>
-            <Input
-              placeholder="Email"
-              value={community.email}
-              updateValue={onCommunityChange('email')}
-            />
+          <div className={styles.horizon}>
+            <div className={styles.control}>
+              <p className={styles.label}>Village Name</p>
+              <Input
+                name="name"
+                placeholder="Village Name"
+                value={community.name}
+                updateValue={onCommunityChange}
+              />
+            </div>
+            <div className={styles.control}>
+              <p className={styles.label}>Password</p>
+              <Input
+                name="password"
+                type="password"
+                placeholder="Password"
+                value={community.password}
+                updateValue={onCommunityChange}
+              />
+            </div>
           </div>
-          <div className={styles.control}>
-            <p className={styles.label}>Password</p>
-            <Input
-              type="password"
-              placeholder="Password"
-              value={community.password}
-              updateValue={onCommunityChange('password')}
-            />
+          <div className={styles.horizon}>
+            <div className={styles.control}>
+              <p className={styles.label}>Organizer First Name</p>
+              <Input
+                name="organizer.firstName"
+                placeholder="First Name"
+                value={community.organizer && community.organizer.firstName}
+                updateValue={onCommunityChange}
+              />
+            </div>
+            <div className={styles.control}>
+              <p className={styles.label}>Email</p>
+              <Input
+                name="email"
+                placeholder="Email"
+                value={community.email}
+                updateValue={onCommunityChange}
+              />
+            </div>
           </div>
-          <div className={styles.control}>
-            <p className={styles.label}>Code</p>
-            <Input
-              placeholder="Code"
-              value={community.code}
-              updateValue={onCommunityChange('code')}
-            />
+          <div className={styles.horizon}>
+            <div className={styles.control}>
+              <p className={styles.label}>Organizer Last Name</p>
+              <Input
+                name="organizer.lastName"
+                placeholder="Last Name"
+                value={community.organizer && community.organizer.lastName}
+                updateValue={onCommunityChange}
+              />
+            </div>
+
+            <div className={styles.control}>
+              <p className={styles.label}>Code</p>
+              <Input
+                name="code"
+                placeholder="Code"
+                value={community.code}
+                updateValue={onCommunityChange}
+              />
+            </div>
           </div>
         </div>
         <div className={styles.buttonBar}>
-          <button className={styles.cancelButton}>Cancel</button>
+          <button
+            className={styles.cancelButton}
+            onClick={() => navigate(backToHomePath)}
+          >
+            Cancel
+          </button>
           <button className={styles.addButton} onClick={onUpdateClick}>
             {communityId === 'create' ? 'Add' : 'Update'}
           </button>

@@ -1,11 +1,16 @@
-import { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { enqueueSnackbar } from 'notistack';
 
 import { Card, TableBody } from '@/components/common';
 import { Input, Select, RadioGroup, Radio } from '@/components/forms';
 import { MagnifierIcon } from '@/components/icons';
 
+import { CouponService } from '@/services';
+
 import { IRange, ITableColumn } from '@/interfaces';
+
+import { getBubbleObject } from '@/utils/data/getBubbleObject';
 
 import ProductSvg from '/assets/admin/backs/Product.svg';
 import styles from './CouponEdit.module.scss';
@@ -34,7 +39,7 @@ export interface IEditingCoupon {
   code?: string;
   discount?: number;
   conditions?: ICondition[];
-  target?: {
+  target: {
     type: TargetType;
     id?: string;
   };
@@ -149,33 +154,19 @@ const initialCoupon: IEditingCoupon = {
   },
   code: '',
   discount: 0,
-  conditions: [
-    {
-      discount: 0,
-    },
-  ],
+  conditions: [],
   target: {
     type: 'Global Coupon',
   },
 };
 
+const homePath = '/admin/customers/coupon';
+
 export function CouponEdit() {
   const { id: couponId } = useParams();
-  const [coupon, setCoupon] = useState<IEditingCoupon>(initialCoupon);
+  const navigate = useNavigate();
 
-  const getBubbleObject = (key: string, object: any, value: string): any => {
-    if (!key.includes('.')) {
-      return typeof object === 'object'
-        ? { ...object, [key]: value }
-        : { [key]: value };
-    }
-    const primaryKey = key.slice(0, key.indexOf('.'));
-    const extraKey = key.slice(key.indexOf('.') + 1);
-    return {
-      ...object,
-      [primaryKey]: getBubbleObject(extraKey, object[primaryKey], value),
-    };
-  };
+  const [coupon, setCoupon] = useState<IEditingCoupon>(initialCoupon);
 
   const updateStrForm = (field: string) => (value: string) => {
     setCoupon(getBubbleObject(field, coupon, value));
@@ -203,7 +194,50 @@ export function CouponEdit() {
     });
   };
 
-  const onAddBtnClick = () => {};
+  const onAddBtnClick = () => {
+    let couponJson: IEditingCoupon = {
+      type: coupon.type,
+      date: coupon.date,
+      code: coupon.code,
+      target: { type: coupon.target.type },
+    };
+    if (coupon.target.type !== 'Global Coupon') {
+      couponJson.target.id = coupon.target.id;
+    }
+
+    if (coupon.type === 'Free Shipping') {
+      couponJson = { ...couponJson, usage: coupon.usage };
+    } else if (coupon.type === 'Percent') {
+      couponJson = { ...coupon, discount: coupon.discount };
+    } else {
+      couponJson = { ...coupon, conditions: coupon.conditions };
+    }
+
+    CouponService.createOne(couponJson)
+      .then(response => {
+        const { status } = response;
+        if (status === 200) {
+          setCoupon(initialCoupon);
+          navigate(homePath);
+          enqueueSnackbar(`${coupon.code} added successfully!`, {
+            variant: 'success',
+          });
+        }
+      })
+      .catch(err => {
+        enqueueSnackbar('Something went wrong with server.', {
+          variant: 'error',
+        });
+      });
+  };
+
+  useEffect(() => {
+    if (!couponId || couponId === 'create') return;
+    CouponService.findOne(couponId).then(response => {
+      const { status, coupon } = response;
+      if (status === 200) setCoupon(coupon);
+    });
+  }, [couponId]);
 
   return (
     <Card title="Coupon Center" className={styles.root}>
@@ -294,7 +328,7 @@ export function CouponEdit() {
               <p>Discount %</p>
               <Input
                 placeholder="Discount"
-                value={coupon.code}
+                value={coupon.discount}
                 updateValue={updateInputForm('discount')}
                 className={styles.amountInput}
                 adornment={{
@@ -409,11 +443,14 @@ export function CouponEdit() {
         </div>
       </div>
       <div className={styles.buttonBar}>
-        <button className={styles.cancelButton} onClick={() => {}}>
+        <button
+          className={styles.cancelButton}
+          onClick={() => navigate(homePath)}
+        >
           Cancel
         </button>
         <button className={styles.addButton} onClick={onAddBtnClick}>
-          Add
+          {couponId === 'create' ? 'Add' : 'Update'}
         </button>
       </div>
     </Card>

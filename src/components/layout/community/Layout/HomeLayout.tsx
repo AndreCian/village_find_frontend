@@ -1,13 +1,12 @@
-import { useState } from 'react';
+import { useContext } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import clsx from 'clsx';
 
-import styles from './HomeLayout.module.scss';
+import { AuthContext } from '@/providers';
 
-const initialCommunity = {
-  name: 'Field Of Artisans',
-  logoUrl: '/assets/community/logo.png',
-};
+import { SERVER_URL } from '@/config/global';
+
+import styles from './HomeLayout.module.scss';
 
 const initialNavItems = [
   {
@@ -26,37 +25,47 @@ const initialNavItems = [
     name: 'Announcement',
     path: 'announcement',
   },
+  {
+    name: 'Events',
+    path: 'events',
+  },
 ];
 
 export function HomeLayout() {
-  const [community, setCommunity] = useState(initialCommunity);
   const location = useLocation();
   const navigate = useNavigate();
   const pathname = location.pathname;
+  const { account } = useContext(AuthContext);
 
   return (
     <div className={styles.root}>
-      {pathname !== '/vendor-community' && (
-        <div className={styles.sidebar}>
-          <div className={styles.logo}>
-            <img src={community.logoUrl} />
-            <p>{community.name}</p>
-          </div>
-          <ul className={styles.navbar}>
-            {initialNavItems.map((item: any, index: number) => (
-              <li
-                key={index}
-                className={clsx(styles.navitem, {
-                  [styles.active]: pathname.endsWith(item.path),
-                })}
-                onClick={() => navigate(item.path)}
-              >
-                {item.name}
-              </li>
-            ))}
-          </ul>
+      <div className={styles.sidebar}>
+        <div className={styles.logo}>
+          <img
+            src={`${SERVER_URL}/${
+              account &&
+              account.profile &&
+              account.profile.images &&
+              account.profile.images.logoUrl
+            }
+              `}
+          />
+          <p>{account && account.profile && account.profile.name}</p>
         </div>
-      )}
+        <ul className={styles.navbar}>
+          {initialNavItems.map((item: any, index: number) => (
+            <li
+              key={index}
+              className={clsx(styles.navitem, {
+                [styles.active]: pathname.endsWith(item.path),
+              })}
+              onClick={() => navigate(item.path)}
+            >
+              {item.name}
+            </li>
+          ))}
+        </ul>
+      </div>
       <div className={styles.content}>
         <Outlet />
       </div>

@@ -12,6 +12,7 @@ import { useCouponStore } from '@/stores';
 import { CouponService } from '@/services';
 
 import styles from './Coupons.module.scss';
+import { enqueueSnackbar } from 'notistack';
 
 const initialStatus: string[] = ['Active', 'Inactive'];
 
@@ -30,8 +31,11 @@ export function Coupons() {
   const columns: ITableColumn[] = [
     {
       title: 'Coupon Name',
-      name: 'name',
+      name: 'code',
       width: 250,
+      cell: (row: any) => (
+        <div>{row.code || (row.usage && row.usage.code)}</div>
+      ),
     },
     {
       title: 'Type',
@@ -55,7 +59,7 @@ export function Coupons() {
       title: 'Discount',
       name: 'discount',
       width: 250,
-      cell: (row: any) => <span>{row.discount ? `${row.discount}%` : ''}</span>,
+      cell: (row: any) => <div>{row.discount ? `${row.discount}%` : ''}</div>,
     },
     {
       title: 'Action',
@@ -86,8 +90,13 @@ export function Coupons() {
   };
 
   const onDeleteClick = (id: string) => () => {
-    CouponService.deleteOne(id).then(() => {
-      deleteStoreCoupon(id);
+    CouponService.deleteOne(id).then(response => {
+      if (response) {
+        deleteStoreCoupon(id);
+        enqueueSnackbar(`Coupon ${id} deleted successfully!`, {
+          variant: 'success',
+        });
+      }
     });
   };
 

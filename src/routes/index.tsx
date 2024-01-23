@@ -1,7 +1,7 @@
 import {
+  CommunityLayout,
   CustomerLayout,
   OtherLayout,
-  CommunityLayout,
 } from '@/components/layout';
 
 import { superAdminRoutes } from '@/routes/super-admin';
@@ -10,26 +10,26 @@ import { vendorRoutes } from '@/routes/vendor';
 import { communityRoutes } from '@/routes/community';
 
 export const routes = [
-  {
-    path: 'admin',
-    element: <OtherLayout />,
-    children: superAdminRoutes,
-  },
-  {
-    path: 'vendor',
-    element: <OtherLayout />,
-    children: vendorRoutes,
-  },
+  // {
+  //   path: 'admin',
+  //   element: <OtherLayout />,
+  //   children: superAdminRoutes,
+  // },
+  // {
+  //   path: 'vendor',
+  //   element: <OtherLayout />,
+  //   children: vendorRoutes,
+  // },
   {
     path: 'vendor-community',
     element: <CommunityLayout />,
     children: communityRoutes,
   },
-  {
-    path: '',
-    element: <CustomerLayout />,
-    children: customerRoutes,
-  },
+  // {
+  //   path: '',
+  //   element: <CustomerLayout />,
+  //   children: customerRoutes,
+  // },
 ];
 
 export { superAdminRoutes, customerRoutes, vendorRoutes };

@@ -9,6 +9,14 @@
     .container {
       @apply mt-10 w-full lg:w-2/3;
 
+      .horizon {
+        @apply flex w-full gap-x-4;
+
+        .control {
+          @apply grow;
+        }
+      }
+
       .control {
         @apply mb-6;
 

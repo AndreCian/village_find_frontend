@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import clsx from 'clsx';
 
@@ -7,6 +7,7 @@ import { Button, Input, Radio, RadioGroup } from '@/components/forms';
 import { HttpService } from '@/services';
 
 import styles from './VendorSignup.module.scss';
+import { enqueueSnackbar } from 'notistack';
 
 const initialRoles = [
   'SEO & Marketing',
@@ -16,16 +17,27 @@ const initialRoles = [
 ];
 
 interface IAccount {
+  shopName: string;
   firstName: string;
   lastName: string;
   phone: string;
   email: string;
   password: string;
-  confirm: string;
+  confirm?: string;
   zipcode: string;
 }
 
+interface ICommunity {
+  _id?: string;
+  name: string;
+  images?: {
+    logoUrl: string;
+    backgroundUrl: string;
+  };
+}
+
 const initialAccount = {
+  shopName: '',
   firstName: '',
   lastName: '',
   phone: '',
@@ -92,22 +104,45 @@ export function VendorSignup() {
 
   const [step, setStep] = useState(0);
   const [collapseId, setCollapseId] = useState(0);
+  const [maxCollapseId, setMaxCollapseId] = useState(0);
   const [roleIndex, setRoleIndex] = useState('0');
 
   const [account, setAccount] = useState<IAccount>(initialAccount);
-  const [subscription, setSubscription] = useState('seedling');
+  const [community, setCommunity] = useState<ICommunity | null>(null);
+  const [subscription, setSubscription] = useState<ISubscription>(
+    initialSubscriptions[0],
+  );
   const [codes, setCodes] = useState<string[]>(Array(5).fill(''));
+  const [codeIssue, setCodeIssue] = useState('');
+  const fullCode = useMemo(() => {
+    return codes.join('');
+  }, [codes]);
 
   const codeRefs = [...Array(5)].map((_: any) =>
     useRef<HTMLInputElement>(null),
   );
 
-  const onCodeSubmit = () => {
-    setCollapseId(1);
+  const initializeStates = () => {
+    setAccount(initialAccount);
+    setCodeIssue('');
+    setCodes(Array(5).fill(''));
+    setCommunity(null);
+    setStep(0);
+    setCollapseId(0);
+    setMaxCollapseId(0);
+    navigate('/sign-up/vendor');
   };
 
-  const onWithoutCommunityClick = () => {
-    setCollapseId(1);
+  const navigateCollapse = (id: number) => {
+    if (id <= maxCollapseId) setCollapseId(id);
+  };
+
+  const onCodeSubmit = () => {
+    if (fullCode.length !== 5) {
+      setCodeIssue('Invalid code');
+    } else {
+      navigate(`/sign-up/vendor?community_code=${fullCode}`);
+    }
   };
 
   const onLoginClick = (e: any) => {
@@ -133,18 +168,80 @@ export function VendorSignup() {
     }
   };
 
-  const onSignupClick = () => {};
+  const onNextCollapse = () => {
+    if (collapseId === 2) {
+      setCollapseId(4);
+      setMaxCollapseId(4);
+    } else {
+      setCollapseId(collapseId + 1);
+      setMaxCollapseId(collapseId + 1);
+    }
+  };
+
+  const onSignupClick = () => {
+    if (account.password === account.confirm) {
+      const reqJson: any = { ...account, subscription };
+      if (community) reqJson.community = community._id;
+      delete reqJson.confirm;
+
+      HttpService.post('/user/vendor/register', reqJson)
+        .then(response => {
+          const { status } = response;
+          if (status === 200) {
+            enqueueSnackbar('Vendor signup successfully!', {
+              variant: 'success',
+            });
+
+            initializeStates();
+          } else if (status === 500) {
+            enqueueSnackbar('Something went wrong with server', {
+              variant: 'error',
+            });
+          }
+        })
+        .catch(err => {
+          enqueueSnackbar('Something went wrong with server', {
+            variant: 'error',
+          });
+        });
+    }
+  };
+
+  const onSignupWithoutCommunity = () => {
+    navigate('/sign-up/vendor?community_code=none');
+  };
 
   useEffect(() => {
+    const communtiyCode = searchParams.get('community_code') as string;
     if (
-      !searchParams.get('community') ||
-      (searchParams.get('community') as string).length !== 5
-    )
-      return;
-    setCodes((searchParams.get('community') as string).split(''));
-    setStep(1);
-    setCollapseId(1);
-  }, []);
+      communtiyCode === 'none' ||
+      (communtiyCode && communtiyCode.length === 5)
+    ) {
+      setStep(1);
+
+      if (communtiyCode === 'none') {
+        setCodes(Array(5).fill(''));
+        setCollapseId(1);
+        setMaxCollapseId(1);
+        setCommunity(null);
+      } else {
+        HttpService.get(`/communities?code=${communtiyCode}`).then(response => {
+          const { status, community } = response;
+          if (status === 200) {
+            setCodeIssue('');
+            setCommunity(community);
+            setCollapseId(1);
+            setMaxCollapseId(1);
+          } else if (status === 404) {
+            setCodeIssue('Invalid code');
+            setCommunity(null);
+          }
+        });
+      }
+    } else {
+      setCollapseId(0);
+    }
+  }, [searchParams]);
 
   return (
     <div className={clsx(styles.root, { [styles.primary]: collapseId > 0 })}>
@@ -192,16 +289,13 @@ export function VendorSignup() {
       ) : (
         <div className={styles.register}>
           <div className={styles.head}>
-            <p
-              className={clsx(styles.title, {
-                [styles.without]: collapseId > 0,
-              })}
-            >
-              {collapseId > 0
-                ? 'Signup without vendor community'
-                : 'Vendor Sign Up'}
-            </p>
-            {collapseId > 0 && (
+            {collapseId === 0 && <p className={styles.title}>Vendor Sign Up</p>}
+            {collapseId > 0 && fullCode !== '' && (
+              <p className={styles.without} onClick={onSignupWithoutCommunity}>
+                Signup without vendor community
+              </p>
+            )}
+            {collapseId > 0 && community && (
               <div className={styles.image}>
                 <img
                   src="/assets/customer/backs/vendor-signup.png"
@@ -228,7 +322,12 @@ export function VendorSignup() {
               })}
             >
               <div className={styles.text}>
-                <p className={styles.title}>Vendor Community Code</p>
+                <p
+                  className={styles.title}
+                  onClick={() => navigate('/sign-up/vendor')}
+                >
+                  Vendor Community Code
+                </p>
                 {collapseId === 0 && (
                   <p className={styles.description}>
                     If you are affiliated with a vendor community, enter their
@@ -240,18 +339,24 @@ export function VendorSignup() {
               {collapseId === 0 && (
                 <div className={styles.verifyBox}>
                   <div className={styles.inputBox}>
-                    {[...Array(5)].map((item: number, index: number) => (
-                      <Input
-                        key={index}
-                        className={styles.input}
-                        ref={codeRefs[index]}
-                        value={codes[index]}
-                        onKeyDown={e => onCodeChange(e, index)}
-                      />
-                    ))}
-                    <Button className={styles.submitBtn} onClick={onCodeSubmit}>
-                      Submit
-                    </Button>
+                    <div className={styles.form}>
+                      {[...Array(5)].map((item: number, index: number) => (
+                        <Input
+                          key={index}
+                          className={styles.input}
+                          ref={codeRefs[index]}
+                          value={codes[index]}
+                          onKeyDown={e => onCodeChange(e, index)}
+                        />
+                      ))}
+                      <Button
+                        className={styles.submitBtn}
+                        onClick={onCodeSubmit}
+                      >
+                        Submit
+                      </Button>
+                    </div>
+                    <p className={styles.codeIssue}>{codeIssue}</p>
                   </div>
                   <div className={styles.otherOption}>
                     <div className={styles.text}>
@@ -263,7 +368,9 @@ export function VendorSignup() {
                     </div>
                     <Button
                       className={styles.justmeBtn}
-                      onClick={onWithoutCommunityClick}
+                      onClick={() =>
+                        navigate('/sign-up/vendor?community_code=none')
+                      }
                     >
                       It's Just Me
                     </Button>
@@ -277,11 +384,20 @@ export function VendorSignup() {
               })}
             >
               <div className={styles.text}>
-                <p className={styles.title}>Account Details</p>
+                <p className={styles.title} onClick={() => navigateCollapse(1)}>
+                  Account Details
+                </p>
               </div>
               {collapseId === 1 && (
                 <div className={styles.details}>
                   <div className={styles.elements}>
+                    <Input
+                      name="shopName"
+                      value={account.shopName}
+                      className={styles.input}
+                      placeholder="Shop Name"
+                      updateValue={onAccountChange}
+                    />
                     <div className={styles.horizon}>
                       <Input
                         name="firstName"
@@ -313,6 +429,7 @@ export function VendorSignup() {
                       updateValue={onAccountChange}
                     />
                     <Input
+                      type="password"
                       name="password"
                       value={account.password}
                       className={styles.input}
@@ -320,6 +437,7 @@ export function VendorSignup() {
                       updateValue={onAccountChange}
                     />
                     <Input
+                      type="password"
                       name="confirm"
                       value={account.confirm}
                       className={styles.input}
@@ -335,10 +453,7 @@ export function VendorSignup() {
                     />
                   </div>
                   <div className={styles.bottom}>
-                    <Button
-                      className={styles.nextBtn}
-                      onClick={() => setCollapseId(collapseId + 1)}
-                    >
+                    <Button className={styles.nextBtn} onClick={onNextCollapse}>
                       Next Step
                     </Button>
                     <div className={styles.contactInfo}>
@@ -367,14 +482,22 @@ export function VendorSignup() {
               })}
             >
               <div className={styles.text}>
-                <p className={styles.title}>Select Subscription</p>
+                <p className={styles.title} onClick={() => navigateCollapse(2)}>
+                  Select Subscription
+                </p>
               </div>
               {collapseId === 2 && (
                 <div className={styles.content}>
                   <RadioGroup
                     color="secondary"
-                    value={subscription}
-                    updateValue={(value: string) => setSubscription(value)}
+                    value={subscription.name}
+                    updateValue={(value: string) =>
+                      setSubscription(
+                        initialSubscriptions.find(
+                          (item: any) => item.name === value,
+                        ) || initialSubscriptions[0],
+                      )
+                    }
                     className={styles.variants}
                   >
                     {initialSubscriptions.map(
@@ -407,10 +530,7 @@ export function VendorSignup() {
                       ),
                     )}
                   </RadioGroup>
-                  <Button
-                    className={styles.nextBtn}
-                    onClick={() => setCollapseId(collapseId + 2)}
-                  >
+                  <Button className={styles.nextBtn} onClick={onNextCollapse}>
                     Next Step
                   </Button>
                 </div>
@@ -422,7 +542,9 @@ export function VendorSignup() {
               })}
             >
               <div className={styles.text}>
-                <p className={styles.title}>Agreement</p>
+                <p className={styles.title} onClick={() => navigateCollapse(3)}>
+                  Agreement
+                </p>
               </div>
             </div>
             <div
@@ -431,7 +553,9 @@ export function VendorSignup() {
               })}
             >
               <div className={styles.text}>
-                <p className={styles.title}>Bill Information</p>
+                <p className={styles.title} onClick={() => navigateCollapse(4)}>
+                  Bill Information
+                </p>
               </div>
               {collapseId === 4 && (
                 <div className={styles.content}>
@@ -441,7 +565,10 @@ export function VendorSignup() {
                     Stripe.
                   </p>
                   <div className={styles.stripe}>
-                    <Button className={styles.connectBtn}>
+                    <Button
+                      className={styles.connectBtn}
+                      onClick={onSignupClick}
+                    >
                       Connect with stripe
                     </Button>
                     <img src="/assets/customer/logos/stripe.png" />

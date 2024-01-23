@@ -9,6 +9,8 @@ import { HttpService } from '@/services';
 
 import { AuthContext } from '@/providers';
 
+import { setupToken } from '@/utils/axios/setupToken';
+
 import styles from './Login.module.scss';
 
 interface IAccount {
@@ -36,25 +38,21 @@ export function Login() {
   const onLogin = () => {
     HttpService.post('/communities/login', account)
       .then(response => {
-        const options: any = {};
-        const { status, msg, profile } = response;
+        const { status, profile, token } = response;
 
         if (status === 200) {
-          options.variant = 'success';
-
-          console.log(profile);
+          enqueueSnackbar('Successfully login!', { variant: 'success' });
 
           setIsLogin(true);
           setAccountProfile({
             role: 'community-organizer',
             profile,
           });
+          setupToken(token);
           navigate('/vendor-community/dashboard');
         } else {
-          options.variant = 'error';
+          enqueueSnackbar('Invalid credentials!', { variant: 'error' });
         }
-
-        enqueueSnackbar(msg, options);
       })
       .catch(err => {
         enqueueSnackbar('Something went wrong with server.', {

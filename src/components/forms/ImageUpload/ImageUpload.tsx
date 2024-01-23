@@ -6,8 +6,6 @@ import { CancelIcon } from '@/components/icons';
 
 import { SERVER_URL } from '@/config/global';
 
-import { ImageType } from '@/interfaces';
-
 import styles from './ImageUpload.module.scss';
 
 export interface IImageUploadProps {

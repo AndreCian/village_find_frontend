@@ -1,9 +1,18 @@
+import { useEffect, useState, useContext } from 'react';
+
 import { TextField } from '@/components/forms';
+import { Card } from '@/components/common';
+
+import { AuthContext } from '@/providers';
+
+import { HttpService } from '@/services';
 
 import styles from './Announcement.module.scss';
+import { enqueueSnackbar } from 'notistack';
 
 export function Announcement() {
-  const updatedAt = new Date();
+  const [announcement, setAnnouncement] = useState('');
+  const { account } = useContext(AuthContext);
 
   const formatDate = (updatedAt: Date) => {
     return updatedAt.toLocaleString('en-US', {
@@ -16,17 +25,58 @@ export function Announcement() {
     });
   };
 
+  const onSubmitClick = () => {
+    HttpService.put('/communities/announcement', { announcement })
+      .then(response => {
+        const { status } = response;
+        if (status === 200) {
+          enqueueSnackbar('Announcement updated successfully!', {
+            variant: 'success',
+          });
+        }
+      })
+      .catch(err => {
+        enqueueSnackbar('Something went wrong with server.', {
+          variant: 'error',
+        });
+      });
+  };
+
+  useEffect(() => {
+    if (!account) return;
+    setAnnouncement(
+      (account.profile &&
+        account.profile.announcement &&
+        account.profile.announcement.text) ??
+        '',
+    );
+  }, [account]);
+
   return (
     <div className={styles.root}>
       <h1>Announcement</h1>
-      <div>
-        <p>Last updated: {formatDate(updatedAt)}</p>
-        <div className={styles.control}>
-          <p className={styles.label}>Announcement</p>
-          <TextField rows={3} className={styles.textarea} />
+      <Card className={styles.card}>
+        <div>
+          <p>
+            Last updated:{' '}
+            {account &&
+              account.profile &&
+              account.profile.announcement &&
+              account.profile.announcement.updated_at &&
+              formatDate(new Date(account.profile.announcement.updated_at))}
+          </p>
+          <div className={styles.control}>
+            <p className={styles.label}>Announcement</p>
+            <TextField
+              rows={3}
+              className={styles.textarea}
+              value={announcement}
+              updateValue={(e: any) => setAnnouncement(e.target.value)}
+            />
+          </div>
         </div>
-      </div>
-      <button>Submit</button>
+        <button onClick={onSubmitClick}>Submit</button>
+      </Card>
     </div>
   );
 }

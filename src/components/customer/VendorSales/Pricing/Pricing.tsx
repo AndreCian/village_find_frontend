@@ -55,7 +55,7 @@ const initialPackages = [
 
 export function Pricing() {
   return (
-    <Container className={styles.root}>
+    <Container id="pricing" className={styles.root}>
       <h1>Choose a package</h1>
       <div className={styles.packages}>
         {initialPackages.map((item: any, index: number) => (

@@ -62,7 +62,7 @@ export function CustomerHome() {
         <Select
           rounded="full"
           value={row.status}
-          options={[]}
+          options={['Active', 'Inactive']}
           className={styles.statusSelector}
         />
       ),
@@ -134,6 +134,11 @@ export function CustomerHome() {
   const onResetClick = () => {
     setFilter('');
     setCategory('');
+    setSort('');
+    setRange({
+      from: '',
+      to: '',
+    });
   };
 
   useEffect(() => {

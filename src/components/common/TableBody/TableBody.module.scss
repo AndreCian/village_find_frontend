@@ -5,7 +5,7 @@
     @apply flex w-fit min-w-fit items-center rounded-full bg-primary text-base;
 
     span {
-      @apply shrink-0 rounded-full px-5 py-4;
+      @apply shrink-0 rounded-full px-5 py-4 font-medium;
     }
 
     .exSpan {

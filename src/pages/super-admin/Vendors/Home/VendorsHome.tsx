@@ -1,9 +1,11 @@
-import { ChangeEvent, useState } from 'react';
+import { ChangeEvent, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import clsx from 'clsx';
 
 import { Card, TableBody, TableToolbar } from '@/components';
 import { Select } from '@/components/forms';
+
+import { HttpService } from '@/services';
 
 import { IRange, ITableColumn } from '@/interfaces';
 
@@ -28,42 +30,17 @@ const initialRange = {
 type StatusType = 'Active' | 'Blocked' | 'Paused' | 'Inactive';
 
 export interface IVendor {
-  vendor: string;
-  owner: string;
-  address: string;
-  subscription: number;
-  revenue: number;
-  status: StatusType;
+  shopName: string;
+  owner?: any;
+  address?: string;
+  subscription: any;
+  revenue?: number;
+  status: string;
 }
 
-const initialTableData: IVendor[] = [
-  {
-    vendor: 'Bill Billerson',
-    owner: 'Bowls of Puter',
-    address: '313 Capitol Avenue Waterbury, Ct 06705',
-    subscription: 4.99,
-    revenue: 56560.67,
-    status: 'Active',
-  },
-  {
-    vendor: 'Bowls of Puter',
-    owner: 'Jacobs Well Best Stuff',
-    address: '313 Capitol Avenue Waterbury, Ct 06705',
-    subscription: 4.99,
-    revenue: 23456.78,
-    status: 'Active',
-  },
-  {
-    vendor: 'John & Sams Cool Things',
-    owner: 'Nathan Bargatzbe',
-    address: '313 Capitol Avenue Waterbury, Ct 06705',
-    subscription: 4.99,
-    revenue: 103995.56,
-    status: 'Active',
-  },
-];
-
-const vendorViewPath = '/admin/vendors/home/detail';
+const formatMonthlyFee = (price: number) => {
+  return price === 0 ? 'Free' : `$${price.toFixed(2)}`;
+};
 
 export function VendorsHome() {
   const navigate = useNavigate();
@@ -71,24 +48,27 @@ export function VendorsHome() {
   const [sort, setSort] = useState('');
   const [category, setCategory] = useState('');
   const [range, setRange] = useState<IRange>(initialRange);
-  const [tableData, setTableData] = useState(initialTableData);
+  const [vendors, setVendors] = useState([]);
 
   const columns: ITableColumn[] = [
     {
       title: 'Vendor Name',
-      name: 'vendor',
+      name: 'shopName',
       width: 150,
     },
     {
       title: 'Shop Owner',
       name: 'owner',
       width: 150,
+      cell: (row: any) => (
+        <div className={styles.cell}>{row.owner && row.owner.name}</div>
+      ),
     },
     {
       title: 'Address',
       name: 'address',
       width: 200,
-      cell: (row: any) => <span className={styles.cell}>{row.address}</span>,
+      cell: (row: any) => <div className={styles.cell}>{row.address}</div>,
     },
     {
       title: 'Subscription',
@@ -96,8 +76,14 @@ export function VendorsHome() {
       width: 150,
       cell: (row: any) => (
         <div className={styles.subscription}>
-          <span>Seedling</span>
-          <span>{row.subscription}</span>
+          {row.subscription && (
+            <>
+              <span>{row.subscription.name}</span>
+              {row.subscription.monthlyFee && (
+                <span>{formatMonthlyFee(row.subscription.monthlyFee)}</span>
+              )}
+            </>
+          )}
         </div>
       ),
     },
@@ -105,7 +91,7 @@ export function VendorsHome() {
       title: 'Revenue',
       name: 'revenue',
       width: 150,
-      cell: (row: any) => <span>${formatNumber(row.revenue)}</span>,
+      cell: (row: any) => <span>${formatNumber(row.revenue || 0)}</span>,
     },
     {
       title: 'Status',
@@ -128,7 +114,7 @@ export function VendorsHome() {
         <div className={styles.actionCell}>
           <button
             className={styles.actionButton}
-            onClick={() => navigate(vendorViewPath)}
+            onClick={() => navigate(row._id)}
           >
             View
           </button>
@@ -146,8 +132,16 @@ export function VendorsHome() {
       setRange({ ...range, [which]: new Date(e.target.value) });
     };
 
+  useEffect(() => {
+    HttpService.get('/user/vendor').then(response => {
+      if (response) {
+        setVendors(response);
+      }
+    });
+  }, []);
+
   return (
-    <Card title="All Orders" className={styles.root}>
+    <Card title="All Vendors" className={styles.root}>
       <TableToolbar
         searchTitle="Search Shop Owner or Vendor Name"
         search={filter}
@@ -184,7 +178,7 @@ export function VendorsHome() {
       />
       <TableBody
         columns={columns}
-        rows={tableData}
+        rows={vendors}
         className={styles.tableBody}
       />
     </Card>
