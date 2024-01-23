@@ -15,21 +15,21 @@ export const routes = [
     element: <OtherLayout />,
     children: superAdminRoutes,
   },
-  // {
-  //   path: 'vendor',
-  //   element: <OtherLayout />,
-  //   children: vendorRoutes,
-  // },
+  {
+    path: 'vendor',
+    element: <OtherLayout />,
+    children: vendorRoutes,
+  },
   {
     path: 'vendor-community',
     element: <CommunityLayout />,
     children: communityRoutes,
   },
-  // {
-  //   path: '',
-  //   element: <CustomerLayout />,
-  //   children: customerRoutes,
-  // },
+  {
+    path: '',
+    element: <CustomerLayout />,
+    children: customerRoutes,
+  },
 ];
 
 export { superAdminRoutes, customerRoutes, vendorRoutes };
