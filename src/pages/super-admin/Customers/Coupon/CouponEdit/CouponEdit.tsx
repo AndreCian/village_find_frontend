@@ -12,7 +12,7 @@ import { IRange, ITableColumn } from '@/interfaces';
 
 import { getBubbleObject } from '@/utils/data/getBubbleObject';
 
-import ProductSvg from '/assets/admin/backs/Product.svg';
+import ProductSvg from '/assets/admin/backs/product.svg';
 import styles from './CouponEdit.module.scss';
 
 export type CouponType = 'Free Shipping' | 'Percent' | 'Tiered';
