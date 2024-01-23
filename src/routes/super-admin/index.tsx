@@ -318,11 +318,11 @@ export const superAdminRoutes = [
           },
         ],
       },
-      {
-        title: 'Featured Communities',
-        path: 'featured',
-        element: <></>,
-      },
+      // {
+      //   title: 'Featured Communities',
+      //   path: 'featured',
+      //   element: <></>,
+      // },
     ],
   },
   {

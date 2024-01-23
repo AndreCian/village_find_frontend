@@ -10,11 +10,11 @@ import { vendorRoutes } from '@/routes/vendor';
 import { communityRoutes } from '@/routes/community';
 
 export const routes = [
-  // {
-  //   path: 'admin',
-  //   element: <OtherLayout />,
-  //   children: superAdminRoutes,
-  // },
+  {
+    path: 'admin',
+    element: <OtherLayout />,
+    children: superAdminRoutes,
+  },
   // {
   //   path: 'vendor',
   //   element: <OtherLayout />,
