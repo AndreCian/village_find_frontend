@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { enqueueSnackbar } from 'notistack';
 import { FaTimes } from 'react-icons/fa';
 
 import clsx from 'clsx';
@@ -12,24 +13,44 @@ import {
   TextField,
 } from '@/components/forms';
 
+import { HttpService } from '@/services';
+
 import { useOnClickOutside } from '@/utils';
 
-import styles from './ProductDialog.module.scss';
+import styles from './AIDialog.module.scss';
 
-interface IProductDialogProps {
+interface IAIDialogProps {
   open: boolean;
   onClose?: () => void;
+  category: string;
+  topic:
+    | 'product name'
+    | 'short product description'
+    | 'long product description'
+    | 'disclaimer';
 }
 
-const initialSortOptions = ['Sort Alphabetically, A-Z'];
+const initialTones = [
+  'Default',
+  'Celebratory',
+  'Empathetic',
+  'Excited',
+  'Formal',
+  'Funny',
+  'Witty',
+];
 
-export function ProductDialog({
+export function AIDialog({
   open,
   onClose = () => {},
-}: IProductDialogProps) {
+  topic,
+  category,
+}: IAIDialogProps) {
   const [ansCount, setAnsCount] = useState(0);
-  const [ansIndex, setAnsIndex] = useState('0');
-  const [answers, setAnswers] = useState<string[]>(['', '']);
+  const [ansIndex, setAnsIndex] = useState(-1);
+  const [ansTone, setAnsTone] = useState('Default');
+  const [prompt, setPrompt] = useState('');
+  const [answers, setAnswers] = useState<string[]>(Array(ansCount).fill(''));
   const dialogRef = useRef<HTMLDivElement>(null);
 
   const onAnswerChange = (index: number) => (e: any) => {
@@ -38,6 +59,29 @@ export function ProductDialog({
         index === _index ? e.target.value : answer,
       ),
     );
+  };
+
+  const onCountChange = (e: any) => {
+    setAnsCount(Number(e.target.value));
+  };
+
+  const onRegenClick = () => {
+    setAnswers(Array(ansCount).fill(''));
+  };
+
+  const onSubmitClick = () => {
+    HttpService.get(
+      `/openai?count=${ansCount}&tone=${ansTone}&type=${topic}&category=${category}&prompt=${prompt}`,
+    ).then(response => {
+      const { status, answers } = response;
+      if (status === 200) {
+        console.log(answers);
+      } else {
+        enqueueSnackbar('Something went wrong with server.', {
+          variant: 'error',
+        });
+      }
+    });
   };
 
   useEffect(() => {
@@ -65,29 +109,47 @@ export function ProductDialog({
                 rounded="full"
                 className={styles.promptInput}
                 placeholder="Write a caption about growing a business using social media"
+                value={prompt}
+                updateValue={(e: any) => setPrompt(e.target.value)}
               />
             </div>
             <div className={styles.elements}>
               <div className={styles.element}>
                 <p className={styles.title}>Select tone</p>
-                <Select placeholder="Default" className={styles.toneSelector} />
+                <Select
+                  placeholder="Default"
+                  className={styles.toneSelector}
+                  options={initialTones}
+                  value={ansTone}
+                  updateValue={(tone: string) => setAnsTone(tone)}
+                />
               </div>
               <div className={styles.element}>
                 <p className={styles.title}>Generated Count</p>
-                <Input type="number" className={styles.countInput} />
+                <Input
+                  type="number"
+                  name="count"
+                  className={styles.countInput}
+                  value={ansCount}
+                  updateValue={onCountChange}
+                />
               </div>
             </div>
-            <Button className={styles.submitBtn}>Submit</Button>
+            <Button className={styles.submitBtn} onClick={onSubmitClick}>
+              Submit
+            </Button>
           </div>
           <div className={styles.answers}>
             <div className={styles.header}>
               <p className={styles.title}>Select One</p>
-              <Button className={styles.regenBtn}>Regenerate</Button>
+              <Button className={styles.regenBtn} onClick={onRegenClick}>
+                Regenerate
+              </Button>
             </div>
             <div className={styles.body}>
               <RadioGroup
-                value={ansIndex}
-                updateValue={(value: string) => setAnsIndex(value)}
+                value={ansIndex.toString()}
+                updateValue={(value: string) => setAnsIndex(Number(value))}
                 className={styles.answerList}
               >
                 {answers.map((answer: string, index: number) => (

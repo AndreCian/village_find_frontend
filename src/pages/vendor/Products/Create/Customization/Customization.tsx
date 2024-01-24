@@ -1,10 +1,10 @@
+import { FaChevronRight } from 'react-icons/fa6';
 import clsx from 'clsx';
 
 import { Card } from '@/components/common';
+import { Input, Radio, TextField } from '@/components/forms';
 
 import styles from './Customization.module.scss';
-import { FaChevronRight } from 'react-icons/fa6';
-import { Input, Radio, TextField } from '@/components';
 
 export function Customization() {
   const productName = 'Black Polish Radish';

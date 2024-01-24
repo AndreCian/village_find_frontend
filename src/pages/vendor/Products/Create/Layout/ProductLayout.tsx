@@ -13,7 +13,7 @@ const pathPrefix = '/vendor/products/create';
 const navItems: INavItem[] = [
   {
     title: 'General Information',
-    path: '/',
+    path: '',
   },
   {
     title: 'Product Styles',

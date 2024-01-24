@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { FaChevronRight } from 'react-icons/fa6';
 import clsx from 'clsx';
 
@@ -10,13 +10,22 @@ import {
   Select,
   TextField,
 } from '@/components/forms';
-import { ProductDialog } from '@/components/super-admin/common';
+import { AIDialog } from '@/components/super-admin/common';
 
 import { MagicIcon } from '@/components/icons';
+
+import { HttpService } from '@/services';
+
+import { ICategory } from '@/interfaces';
 
 import styles from './General.module.scss';
 
 type PayType = 'Shipping' | 'Near By' | 'Local Subscriptions';
+type TopicType =
+  | 'product name'
+  | 'short product description'
+  | 'long product description'
+  | 'disclaimer';
 
 interface IProductGeneralInfo {
   name: string;
@@ -44,6 +53,14 @@ export function General() {
   const [generalInfo, setGeneralInfo] =
     useState<IProductGeneralInfo>(initialInfo);
   const [productDialogOpen, setProductDialogOpen] = useState(false);
+  const [categories, setCategories] = useState<ICategory[]>([]);
+  const [dialogTopic, setDialogTopic] = useState<TopicType>('product name');
+
+  useEffect(() => {
+    HttpService.get('/settings/general/category').then(response => {
+      setCategories(response);
+    });
+  }, []);
 
   return (
     <div className={styles.root}>
@@ -103,16 +120,14 @@ export function General() {
           <div className={styles.form}>
             <div className={styles.control}>
               <p>Product Category</p>
-              {/* <Input
-                rounded="full"
-                border="none"
-                bgcolor="secondary"
-                placeholder="Product Category"
-              /> */}
               <Select
                 placeholder="Product category"
-                options={[]}
+                options={categories.map((item: ICategory) => item.name)}
                 className={styles.categories}
+                value={generalInfo.category}
+                updateValue={(category: string) =>
+                  setGeneralInfo({ ...generalInfo, category })
+                }
               />
             </div>
             <div className={styles.control}>
@@ -122,10 +137,16 @@ export function General() {
                 border="none"
                 bgcolor="secondary"
                 placeholder="Product name"
+                className={styles.input}
                 adornment={{
                   position: 'right',
                   content: (
-                    <MagicIcon onClick={() => setProductDialogOpen(true)} />
+                    <MagicIcon
+                      onClick={() => {
+                        setDialogTopic('product name');
+                        setProductDialogOpen(true);
+                      }}
+                    />
                   ),
                 }}
               />
@@ -137,10 +158,16 @@ export function General() {
                 border="none"
                 bgcolor="secondary"
                 placeholder="Short Product Description"
+                className={styles.input}
                 adornment={{
                   position: 'right',
                   content: (
-                    <MagicIcon onClick={() => setProductDialogOpen(true)} />
+                    <MagicIcon
+                      onClick={() => {
+                        setDialogTopic('short product description');
+                        setProductDialogOpen(true);
+                      }}
+                    />
                   ),
                 }}
               />
@@ -152,10 +179,16 @@ export function General() {
                 border="none"
                 bgcolor="secondary"
                 placeholder="Long Product Description"
+                className={styles.textInput}
                 adornment={{
                   position: 'right',
                   content: (
-                    <MagicIcon onClick={() => setProductDialogOpen(true)} />
+                    <MagicIcon
+                      onClick={() => {
+                        setDialogTopic('long product description');
+                        setProductDialogOpen(true);
+                      }}
+                    />
                   ),
                 }}
               />
@@ -166,11 +199,17 @@ export function General() {
                 rounded="full"
                 border="none"
                 bgcolor="secondary"
-                placeholder="Discalimer"
+                placeholder="Disclaimer"
+                className={styles.textInput}
                 adornment={{
                   position: 'right',
                   content: (
-                    <MagicIcon onClick={() => setProductDialogOpen(true)} />
+                    <MagicIcon
+                      onClick={() => {
+                        setDialogTopic('disclaimer');
+                        setProductDialogOpen(true);
+                      }}
+                    />
                   ),
                 }}
               />
@@ -211,9 +250,11 @@ export function General() {
           </div>
         </div>
       </Card>
-      <ProductDialog
+      <AIDialog
         open={productDialogOpen}
         onClose={() => setProductDialogOpen(false)}
+        topic={dialogTopic}
+        category={generalInfo.category}
       />
     </div>
   );

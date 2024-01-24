@@ -47,7 +47,7 @@ export function Sidebar() {
   const renderChildRoute = (children: IRouteItem[], currentPath: string) => {
     return children.map((route: IRouteItem, index: number) =>
       route.children && !route.leaf ? (
-        <div key={index}>
+        <div key={`${currentPath}-${route.path}-${index}`}>
           <p className={styles.subParentItem}>{route.title}</p>
           <div className={styles.childPanel}>
             {renderChildRoute(

@@ -18,7 +18,7 @@ const steps: IStep[] = [
     num: 1,
     title: 'Connect to Stripe',
     body: 'Profile > My Bank Details',
-    path: '/vendor/profile/my-bank',
+    path: '/vendor/profile/bank-detail',
   },
   {
     num: 2,

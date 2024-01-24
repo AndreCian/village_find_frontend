@@ -14,7 +14,7 @@
           @apply space-y-1;
 
           .text {
-            @apply text-[16px] leading-[25px];
+            @apply text-[16px] font-medium leading-[25px];
           }
 
           .promptInput {
@@ -28,9 +28,24 @@
           .element {
             @apply space-y-2;
 
+            .title {
+              @apply font-medium;
+            }
+
             .toneSelector {
               & > div:nth-child(1) {
                 @apply rounded-full border-none bg-primary;
+              }
+              & > div:nth-child(2) {
+                @apply rounded-2xl border-none bg-white text-[13px] leading-[18px] shadow-xl;
+
+                span {
+                  @apply hover:bg-primary;
+                }
+
+                span.active {
+                  @apply bg-primary;
+                }
               }
             }
 

@@ -65,7 +65,7 @@ export const vendorRoutes = [
       {
         title: 'Home',
         path: '',
-        leaf: true,
+        hide: true,
         element: <ProfileHome />,
       },
       {
