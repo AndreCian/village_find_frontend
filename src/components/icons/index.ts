@@ -17,3 +17,4 @@ export * from './Grid';
 export * from './Cart';
 export * from './ZipCode';
 export * from './Arrow';
+export * from './Pencil';

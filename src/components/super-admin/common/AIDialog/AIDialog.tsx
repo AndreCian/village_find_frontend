@@ -12,6 +12,7 @@ import {
   Select,
   TextField,
 } from '@/components/forms';
+import { PencilIcon } from '@/components/icons';
 
 import { HttpService } from '@/services';
 
@@ -19,15 +20,18 @@ import { useOnClickOutside } from '@/utils';
 
 import styles from './AIDialog.module.scss';
 
+type TopicType =
+  | 'product name'
+  | 'short product description'
+  | 'long product description'
+  | 'disclaimer';
+
 interface IAIDialogProps {
   open: boolean;
   onClose?: () => void;
+  onSelect?: (_: string) => void;
   category: string;
-  topic:
-    | 'product name'
-    | 'short product description'
-    | 'long product description'
-    | 'disclaimer';
+  topic: TopicType;
 }
 
 const initialTones = [
@@ -43,6 +47,7 @@ const initialTones = [
 export function AIDialog({
   open,
   onClose = () => {},
+  onSelect = () => {},
   topic,
   category,
 }: IAIDialogProps) {
@@ -50,8 +55,18 @@ export function AIDialog({
   const [ansIndex, setAnsIndex] = useState(-1);
   const [ansTone, setAnsTone] = useState('Default');
   const [prompt, setPrompt] = useState('');
-  const [answers, setAnswers] = useState<string[]>(Array(ansCount).fill(''));
+  const [answers, setAnswers] = useState<string[]>([]);
+  const [isEditings, setIsEditings] = useState<boolean[]>([]);
   const dialogRef = useRef<HTMLDivElement>(null);
+
+  const initializeStates = () => {
+    setAnsCount(0);
+    setAnsIndex(-1);
+    setAnsTone('Default');
+    setPrompt('');
+    setAnswers([]);
+    setIsEditings([]);
+  };
 
   const onAnswerChange = (index: number) => (e: any) => {
     setAnswers(
@@ -67,6 +82,15 @@ export function AIDialog({
 
   const onRegenClick = () => {
     setAnswers(Array(ansCount).fill(''));
+    setIsEditings(Array(ansCount).fill(false));
+  };
+
+  const onAnsEditClick = (index: number) => () => {
+    setIsEditings(
+      isEditings.map((_editing: boolean, _index: number) =>
+        _index === index ? !_editing : _editing,
+      ),
+    );
   };
 
   const onSubmitClick = () => {
@@ -75,13 +99,22 @@ export function AIDialog({
     ).then(response => {
       const { status, answers } = response;
       if (status === 200) {
-        console.log(answers);
+        setAnswers(answers);
       } else {
         enqueueSnackbar('Something went wrong with server.', {
           variant: 'error',
         });
       }
     });
+  };
+
+  const onSelectClick = () => {
+    if (ansIndex === -1) {
+      enqueueSnackbar('Choose one of the answers.', { variant: 'warning' });
+      return;
+    }
+    onSelect(answers[ansIndex]);
+    initializeStates();
   };
 
   useEffect(() => {
@@ -159,13 +192,24 @@ export function AIDialog({
                       value={answer}
                       updateValue={onAnswerChange(index)}
                       className={styles.ansInput}
+                      disabled={!isEditings[index]}
+                      adornment={{
+                        position: 'right',
+                        content: !isEditings[index] ? (
+                          <PencilIcon onClick={onAnsEditClick(index)} />
+                        ) : (
+                          <></>
+                        ),
+                      }}
                     />
                   </div>
                 ))}
               </RadioGroup>
             </div>
           </div>
-          <Button className={styles.chooseBtn}>Select</Button>
+          <Button className={styles.chooseBtn} onClick={onSelectClick}>
+            Select
+          </Button>
         </div>
         <span className={styles.closeBtn} onClick={onClose}>
           <FaTimes size={24} />

@@ -87,6 +87,10 @@
               input {
                 @apply rounded-none;
               }
+
+              span {
+                @apply bg-transparent;
+              }
             }
           }
         }

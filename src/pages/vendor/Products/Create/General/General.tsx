@@ -56,6 +56,25 @@ export function General() {
   const [categories, setCategories] = useState<ICategory[]>([]);
   const [dialogTopic, setDialogTopic] = useState<TopicType>('product name');
 
+  const onAnswerSelect = (answer: string) => {
+    setGeneralInfo({
+      ...generalInfo,
+      [dialogTopic === 'product name'
+        ? 'name'
+        : dialogTopic === 'long product description'
+        ? 'longDesc'
+        : dialogTopic === 'short product description'
+        ? 'shortDesc'
+        : 'disclaimer']: answer,
+    });
+    setProductDialogOpen(false);
+  };
+
+  const onDialogOpenClick = (topic: TopicType) => () => {
+    setDialogTopic(topic);
+    setProductDialogOpen(true);
+  };
+
   useEffect(() => {
     HttpService.get('/settings/general/category').then(response => {
       setCategories(response);
@@ -98,7 +117,7 @@ export function General() {
                 }
               >
                 {['Shipping', 'Near By', 'Local Subscriptions'].map(
-                  (type: string, index: number) => (
+                  (type: string) => (
                     <div
                       key={type}
                       className={clsx(
@@ -137,16 +156,13 @@ export function General() {
                 border="none"
                 bgcolor="secondary"
                 placeholder="Product name"
+                value={generalInfo.name}
                 className={styles.input}
+                disabled={true}
                 adornment={{
                   position: 'right',
                   content: (
-                    <MagicIcon
-                      onClick={() => {
-                        setDialogTopic('product name');
-                        setProductDialogOpen(true);
-                      }}
-                    />
+                    <MagicIcon onClick={onDialogOpenClick('product name')} />
                   ),
                 }}
               />
@@ -158,15 +174,14 @@ export function General() {
                 border="none"
                 bgcolor="secondary"
                 placeholder="Short Product Description"
+                disabled={true}
                 className={styles.input}
+                value={generalInfo.shortDesc}
                 adornment={{
                   position: 'right',
                   content: (
                     <MagicIcon
-                      onClick={() => {
-                        setDialogTopic('short product description');
-                        setProductDialogOpen(true);
-                      }}
+                      onClick={onDialogOpenClick('short product description')}
                     />
                   ),
                 }}
@@ -179,15 +194,14 @@ export function General() {
                 border="none"
                 bgcolor="secondary"
                 placeholder="Long Product Description"
+                disabled={true}
+                value={generalInfo.longDesc}
                 className={styles.textInput}
                 adornment={{
                   position: 'right',
                   content: (
                     <MagicIcon
-                      onClick={() => {
-                        setDialogTopic('long product description');
-                        setProductDialogOpen(true);
-                      }}
+                      onClick={onDialogOpenClick('long product description')}
                     />
                   ),
                 }}
@@ -200,16 +214,13 @@ export function General() {
                 border="none"
                 bgcolor="secondary"
                 placeholder="Disclaimer"
+                disabled={true}
                 className={styles.textInput}
+                value={generalInfo.disclaimer}
                 adornment={{
                   position: 'right',
                   content: (
-                    <MagicIcon
-                      onClick={() => {
-                        setDialogTopic('disclaimer');
-                        setProductDialogOpen(true);
-                      }}
-                    />
+                    <MagicIcon onClick={onDialogOpenClick('disclaimer')} />
                   ),
                 }}
               />
@@ -253,6 +264,7 @@ export function General() {
       <AIDialog
         open={productDialogOpen}
         onClose={() => setProductDialogOpen(false)}
+        onSelect={onAnswerSelect}
         topic={dialogTopic}
         category={generalInfo.category}
       />

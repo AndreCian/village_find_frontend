@@ -16,6 +16,7 @@ export interface ITextFieldProps {
   border?: BorderType;
   bgcolor?: BgColorType;
   adornment?: IAdornment;
+  disabled?: boolean;
 }
 
 export function TextField({
