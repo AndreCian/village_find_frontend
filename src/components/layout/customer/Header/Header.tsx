@@ -14,7 +14,7 @@ import { Button, Input } from '@/components/forms';
 import { MagnifierIcon, CartIcon, UserIcon } from '@/components/icons';
 import { Logo } from '@/components/layout/customer';
 
-import { SearchbarContext } from '@/providers';
+import { AuthContext, SearchbarContext } from '@/providers';
 
 import { useWindowWidth } from '@/utils/hook/useWindowWidth';
 
@@ -34,9 +34,9 @@ export function Header({
   const shopLoc: string = 'Waterbury';
   const shopZipcode: string = '06705';
   const cartItemCount: number = 3;
-  const userName: string = 'Brandon';
-  const authenticated: boolean = false;
+  // const userName: string = 'Brandon';
 
+  const { isLogin, account } = useContext(AuthContext);
   const { isSearchbar } = useContext(SearchbarContext);
 
   const [shopLocAnchor, setShopLocAnchor] = useState(-1);
@@ -137,10 +137,10 @@ export function Header({
             }}
           />
         </div>
-        {authenticated ? (
+        {isLogin ? (
           <>
             <div className={styles.account}>
-              <p>Hi, {userName}</p>
+              <p>Hi, {account?.profile && account.profile.firstName}</p>
               <UserIcon className={styles.icon} />
             </div>
             <div className={styles.navToCart}>
@@ -169,9 +169,11 @@ export function Header({
       <div className={styles.collapsePanel}>
         {collapseAnchor && (
           <ul className={styles.subHeader}>
-            {authenticated ? (
+            {isLogin ? (
               <>
-                <li className={styles.namebar}>Hi, {userName}</li>
+                <li className={styles.namebar}>
+                  Hi, {account?.profile && account.profile.firstName}
+                </li>
                 <li className={styles.activeItem} onClick={onProfileClick}>
                   View Profile
                 </li>

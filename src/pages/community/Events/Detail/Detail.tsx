@@ -7,7 +7,7 @@ import { formatDate, getBubbleObject } from '@/utils';
 
 import styles from './Detail.module.scss';
 
-const homePath = '/vendor-community/events';
+const homePath = '/village-community/events';
 
 interface IDetailProps {
   event: IEventDetail;
@@ -30,13 +30,10 @@ export interface IEventDetail {
 export interface IAttendee {
   _id?: string;
   name: string;
-  height: {
-    min: number;
-    max: number;
-  };
-  weight: number;
-  date: string;
-  isAttend: boolean;
+  height: string;
+  weight: string;
+  submited_at: string;
+  attending: string;
 }
 
 export type IEditingEventDetail = IEventDetail & {

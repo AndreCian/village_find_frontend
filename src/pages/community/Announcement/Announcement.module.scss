@@ -1,5 +1,5 @@
 .root {
-  @apply flex w-full flex-col gap-y-4;
+  @apply flex w-full flex-col gap-y-6;
 
   h1 {
     @apply text-[32px] font-bold leading-[36px] text-dark;
@@ -10,18 +10,10 @@
 
     .control {
       @apply space-y-2;
-
-      .textarea {
-        @apply border-none p-0;
-
-        textarea {
-          @apply rounded-md border-1 border-gray-400 p-2.5 focus:border-blue-500 focus:ring-3 focus:ring-blue-300;
-        }
-      }
     }
 
     button {
-      @apply self-end rounded-md bg-blue-600 p-2 text-white active:ring-3 active:ring-blue-300;
+      @apply self-end rounded-full bg-dark px-8 py-2 text-[16px] leading-[25px] text-white;
     }
   }
 }

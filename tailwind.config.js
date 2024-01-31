@@ -31,6 +31,7 @@ export default {
         warning: '#EFD9CE',
         danger: '#957FEF',
         GRay: '#E0E0E0',
+        SGray: '#A0A0A0',
         lightgray: '#F5F5F5',
         info: '#DEC0F1',
         light: '#84A98C',
@@ -43,6 +44,7 @@ export default {
         dark: '#616161',
         success: '#652F90',
         light: '#84A98C',
+        placeholder: '#9B9B9B',
       },
       borderColor: {
         primary: '#3F3F3F',

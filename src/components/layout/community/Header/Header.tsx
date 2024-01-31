@@ -8,7 +8,7 @@ import { AuthContext } from '@/providers';
 
 import styles from './Header.module.scss';
 
-const homePath = '/vendor-community';
+const homePath = '/village-community';
 
 export function Header() {
   const { isLogin, setIsLogin } = useContext(AuthContext);
@@ -37,7 +37,7 @@ export function Header() {
       ) : (
         <button
           className={styles.button}
-          onClick={() => navigate('/vendor-community/auth/login')}
+          onClick={() => navigate('/village-community/auth/login')}
         >
           Login
         </button>

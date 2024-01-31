@@ -27,7 +27,7 @@
 }
 
 .rightDrop .dropboxPanel {
-  @apply -left-full -translate-x-1;
+  @apply -left-full translate-x-2 translate-y-2;
 }
 
 .rightDrop > .dropboxPanel {

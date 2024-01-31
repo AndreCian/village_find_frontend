@@ -48,8 +48,8 @@ export function Login() {
             role: 'community-organizer',
             profile,
           });
-          setupToken(token);
-          navigate('/vendor-community/dashboard');
+          setupToken(token, 'community');
+          navigate('/village-community/dashboard');
         } else {
           enqueueSnackbar('Invalid credentials!', { variant: 'error' });
         }
@@ -83,7 +83,7 @@ export function Login() {
         <button onClick={onLogin}>Login</button>
         <p>
           Don't have an account?{' '}
-          <Link to="/vendor-community/auth/register" className={styles.signup}>
+          <Link to="/village-community/auth/register" className={styles.signup}>
             Sign Up
           </Link>
         </p>

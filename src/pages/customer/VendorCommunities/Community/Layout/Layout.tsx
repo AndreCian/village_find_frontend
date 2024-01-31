@@ -1,35 +1,43 @@
 import { useEffect, useState } from 'react';
-import { Outlet, useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { enqueueSnackbar } from 'notistack';
+
+import {
+  CommunityAbout,
+  CommunityVendors,
+} from '@/pages/customer/VendorCommunities';
 
 import { Container } from '@/components/layout/customer';
 import { Button, Select } from '@/components/forms';
 
 import { HttpService } from '@/services';
 
+import { SERVER_ASSETS_URL } from '@/config/global';
+
 import styles from './Layout.module.scss';
 
-const initialVendor = {
-  image: '/assets/customer/backs/shopvcom.png',
-  title: 'Field Of Artisans',
-  description:
-    'Fresh food at an affordable price for the family and for the friends in life you have.',
-};
-
-const initialNavItems = ['Vendors', 'About', 'Join Our Community'];
+const initialNavItems = [
+  { name: 'Vendors', value: 'vendor' },
+  { name: 'About', value: 'about' },
+  { name: 'Join Our Community', value: 'join' },
+];
 
 export function Layout() {
-  const location = useLocation();
   const navigate = useNavigate();
-  const { id: vendorId } = useParams();
-
-  const pathname = location.pathname;
+  const { slug } = useParams();
+  const [searchParams] = useSearchParams();
 
   const [community, setCommunity] = useState<any>({});
+  const [currentTab, setCurrentTab] = useState('vendor');
 
-  const initialPath = `'/communities/${vendorId}`;
+  const initialPath = `/communities/${slug}`;
 
   const onNavItemClick = (item: string) => {
-    navigate(`${initialPath}/${item.toLowerCase()}`);
+    if (item == 'join') {
+      onJoinClick();
+      return;
+    }
+    navigate(`${initialPath}?tab=${item}`);
   };
 
   const onJoinClick = () => {
@@ -38,11 +46,23 @@ export function Layout() {
   };
 
   useEffect(() => {
-    if (!vendorId) return;
-    HttpService.get(`/communities/${vendorId}`).then(response => {
-      setCommunity(response || {});
+    if (!slug) return;
+    HttpService.get(`/communities?slug=${slug}`).then(response => {
+      const { status, community } = response;
+      if (status === 404) {
+        enqueueSnackbar('Community not found!', { variant: 'error' });
+        navigate('/communities');
+        return;
+      }
+      setCommunity(community ?? {});
     });
-  }, [vendorId]);
+  }, [slug]);
+
+  useEffect(() => {
+    if (!searchParams) return;
+    const tab = searchParams.get('tab') ?? 'vendor';
+    setCurrentTab(tab);
+  }, [searchParams]);
 
   return (
     <div className={styles.root}>
@@ -52,34 +72,33 @@ export function Layout() {
           border="none"
           options={initialNavItems}
           bgcolor="primary"
-          value={
-            initialNavItems.find(item =>
-              pathname.endsWith(item.toLowerCase()),
-            ) || ''
-          }
+          value={currentTab}
           updateValue={onNavItemClick}
           className={styles.navItems}
         />
         <div className={styles.header}>
           <div className={styles.vendor}>
             <div className={styles.image}>
-              <img src={community.image || initialVendor.image} />
+              <img
+                alt="Community logo image"
+                src={`${SERVER_ASSETS_URL}/${
+                  community.images && community.images.logoUrl
+                }`}
+              />
             </div>
             <div className={styles.text}>
-              <p className={styles.title}>{community.villageName || ''}</p>
-              <p className={styles.body}>{community.description || ''}</p>
+              <p className={styles.title}>{community.name}</p>
+              <p className={styles.body}>{community.shortDesc}</p>
             </div>
           </div>
           <div className={styles.links}>
-            {initialNavItems.slice(0, 2).map((link: string, index: number) => (
+            {initialNavItems.slice(0, 2).map((item: any, index: number) => (
               <p
-                key={`link-${index}`}
-                className={
-                  pathname.endsWith(link.toLowerCase()) ? styles.active : ''
-                }
-                onClick={() => navigate(`${initialPath}/${link.toLowerCase()}`)}
+                key={index}
+                className={currentTab === item.value ? styles.active : ''}
+                onClick={() => navigate(`${initialPath}?tab=${item.value}`)}
               >
-                {link}
+                {item.name}
               </p>
             ))}
             <Button className={styles.joinButton} onClick={onJoinClick}>
@@ -88,7 +107,17 @@ export function Layout() {
           </div>
         </div>
       </Container>
-      <Outlet />
+      {currentTab === 'vendor' ? (
+        <CommunityVendors
+          announcement={community.announcement ?? {}}
+          vendors={community.vendors ?? []}
+          events={community.events ?? []}
+        />
+      ) : currentTab === 'about' ? (
+        <CommunityAbout />
+      ) : (
+        <></>
+      )}
     </div>
   );
 }

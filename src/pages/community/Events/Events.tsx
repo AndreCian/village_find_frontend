@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { enqueueSnackbar } from 'notistack';
 
-import { Button, Input, Dropdown } from '@/components/forms';
+import { Button, Input, Dropdown, Select } from '@/components/forms';
 import { MagnifierIcon } from '@/components/icons';
 import { Card, TableBody } from '@/components/common';
 
@@ -9,24 +10,44 @@ import { ITableColumn } from '@/interfaces';
 
 import { formatUsDate } from '@/utils';
 
-import styles from './Events.module.scss';
 import { HttpService } from '@/services';
-import { enqueueSnackbar } from 'notistack';
+
+import styles from './Events.module.scss';
 
 const initialActions = [
   {
     name: 'Export',
     children: [
       {
-        name: 'Pdf',
+        name: 'PDF',
       },
       {
-        name: 'Excel',
+        name: 'CSV',
       },
     ],
   },
   {
     name: 'Print',
+  },
+];
+
+const initialStatuses = ['Active', 'Canceled', 'Completed', 'Inactive'];
+const initialColors = [
+  {
+    status: 'Active',
+    color: 'success',
+  },
+  {
+    status: 'Canceled',
+    color: 'warning',
+  },
+  {
+    status: 'Completed',
+    color: 'light',
+  },
+  {
+    status: 'Inactive',
+    color: 'gray',
   },
 ];
 
@@ -64,7 +85,17 @@ export function Events() {
       title: 'Status',
       name: 'status',
       width: 200,
-      cell: (row: any) => <div className={styles.eventCell}>{row.status}</div>,
+      cell: (row: any) => (
+        <Select
+          border="none"
+          rounded="full"
+          colorable={true}
+          colors={initialColors}
+          options={initialStatuses}
+          value={row.status}
+          className={styles.statusSelector}
+        />
+      ),
     },
     {
       title: 'Where',
@@ -93,7 +124,7 @@ export function Events() {
       })
       .catch(err => {
         enqueueSnackbar('Something went wrong with server.', {
-          variant: 'success',
+          variant: 'error',
         });
       });
   }, []);

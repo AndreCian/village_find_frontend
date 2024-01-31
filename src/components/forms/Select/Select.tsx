@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import clsx from 'clsx';
 
 import { FaChevronDown, FaChevronUp } from 'react-icons/fa6';
@@ -12,15 +12,17 @@ type BorderType = 'solid' | 'none';
 type BgColorType = 'primary' | 'secondary' | 'blue' | 'red' | 'white' | 'dark';
 
 export interface ISelectProps {
-  value?: string;
+  value?: string | null;
   updateValue?: (e: string) => void;
   placeholder?: string;
-  options?: string[];
+  options?: (string | { _id?: string; name: string; value: string })[];
   rounded?: RoundedType;
   border?: BorderType;
   bgcolor?: BgColorType;
   className?: string;
   disabled?: boolean;
+  colorable?: boolean;
+  colors?: { status: string; color: string }[];
 }
 
 export function Select({
@@ -33,9 +35,37 @@ export function Select({
   bgcolor = 'white',
   className = '',
   disabled = false,
+  colorable = false,
+  colors = [],
 }: ISelectProps) {
-  const selectRef = useRef<HTMLDivElement>(null);
   const [anchor, setAnchor] = useState<boolean>(false);
+  const currentName = useMemo(() => {
+    const currentOption = options.find(item =>
+      typeof item === 'object'
+        ? item.value.toLowerCase() === value?.toLowerCase()
+        : item.toLowerCase() === value?.toLowerCase(),
+    );
+    return !currentOption
+      ? placeholder
+      : typeof currentOption === 'object'
+      ? currentOption.name
+      : currentOption;
+  }, [value]);
+
+  const selectRef = useRef<HTMLDivElement>(null);
+
+  const colorClasses = () => {
+    const currentColor = colors.find(
+      (color: { status: string; color: string }) => color.status === value,
+    );
+    if (!currentColor) return {};
+    return clsx([styles.colorable], {
+      [styles.successSelectBox]: currentColor.color === 'success',
+      [styles.warningSelectBox]: currentColor.color === 'warning',
+      [styles.lightSelectBox]: currentColor.color === 'light',
+      [styles.graySelectBox]: currentColor.color === 'gray',
+    });
+  };
 
   const classes = clsx(
     styles.root,
@@ -51,6 +81,8 @@ export function Select({
       ? styles.bgColorRed
       : bgcolor === 'dark'
       ? styles.bgColorDark
+      : colorable === true
+      ? colorClasses()
       : '',
     className,
   );
@@ -66,20 +98,31 @@ export function Select({
   return (
     <div className={classes} ref={selectRef}>
       <div className={styles.selectBox} onClick={() => setAnchor(!anchor)}>
-        <span>{value === '' ? placeholder : value}</span>
+        <span className={clsx({ [styles.placeholder]: !value })}>
+          {currentName}
+        </span>
         {anchor ? <FaChevronUp /> : <FaChevronDown />}
       </div>
       {anchor && options.length !== 0 && (
         <div className={styles.viewBox}>
-          {options.map((option: string) => (
-            <span
-              key={option}
-              onClick={() => onSelectOption(option)}
-              className={option === value ? styles.activeItem : ''}
-            >
-              {option}
-            </span>
-          ))}
+          {options.map(
+            (
+              option: string | { _id?: string; name: string; value: string },
+              index: number,
+            ) => (
+              <span
+                key={index}
+                onClick={() =>
+                  onSelectOption(
+                    typeof option === 'object' ? option.value : option,
+                  )
+                }
+                className={option === value ? styles.activeItem : ''}
+              >
+                {typeof option === 'object' ? option.name : option}
+              </span>
+            ),
+          )}
         </div>
       )}
     </div>

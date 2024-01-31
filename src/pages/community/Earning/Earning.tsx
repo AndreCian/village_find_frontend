@@ -19,11 +19,20 @@ export function Earning() {
     <div className={styles.root}>
       <h1>Your Earnings</h1>
       <div className={styles.content}>
-        <input placeholder="Vendor" value={shop} onChange={onShopChange} />
-        <button className={styles.submit}>Submit</button>
-        <button className={styles.reset} onClick={onResetClick}>
-          Reset
-        </button>
+        <Input
+          placeholder="Vendor"
+          rounded="full"
+          border="none"
+          value={shop}
+          updateValue={onShopChange}
+          className={styles.input}
+        />
+        <div className={styles.buttons}>
+          <button className={styles.submit}>Submit</button>
+          <button className={styles.reset} onClick={onResetClick}>
+            Reset
+          </button>
+        </div>
       </div>
     </div>
   );

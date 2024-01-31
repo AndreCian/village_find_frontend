@@ -20,8 +20,6 @@ const initialForms = [
   {
     title: 'Height',
     key: 'height',
-    value: (object: any) =>
-      object.height ? `${object.height.min}-${object.height.max}` : '',
   },
   {
     title: 'Weight',
@@ -29,8 +27,7 @@ const initialForms = [
   },
   {
     title: 'Attending',
-    key: 'isAttend',
-    value: (object: any) => `${object.isAttend ? 'Yes' : 'No'}`,
+    key: 'attending',
   },
 ];
 
@@ -65,7 +62,7 @@ export function FormViewDialog({ open, onClose, form }: IFormViewDialogProps) {
                 </p>
                 <p>
                   <span>Date Submitted:</span>{' '}
-                  {formatUsDate(new Date(form.date))}
+                  {form.submited_at && formatUsDate(new Date(form.submited_at))}
                 </p>
               </div>
             </div>
@@ -82,7 +79,7 @@ export function FormViewDialog({ open, onClose, form }: IFormViewDialogProps) {
                         ))}
                     </div>
                     <div className={styles.input}>
-                      {item.value ? item.value(form) : (form as any)[item.key]}
+                      {(form as any)[item.key]}
                     </div>
                   </div>
                 </div>

@@ -1,8 +1,16 @@
 import React, { useState } from 'react';
 
-type IRole = 'admin' | 'vendor' | 'customer' | 'community-organizer';
+export type RoleType = 'admin' | 'vendor' | 'customer' | 'community-organizer';
+
+interface ICustomerProfile {
+  _id?: string;
+  firstName: string;
+  lastName: string;
+  zipcode: string;
+}
 
 interface ICommunityProfile {
+  _id?: string;
   code: string;
   name: string;
   slug?: string;
@@ -19,8 +27,8 @@ interface ICommunityProfile {
 }
 
 interface IAccount {
-  role: IRole;
-  profile: ICommunityProfile | any;
+  role: RoleType;
+  profile: any;
 }
 
 interface IAuthContext {

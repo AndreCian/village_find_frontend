@@ -19,9 +19,9 @@ export interface IAdornment {
 export interface IInputProps {
   name?: string;
   type?: string;
-  value?: string | number;
+  value?: any;
   defaultValue?: string;
-  updateValue?: (e: ChangeEvent<HTMLInputElement>) => void;
+  updateValue?: (e: any) => void;
   placeholder?: string;
   rounded?: RoundedType;
   border?: BorderType;
@@ -50,6 +50,7 @@ export const Input = forwardRef((props: IInputProps, ref: any) => {
     bgcolor = 'primary',
     select = 'text',
     className = '',
+    value = '',
     adornment = null,
     defaultValue = '',
     updateValue = () => {},
@@ -83,6 +84,7 @@ export const Input = forwardRef((props: IInputProps, ref: any) => {
       <input
         name={name}
         type={type}
+        value={value}
         placeholder={placeholder}
         className={styles.input}
         onChange={updateValue}

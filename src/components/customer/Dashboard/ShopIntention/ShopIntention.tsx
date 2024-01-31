@@ -1,7 +1,7 @@
 import { Container } from '@/components/layout/customer';
 
 import styles from './ShopIntention.module.scss';
-import { SERVER_URL } from '@/config/global';
+import { SERVER_ASSETS_URL } from '@/config/global';
 
 const initialTexts = [
   {
@@ -59,7 +59,10 @@ export function ShopIntention({
 }: IShopIntentionProps) {
   return (
     <div className={styles.root}>
-      <img src={`${SERVER_URL}/${images[0]}`} className={styles.shopImage} />
+      <img
+        src={`${SERVER_ASSETS_URL}/${images[0]}`}
+        className={styles.shopImage}
+      />
       <Container className={styles.intention}>
         <h1>{title}</h1>
         <p>{subtitle}</p>
@@ -72,7 +75,7 @@ export function ShopIntention({
               </div>
             ))}
           </div>
-          <img src={`${SERVER_URL}/${images[1]}`} />
+          <img src={`${SERVER_ASSETS_URL}/${images[1]}`} />
         </div>
       </Container>
     </div>

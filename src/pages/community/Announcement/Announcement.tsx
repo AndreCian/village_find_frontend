@@ -69,8 +69,11 @@ export function Announcement() {
             <p className={styles.label}>Announcement</p>
             <TextField
               rows={3}
-              className={styles.textarea}
+              rounded="full"
+              border="none"
+              bgcolor="secondary"
               value={announcement}
+              className={styles.textarea}
               updateValue={(e: any) => setAnnouncement(e.target.value)}
             />
           </div>

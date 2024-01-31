@@ -30,7 +30,7 @@ export function Attendee({ attendees }: IAttendeeProps) {
       width: 500,
       cell: (row: any) => (
         <div className={styles.attendeeCell}>
-          {row.date && formatUsDate(new Date(row.date))}
+          {row.submited_at && formatUsDate(new Date(row.submited_at))}
         </div>
       ),
     },

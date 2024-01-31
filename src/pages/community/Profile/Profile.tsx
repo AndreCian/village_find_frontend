@@ -1,4 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
+import { enqueueSnackbar } from 'notistack';
 
 import { ImageUpload, Input, TextField } from '@/components/forms';
 import { Card } from '@/components/common';
@@ -7,9 +8,9 @@ import { AuthContext } from '@/providers';
 
 import { ImageType } from '@/interfaces';
 
-import styles from './Profile.module.scss';
 import { HttpService } from '@/services';
-import { enqueueSnackbar } from 'notistack';
+
+import styles from './Profile.module.scss';
 
 interface ICommunityProfile {
   code: string;
@@ -74,6 +75,10 @@ export function Profile() {
           <p className={styles.label}>Community Code*</p>
           <Input
             name="code"
+            rounded="full"
+            border="none"
+            bgcolor="secondary"
+            placeholder="Code"
             className={styles.input}
             value={(profile && profile.code) ?? ''}
             updateValue={onProfileChange}
@@ -83,6 +88,10 @@ export function Profile() {
           <p className={styles.label}>Slug*</p>
           <Input
             name="slug"
+            rounded="full"
+            border="none"
+            bgcolor="secondary"
+            placeholder="Slug"
             className={styles.input}
             value={(profile && profile.slug) ?? ''}
             updateValue={onProfileChange}
@@ -103,7 +112,7 @@ export function Profile() {
               ''
             }
             updateBaseImage={onLogoChange}
-            className={styles.input}
+            className={styles.upload}
           />
         </div>
         <div className={styles.control}>
@@ -121,7 +130,7 @@ export function Profile() {
               ''
             }
             updateBaseImage={onImageChange}
-            className={styles.input}
+            className={styles.upload}
           />
         </div>
         <div className={styles.control}>
@@ -129,6 +138,9 @@ export function Profile() {
           <TextField
             rows={5}
             name="shortDesc"
+            rounded="full"
+            border="none"
+            bgcolor="secondary"
             className={styles.textarea}
             value={(profile && profile.shortDesc) ?? ''}
             updateValue={onProfileChange}
@@ -138,8 +150,11 @@ export function Profile() {
           <p className={styles.label}>About Long*</p>
           <TextField
             rows={5}
-            className={styles.textarea}
             name="longDesc"
+            rounded="full"
+            border="none"
+            bgcolor="secondary"
+            className={styles.textarea}
             value={(profile && profile.longDesc) ?? ''}
             updateValue={onProfileChange}
           />

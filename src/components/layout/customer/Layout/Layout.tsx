@@ -1,5 +1,6 @@
 import { useState, useContext, useEffect } from 'react';
-import { Outlet, useLocation } from 'react-router-dom';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { enqueueSnackbar } from 'notistack';
 import clsx from 'clsx';
 
 import {
@@ -11,9 +12,10 @@ import {
 } from '@/components/layout/customer';
 import { Categories } from '@/components/customer/Market';
 
-import { CategoryContext, SearchbarContext } from '@/providers';
+import { AuthContext, CategoryContext, SearchbarContext } from '@/providers';
 
-import { useWindowWidth } from '@/utils';
+import { setupToken, useWindowWidth } from '@/utils';
+import { HttpService } from '@/services';
 
 export function Layout() {
   const location = useLocation();
@@ -21,8 +23,10 @@ export function Layout() {
 
   const { isCategoryBar } = useContext(CategoryContext);
   const { showSearchbar } = useContext(SearchbarContext);
+  const { isLogin, setIsLogin, setAccount } = useContext(AuthContext);
 
   const [isScreen, setIsScreen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const [_, breakpoint] = useWindowWidth();
 
@@ -43,6 +47,36 @@ export function Layout() {
     return () => {
       window.removeEventListener('scroll', onWindowScroll);
     };
+  }, []);
+
+  useEffect(() => {
+    if (isLogin) return;
+    const token = localStorage.getItem('customer_token');
+    if (token) {
+      setupToken(token, 'customer');
+      HttpService.post('/user/customer/login', {})
+        .then(response => {
+          const { status, profile } = response;
+          if (status === 200) {
+            setIsLogin(true);
+            setAccount({
+              role: 'customer',
+              profile,
+            });
+          } else {
+            setupToken(null, 'customer');
+          }
+          setIsLoading(false);
+        })
+        .catch(err => {
+          enqueueSnackbar('Something went wrong with server.', {
+            variant: 'error',
+          });
+          setIsLoading(false);
+        });
+    } else {
+      setIsLoading(false);
+    }
   }, []);
 
   return (
@@ -72,7 +106,7 @@ export function Layout() {
             <Categories />
           </Container>
         )}
-        <Outlet />
+        {!isLoading && <Outlet />}
         <Footer />
       </div>
     </div>

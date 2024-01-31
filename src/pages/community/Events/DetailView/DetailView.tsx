@@ -43,6 +43,7 @@ export function DetailView() {
   const [event, setEvent] = useState<IEvent>(initialEvent);
   const [editingEvent, setEditingEvent] =
     useState<IEditingEventDetail>(initialEditingEvent);
+  const [attendees, setAttendees] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState('detail');
 
   const updateEvent = (eventJson: IEvent) => {
@@ -51,7 +52,7 @@ export function DetailView() {
         const { status } = response;
         if (status === 200) {
           enqueueSnackbar('Event added successfully!', { variant: 'success' });
-          navigate('/vendor-community/events');
+          navigate('/village-community/events');
         }
       })
       .catch(err => {
@@ -74,14 +75,18 @@ export function DetailView() {
   };
 
   const onEditingUpdate = () => {
-    HttpService.put(`/communities/event/${eventId}`, editingEvent)
+    const reqJson = {
+      ...editingEvent,
+      status: editingEvent.isActive ? 'Active' : 'Inactive',
+    };
+    HttpService.put(`/communities/event/${eventId}`, reqJson)
       .then(response => {
         const { status } = response;
         if (status === 200) {
           enqueueSnackbar('Event updated successfully!', {
             variant: 'success',
           });
-          navigate('/vendor-community/events');
+          navigate('/village-community/events');
         } else {
           enqueueSnackbar('Event not found!', { variant: 'error' });
         }
@@ -99,7 +104,25 @@ export function DetailView() {
       .then(response => {
         const { status, event } = response;
         if (status === 200) {
-          setEditingEvent(event);
+          const resJson: IEditingEventDetail = {
+            ...event,
+            isActive: event.status === 'Active',
+          };
+          setEditingEvent(resJson);
+        } else {
+          enqueueSnackbar('Event not found!', { variant: 'error' });
+        }
+      })
+      .catch(err => {
+        enqueueSnackbar('Something went wrong with server.', {
+          variant: 'error',
+        });
+      });
+    HttpService.get(`/communities/meetup/attendee/${eventId}`)
+      .then(response => {
+        const { status, attendees } = response;
+        if (status === 200) {
+          setAttendees(attendees ?? []);
         } else {
           enqueueSnackbar('Event not found!', { variant: 'error' });
         }
@@ -160,9 +183,7 @@ export function DetailView() {
               onFinalUpdate={onFormUpdate}
             />
           )
-        : activeTab === 'detail' && (
-            <Attendee attendees={editingEvent.attendees ?? []} />
-          )}
+        : activeTab === 'detail' && <Attendee attendees={attendees} />}
     </div>
   );
 }

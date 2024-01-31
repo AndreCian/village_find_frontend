@@ -9,7 +9,7 @@
     @apply flex items-center gap-x-2.5;
 
     .image {
-      @apply aspect-square shrink-0 cursor-pointer rounded-md shadow-lg;
+      @apply aspect-square max-w-[120px] shrink-0 cursor-pointer rounded-md shadow-lg;
 
       img {
         @apply aspect-square h-full w-full;

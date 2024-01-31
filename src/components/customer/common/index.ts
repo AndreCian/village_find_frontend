@@ -6,3 +6,5 @@ export * from './FilterAndSortDialog';
 export * from './MobileSettingDialog';
 export * from './PickDateDialog';
 export * from './PickupLocationDialog';
+export * from './EventMeetupDialog';
+export * from './RegisterFormDialog';

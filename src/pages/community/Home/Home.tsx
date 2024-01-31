@@ -15,7 +15,7 @@ export function Home() {
         <div className={styles.content}>
           <h1>Vendor Community Login</h1>
           <p>Click below to login to you vendor comunity dashboard</p>
-          <button onClick={() => navigate('/vendor-community/auth/login')}>
+          <button onClick={() => navigate('/village-community/auth/login')}>
             Login
           </button>
         </div>

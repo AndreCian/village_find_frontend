@@ -10,8 +10,6 @@ import { ITableColumn } from '@/interfaces';
 
 import styles from './Products.module.scss';
 
-const createPath = '/vendor/products/create/';
-
 export function Products() {
   const navigate = useNavigate();
   const { products } = useProductStore();
@@ -121,7 +119,7 @@ export function Products() {
           <div className={styles.buttonBar}>
             <button
               className={styles.button}
-              onClick={() => navigate(createPath)}
+              onClick={() => navigate('create')}
             >
               New
             </button>

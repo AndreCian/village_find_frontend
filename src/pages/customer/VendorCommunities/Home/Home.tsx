@@ -9,39 +9,62 @@ import { HttpService } from '@/services';
 
 import styles from './Home.module.scss';
 
-const initialCategories = [
-  'All Categories',
-  'Kitchenware',
-  'Hand Cut',
-  'Wood Working',
-  'Stationary',
-];
+interface ICategory {
+  _id?: string;
+  name: string;
+  value: string;
+}
 
-const initialCommunity = {
-  backImage: '/assets/customer/vcom/back1.png',
-  logoImage: '/assets/customer/backs/shopvcom.png',
-  title: 'Wood Working Club',
-  description: 'Over 600 artisans making unique one-of-a-kind items.',
-  category: 'Wood Working',
-};
+interface ICommunity {
+  vcomId: string;
+  backImage: string;
+  logoImage: string;
+  title: string;
+  description: string;
+  vendors: number;
+  category: string;
+}
 
 export function Home() {
-  const [category, setCategory] = useState('Wood Working');
+  const [category, setCategory] = useState<string | null>(null);
+  const [categoryList, setCategoryList] = useState<ICategory[]>([]);
   const [filter, setFilter] = useState('');
-  const [communities, setCommunities] = useState([]);
+  const [communities, setCommunities] = useState<ICommunity[]>([]);
 
   const onCategoryChange = (value: string) => {
     setCategory(value);
   };
 
   useEffect(() => {
-    HttpService.get('/communities', {
+    HttpService.get('/settings/general/category').then(response => {
+      const categories = [
+        { name: 'All Categories', value: 'all' },
+        ...(response ?? []),
+      ].map(category => ({
+        ...category,
+        value: category.value ?? category.name.toLowerCase(),
+      }));
+      setCategoryList(categories);
+    });
+  }, []);
+
+  useEffect(() => {
+    HttpService.get(`/communities`, {
       name: filter,
+      category,
     }).then(response => {
-      const result = response || [];
+      const result = (response ?? []).map((community: any) => ({
+        vcomId: community.slug,
+        backImage: community.images && community.images.backgroundUrl,
+        logoImage: community.images && community.images.logoUrl,
+        title: community.name,
+        description: community.shortDesc,
+        vendors: community.vendors,
+        category: community.category,
+      }));
       setCommunities(result);
     });
-  }, [filter]);
+  }, [filter, category]);
 
   return (
     <Container className={styles.root}>
@@ -61,14 +84,14 @@ export function Home() {
           <div className={styles.leftbar}>
             <p>Community Interest</p>
             <ul className={styles.categories}>
-              {initialCategories.map((_category: string, index: number) => (
+              {categoryList.map((_category: any, _index: number) => (
                 <li
-                  key={`category-${index}`}
-                  onClick={() => setCategory(_category)}
-                  className={category === _category ? styles.active : ''}
+                  key={_category._id ?? _index}
+                  onClick={() => setCategory(_category.value)}
+                  className={category === _category.value ? styles.active : ''}
                 >
                   <span />
-                  <p>{_category}</p>
+                  <p>{_category.name}</p>
                 </li>
               ))}
             </ul>
@@ -78,7 +101,7 @@ export function Home() {
               <Select
                 rounded="full"
                 placeholder="Community Interest"
-                options={initialCategories}
+                options={categoryList}
                 border="none"
                 bgcolor="primary"
                 className={styles.interests}
@@ -99,7 +122,7 @@ export function Home() {
             </div>
             <div className={styles.header}>
               <div className={styles.title}>
-                <p>{category}</p>
+                <p>{}</p>
                 <span>{communities.length} Communities</span>
               </div>
               <Input
@@ -116,18 +139,7 @@ export function Home() {
             </div>
             <div className={styles.body}>
               {communities.map((community: any, index: number) => (
-                <VComCard
-                  key={`vendor-com-${index}`}
-                  vcomId={community._id}
-                  backImage={community.backImage || initialCommunity.backImage}
-                  logoImage={community.logoImage || initialCommunity.logoImage}
-                  title={community.villageName || initialCommunity.title}
-                  description={
-                    community.description || initialCommunity.description
-                  }
-                  vendors={community.vendors || 0}
-                  category={community.category || initialCommunity.category}
-                />
+                <VComCard key={index} {...community} />
               ))}
             </div>
           </div>

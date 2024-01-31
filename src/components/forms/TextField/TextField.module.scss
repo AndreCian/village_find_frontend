@@ -1,8 +1,8 @@
 .root {
-  @apply relative w-full rounded-md border-1 border-primary px-4 py-2.5 text-xs placeholder-primary outline-none;
+  @apply relative w-full rounded-md border-1 border-primary px-4 py-2.5 text-xs outline-none;
 
   textarea {
-    @apply w-full bg-transparent outline-none;
+    @apply w-full bg-transparent placeholder-secondary outline-none;
   }
 
   span {

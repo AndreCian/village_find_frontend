@@ -1,5 +1,5 @@
 .root {
-  @apply flex w-full flex-col gap-y-10;
+  @apply flex w-full flex-col gap-y-6;
 
   h1 {
     @apply text-[32px] font-bold leading-[36px] text-dark;
@@ -10,7 +10,7 @@
       @apply flex items-center text-[20px] leading-[24px];
 
       span {
-        @apply mx-1 rounded-md bg-blue-500 p-1 text-[14px] leading-[18px] text-white;
+        @apply mx-1 cursor-pointer rounded-md bg-success p-1 text-white;
       }
     }
 
@@ -19,7 +19,7 @@
 
       .earning,
       .vendors {
-        @apply font-bold text-green-500;
+        @apply font-bold text-success;
       }
     }
   }

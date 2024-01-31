@@ -2,10 +2,14 @@
   @apply relative  min-w-0 select-none lg:min-w-[250px];
 
   .selectBox {
-    @apply flex w-full items-center justify-between rounded-md border border-0.5 border-primary bg-white px-4 py-3 text-xs outline-none;
+    @apply flex w-full items-center justify-between rounded-md border border-0.5 border-primary bg-white px-4 py-3 text-xs font-medium outline-none;
 
     span {
       @apply mr-4;
+    }
+
+    span.placeholder {
+      @apply text-placeholder;
     }
   }
 
@@ -85,5 +89,41 @@
     .activeItem {
       @apply rounded-full font-bold;
     }
+  }
+}
+
+.colorable .selectBox {
+  @apply px-4 py-1 text-[16px] leading-[25px];
+}
+
+.successSelectBox .selectBox {
+  @apply bg-success;
+
+  span {
+    @apply text-white;
+  }
+}
+
+.warningSelectBox .selectBox {
+  @apply bg-warning;
+
+  span {
+    @apply text-black;
+  }
+}
+
+.lightSelectBox .selectBox {
+  @apply bg-warning;
+
+  span {
+    @apply text-white;
+  }
+}
+
+.graySelectBox .selectBox {
+  @apply bg-SGray;
+
+  span {
+    @apply text-black;
   }
 }

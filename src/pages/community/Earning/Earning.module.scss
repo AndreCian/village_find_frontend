@@ -1,23 +1,27 @@
 .root {
-  @apply flex w-full flex-col gap-y-4;
+  @apply flex w-full flex-col gap-y-6;
 
   h1 {
     @apply text-[32px] font-bold leading-[36px] text-dark;
   }
 
-  input {
-    @apply rounded-md border-1 border-gray-400 px-2 py-1 text-[14px] leading-[18px] outline-none focus:border-blue-500 focus:ring-3 focus:ring-blue-300;
-  }
+  .content {
+    @apply flex gap-x-6;
 
-  .content {  
-    @apply flex gap-x-2;
-
-    button {
-      @apply rounded-md p-2 active:ring-3 active:ring-blue-300;
+    .input {
+      @apply w-full max-w-[250px];
     }
 
-    .submit {
-      @apply bg-blue-600 text-white;
+    .buttons {
+      @apply flex w-full gap-x-2;
+
+      button {
+        @apply w-full max-w-[120px] rounded-full border-1 border-primary py-2 text-primary;
+      }
+
+      .submit {
+        @apply border-none bg-dark text-white;
+      }
     }
   }
 }

@@ -2,7 +2,7 @@
   @apply relative text-xs;
 
   .input {
-    @apply w-full min-w-0 rounded-md border-0.5 border-primary px-4 py-3 placeholder-primary outline-none;
+    @apply w-full min-w-0 rounded-md border-0.5 border-primary px-4 py-3 placeholder-secondary outline-none;
   }
 
   .circleBar {
@@ -80,26 +80,22 @@
   }
 }
 
-.selectNone {
-  .input {
-    @apply select-none;
-  }
+.selectNone .input {
+  @apply select-none;
 }
 
-.bgColorSecondary {
-  .input {
-    @apply bg-primary;
-  }
+.bgColorSecondary .input {
+  @apply bg-primary;
 }
 
-.borderColorSuccess {
-  .input {
-    @apply border-2 border-success placeholder-secondary;
-  }
+.borderColorSuccess .input {
+  @apply border-2 border-success placeholder-secondary;
 }
 
-.borderColorPrimary {
-  .input {
-    @apply border-1 border-primary placeholder-primary;
-  }
+.borderColorPrimary .input {
+  @apply border-1 border-primary placeholder-primary;
+}
+
+.borderNone .input {
+  @apply placeholder-secondary;
 }

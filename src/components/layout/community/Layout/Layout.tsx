@@ -14,9 +14,9 @@ export function Layout() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('community_token');
     if (token) {
-      setupToken(token);
+      setupToken(token, 'community');
       HttpService.post('/communities/login', {})
         .then(response => {
           const { status, profile } = response;
@@ -27,22 +27,22 @@ export function Layout() {
               profile,
             });
           } else if (status === 401) {
-            setupToken(null);
-            navigate('/vendor-community/auth/login');
+            setupToken(null, 'community');
+            navigate('/village-community/auth/login');
             enqueueSnackbar('Unauthorized!', { variant: 'error' });
           }
           setIsLoading(false);
         })
         .catch(err => {
-          setupToken(null);
-          navigate('/vendor-community/auth/login');
+          setupToken(null, 'community');
+          navigate('/village-community/auth/login');
           enqueueSnackbar('Something went wrong with server.', {
             variant: 'error',
           });
           setIsLoading(false);
         });
     } else {
-      navigate('/vendor-community/auth/login');
+      navigate('/village-community/auth/login');
       setIsLoading(false);
     }
   }, []);

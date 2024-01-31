@@ -26,10 +26,17 @@ export function Dropdown({
   const [itemState, setItemState] = useState<{ [key: string]: boolean }>({});
   const selectRef = useRef<HTMLDivElement>(null);
 
-  const onItemDrop = (key: string) => {
+  const onItemHover = (key: string) => () => {
     setItemState({
       ...itemState,
-      [key]: !itemState[key],
+      [key]: true,
+    });
+  };
+
+  const onItemLeave = (key: string) => () => {
+    setItemState({
+      ...itemState,
+      [key]: false,
     });
   };
 
@@ -39,7 +46,11 @@ export function Dropdown({
         {parent.map((item: IRoute, index: number) => (
           <>
             <div className={styles.dropboxItem}>
-              <p key={index} onClick={() => onItemDrop(`${level}-${index}`)}>
+              <p
+                key={index}
+                onMouseEnter={onItemHover(`${level}-${index}`)}
+                onMouseLeave={onItemLeave(`${level}-${index}`)}
+              >
                 {item.name}
               </p>
               {item.children && <FaChevronRight />}
@@ -53,21 +64,21 @@ export function Dropdown({
     );
   };
 
-  const onHideDropbox = () => {
+  const onCloseDropbox = () => {
     setIsDropped(false);
     setItemState({});
   };
 
   const onSelectClick = () => {
     if (isDropped) {
-      onHideDropbox();
+      onCloseDropbox();
     } else {
       setIsDropped(true);
     }
   };
 
   useEffect(() => {
-    useOnClickOutside(selectRef, onHideDropbox, 'mousedown');
+    useOnClickOutside(selectRef, onCloseDropbox, 'mousedown');
   }, []);
 
   return (

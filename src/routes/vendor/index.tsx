@@ -158,14 +158,19 @@ export const vendorRoutes = [
         element: <Products />,
       },
       {
-        title: 'Create',
-        path: 'create',
+        title: 'Create & Edit',
+        path: ':id',
         element: <ProductLayout />,
         leaf: true,
         children: [
           {
-            title: 'General',
+            title: 'Home',
             path: '',
+            element: <Navigate to="general" />,
+          },
+          {
+            title: 'General',
+            path: 'general',
             element: <General />,
           },
           {

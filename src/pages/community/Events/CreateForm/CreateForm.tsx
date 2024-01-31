@@ -13,7 +13,7 @@ interface ICreateFormProps {
   onFinalUpdate: (_: string[]) => void;
 }
 
-const homePath = '/vendor-community/events';
+const homePath = '/village-community/events';
 
 export function CreateForm({
   questions,

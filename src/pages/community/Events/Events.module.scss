@@ -1,8 +1,8 @@
 .root {
-  @apply flex w-full flex-col gap-y-4;
+  @apply flex w-full flex-col gap-y-6;
 
   h1 {
-    @apply mb-16 text-[32px] font-bold leading-[36px] text-dark;
+    @apply text-[32px] font-bold leading-[36px] text-dark;
   }
 
   .content {
@@ -33,4 +33,8 @@
 
 .eventCell {
   @apply text-[13px] leading-[18px];
+}
+
+.statusSelector {
+  @apply min-w-0;
 }

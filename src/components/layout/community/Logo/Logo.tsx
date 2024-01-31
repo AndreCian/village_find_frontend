@@ -16,7 +16,7 @@ export function Logo({ className = '' }: ILogoProps) {
         'flex cursor-pointer items-center gap-x-1 space-x-1 py-2.5 text-xl font-semibold',
         className,
       )}
-      onClick={() => navigate('/vendor-community')}
+      onClick={() => navigate('/village-community')}
     >
       <img src={LogoPink} />
       <span>Village Finds</span>

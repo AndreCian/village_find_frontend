@@ -1,16 +1,41 @@
-import clsx from 'clsx';
+import { useState, useContext } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { enqueueSnackbar } from 'notistack';
+import clsx from 'clsx';
 
 import { Button, Input } from '@/components/forms';
 import { Container } from '@/components/layout/customer';
 
-import styles from './Login.module.scss';
+import { HttpService } from '@/services';
+
+import { RoleType, AuthContext } from '@/providers';
+
+import { setupToken } from '@/utils';
+
 import LoginImage from '/assets/customer/backs/login.png';
+import styles from './Login.module.scss';
+
+interface IUser {
+  email: string;
+  password: string;
+}
+
+const initialUser: IUser = {
+  email: '',
+  password: '',
+};
 
 export function Login() {
   const navigate = useNavigate();
   const location = useLocation();
   const pathname = location.pathname;
+
+  const { setAccount, setIsLogin } = useContext(AuthContext);
+  const [currentUser, setCurrentUser] = useState<IUser>(initialUser);
+
+  const onUserChange = (e: any) => {
+    setCurrentUser({ ...currentUser, [e.target.name]: e.target.value });
+  };
 
   const onNavItemClick = (path: string) => () => {
     navigate(path);
@@ -23,6 +48,37 @@ export function Login() {
   const onSignupClick = () => {
     const role = pathname.slice('/login/'.length);
     navigate(`/sign-up/${role}`);
+  };
+
+  const onLoginClick = () => {
+    const role = pathname.slice('/login/'.length);
+    HttpService.post(`/user/${role}/login`, currentUser)
+      .then(response => {
+        const { status, token, profile } = response;
+        if (status === 200) {
+          setAccount({
+            role: role as RoleType,
+            profile,
+          });
+          setupToken(token, role);
+          setIsLogin(true);
+          enqueueSnackbar('Login successfully!', { variant: 'success' });
+          navigate(role === 'vendor' ? '/vendor' : '/dashboard');
+        } else if (status === 400) {
+          enqueueSnackbar('Invalid credentials!', { variant: 'error' });
+        } else if (status === 404) {
+          enqueueSnackbar('Email does not exist!', { variant: 'error' });
+        } else {
+          enqueueSnackbar('Something went wrong with server.', {
+            variant: 'error',
+          });
+        }
+      })
+      .catch(err => {
+        enqueueSnackbar('Something went wrong with server.', {
+          variant: 'error',
+        });
+      });
   };
 
   return (
@@ -64,23 +120,31 @@ export function Login() {
             </ul>
             <div className={styles.control}>
               <Input
+                name="email"
                 rounded="small"
                 border="none"
                 size="large"
                 placeholder="Email/Phone Number"
                 className={styles.input}
+                value={currentUser.email}
+                updateValue={onUserChange}
               />
               <Input
+                name="password"
                 type="password"
                 rounded="small"
                 border="none"
                 size="large"
                 placeholder="Password"
                 className={styles.input}
+                value={currentUser.password}
+                updateValue={onUserChange}
               />
             </div>
             <span>Forgot password?</span>
-            <Button className={styles.loginButton}>Login</Button>
+            <Button className={styles.loginButton} onClick={onLoginClick}>
+              Login
+            </Button>
             <p className={styles.signupLink}>
               Don't have an account?<span onClick={onSignupClick}>Sign up</span>
             </p>

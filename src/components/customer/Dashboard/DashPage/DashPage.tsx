@@ -5,7 +5,7 @@ import { Container } from '@/components/layout/customer';
 import { Input } from '@/components/forms';
 import { MagnifierIcon } from '@/components/icons';
 
-import { SERVER_URL } from '@/config/global';
+import { SERVER_ASSETS_URL } from '@/config/global';
 
 import { SearchbarContext } from '@/providers';
 
@@ -43,7 +43,10 @@ export function DashPage({ title, subtitle, images }: IDashPageProps) {
 
   return (
     <div className={styles.root}>
-      <img src={`${SERVER_URL}/${images[0]}`} className={styles.dashImage} />
+      <img
+        src={`${SERVER_ASSETS_URL}/${images[0]}`}
+        className={styles.dashImage}
+      />
       <div className={styles.grayLayer} />
       <Container className={styles.searchBar}>
         <h1>{title}</h1>

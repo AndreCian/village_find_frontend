@@ -4,7 +4,7 @@ import clsx from 'clsx';
 
 import { AuthContext } from '@/providers';
 
-import { SERVER_URL } from '@/config/global';
+import { SERVER_ASSETS_URL } from '@/config/global';
 
 import styles from './HomeLayout.module.scss';
 
@@ -42,7 +42,7 @@ export function HomeLayout() {
       <div className={styles.sidebar}>
         <div className={styles.logo}>
           <img
-            src={`${SERVER_URL}/${
+            src={`${SERVER_ASSETS_URL}/${
               account &&
               account.profile &&
               account.profile.images &&

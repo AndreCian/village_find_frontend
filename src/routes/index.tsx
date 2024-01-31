@@ -21,7 +21,7 @@ export const routes = [
     children: vendorRoutes,
   },
   {
-    path: 'vendor-community',
+    path: 'village-community',
     element: <CommunityLayout />,
     children: communityRoutes,
   },

@@ -1,5 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 
+import { SERVER_ASSETS_URL } from '@/config/global';
+
 import styles from './VComCard.module.scss';
 
 interface IVComCardProps {
@@ -9,7 +11,7 @@ interface IVComCardProps {
   title: string;
   description: string;
   category: string;
-  vendors: number;
+  vendors: { _id: string }[];
 }
 
 export function VComCard({
@@ -25,18 +27,22 @@ export function VComCard({
 
   return (
     <div className={styles.root}>
-      <img src={backImage} />
+      <img
+        alt="Community background image"
+        src={`${SERVER_ASSETS_URL}/${backImage}`}
+      />
       <div className={styles.community}>
         <div className={styles.image}>
           <img
-            src={logoImage}
-            onClick={() => navigate(`/communities/${vcomId}/vendors`)}
+            alt="Community logo image"
+            src={`${SERVER_ASSETS_URL}/${logoImage}`}
+            onClick={() => navigate(`/communities/${vcomId}`)}
           />
         </div>
         <div className={styles.text}>
           <p
             className={styles.head}
-            onClick={() => navigate(`/communities/${vcomId}/vendors`)}
+            onClick={() => navigate(`/communities/${vcomId}`)}
           >
             {title}
           </p>
@@ -48,7 +54,7 @@ export function VComCard({
             </div>
             <div className={styles.vendor}>
               <p>Vendors</p>
-              <span>{vendors}</span>
+              <span>{vendors.length}</span>
             </div>
           </div>
         </div>

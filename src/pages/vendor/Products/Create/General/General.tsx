@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { FaChevronRight } from 'react-icons/fa6';
 import clsx from 'clsx';
 
@@ -19,6 +20,7 @@ import { HttpService } from '@/services';
 import { ICategory } from '@/interfaces';
 
 import styles from './General.module.scss';
+import { enqueueSnackbar } from 'notistack';
 
 type PayType = 'Shipping' | 'Near By' | 'Local Subscriptions';
 type TopicType =
@@ -50,9 +52,13 @@ const initialInfo: IProductGeneralInfo = {
 };
 
 export function General() {
+  const { id: productId } = useParams();
+  const navigate = useNavigate();
+
+  const [productDialogOpen, setProductDialogOpen] = useState(false);
+  const [nutrition, setNutrition] = useState<File | null>(null);
   const [generalInfo, setGeneralInfo] =
     useState<IProductGeneralInfo>(initialInfo);
-  const [productDialogOpen, setProductDialogOpen] = useState(false);
   const [categories, setCategories] = useState<ICategory[]>([]);
   const [dialogTopic, setDialogTopic] = useState<TopicType>('product name');
 
@@ -71,8 +77,31 @@ export function General() {
   };
 
   const onDialogOpenClick = (topic: TopicType) => () => {
+    if (!generalInfo.category) {
+      return enqueueSnackbar('Choose on the product categories.', {
+        variant: 'warning',
+      });
+    }
     setDialogTopic(topic);
     setProductDialogOpen(true);
+  };
+
+  const onNutritionChange = (e: any) => {
+    setNutrition(e.target.files[0]);
+  };
+
+  const onCancelClick = () => {
+    navigate('/vendor/products');
+  };
+
+  const onSubmitClick = () => {
+    const formData = new FormData();
+    Object.keys(generalInfo).forEach((key: string) => {
+      formData.append(key, (generalInfo as any)[key]);
+    });
+    if (nutrition) formData.append('nutrition', nutrition);
+    console.log(formData);
+    HttpService.post('/products', formData).then(response => {});
   };
 
   useEffect(() => {
@@ -124,6 +153,12 @@ export function General() {
                         styles.radioPanel,
                         generalInfo.payment === type ? styles.active : '',
                       )}
+                      onClick={() =>
+                        setGeneralInfo({
+                          ...generalInfo,
+                          payment: type as PayType,
+                        })
+                      }
                     >
                       <Radio
                         value={type}
@@ -232,6 +267,8 @@ export function General() {
                 rounded="full"
                 border="none"
                 bgcolor="secondary"
+                value={nutrition ?? ''}
+                updateValue={onNutritionChange}
               />
             </div>
             <div className={styles.control}>
@@ -254,19 +291,24 @@ export function General() {
             </div>
           </div>
           <div className={styles.buttonBar}>
-            <button className={styles.button}>Cancel</button>
-            <button className={clsx(styles.button, styles.updateButton)}>
-              Update
+            <button className={styles.button} onClick={onCancelClick}>
+              Cancel
+            </button>
+            <button
+              className={clsx(styles.button, styles.updateButton)}
+              onClick={onSubmitClick}
+            >
+              {productId === 'create' ? 'Add' : 'Update'}
             </button>
           </div>
         </div>
       </Card>
       <AIDialog
         open={productDialogOpen}
-        onClose={() => setProductDialogOpen(false)}
-        onSelect={onAnswerSelect}
         topic={dialogTopic}
         category={generalInfo.category}
+        onClose={() => setProductDialogOpen(false)}
+        onSelect={onAnswerSelect}
       />
     </div>
   );

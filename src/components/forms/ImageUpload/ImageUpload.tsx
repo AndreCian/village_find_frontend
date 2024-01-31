@@ -4,7 +4,7 @@ import clsx from 'clsx';
 import { Input } from '@/components/forms';
 import { CancelIcon } from '@/components/icons';
 
-import { SERVER_URL } from '@/config/global';
+import { SERVER_ASSETS_URL } from '@/config/global';
 
 import styles from './ImageUpload.module.scss';
 
@@ -80,7 +80,7 @@ export function ImageUpload({
         ) : imagePath !== '' ? (
           <img
             alt="The base uploaded image"
-            src={`${SERVER_URL}/${imagePath}`}
+            src={`${SERVER_ASSETS_URL}/${imagePath}`}
             className={styles.imgViewer}
           />
         ) : (

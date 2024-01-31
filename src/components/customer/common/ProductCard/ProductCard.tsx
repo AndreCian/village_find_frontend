@@ -2,7 +2,7 @@ import clsx from 'clsx';
 import { FaChevronRight } from 'react-icons/fa6';
 
 import styles from './ProductCard.module.scss';
-import { SERVER_URL } from '@/config/global';
+import { SERVER_ASSETS_URL } from '@/config/global';
 
 interface IProduct {
   image: string;
@@ -42,10 +42,9 @@ export function ProductCard({
       )}
     >
       <div className={styles.image}>
-        <object data={`${SERVER_URL}/${image}`} type="image/png">
+        <object data={`${SERVER_ASSETS_URL}/${image}`} type="image/png">
           <img src={image} alt="Fallback image" />
         </object>
-        {/* <img src={`${SERVER_URL}/${image}`} /> */}
         {isLoadMore && (
           <p className={styles.moreContext}>
             Load More

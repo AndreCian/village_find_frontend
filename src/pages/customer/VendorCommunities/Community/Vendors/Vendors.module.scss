@@ -19,11 +19,11 @@
     }
   }
 
-  .announcement {
-    @apply py-2;
+  .schedule {
+    @apply flex w-full flex-col items-stretch;
 
-    .container {
-      @apply flex flex-col gap-6 rounded-sm bg-lightgray px-8 py-1.5 xl:flex-row;
+    .announcement .container {
+      @apply flex flex-col gap-6 rounded-sm bg-lightgray px-8 py-1.5 xl:flex-row xl:items-center;
 
       .title {
         @apply shrink-0 space-y-2;
@@ -44,9 +44,21 @@
           @apply text-[12px] leading-[18px];
         }
 
+        p.collapsed {
+          @apply line-clamp-3;
+        }
+
         span {
           @apply cursor-pointer text-[12px] leading-[18px] underline;
         }
+      }
+    }
+
+    .eventsButton {
+      @apply flex items-center justify-center gap-x-2.5 bg-success py-2.5 xl:py-4;
+
+      p {
+        @apply text-[16px] font-bold leading-[25px] text-white;
       }
     }
   }

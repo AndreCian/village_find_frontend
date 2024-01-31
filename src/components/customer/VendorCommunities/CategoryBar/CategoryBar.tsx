@@ -18,37 +18,36 @@ const initialVendors = [
 
 interface ICategoryBarProps {
   panel: boolean;
-  category: number;
-  categories: string[];
-  changeCategory: (_: number) => void;
+  category: string;
+  categories: { name: string; value: string }[];
+  changeCategory: (_: string) => void;
   vendor: number;
   changeVendor: (_: number) => void;
 }
 
 export function CategoryBar({
   panel = true,
-  category = -1,
-  changeCategory = () => {},
+  category = '',
   categories = [],
+  changeCategory = () => {},
   vendor = -1,
   changeVendor = () => {},
 }: ICategoryBarProps) {
-  const onCategoryChange = (index: number) => {
-    category === index ? changeCategory(-1) : changeCategory(index);
-  };
   return (
     <div className={styles.root}>
       <div className={styles.categoryList}>
         <p>By Interest</p>
         <ul className={styles.categories}>
-          {categories.map((_category: string, index: number) => (
+          {categories.map((_category: any, index: number) => (
             <li
-              key={`interest-category-${index}`}
-              onClick={() => onCategoryChange(index)}
-              className={panel && category === index ? styles.active : ''}
+              key={index}
+              onClick={() => changeCategory(_category.value)}
+              className={
+                panel && category === _category.value ? styles.active : ''
+              }
             >
               <span />
-              <p>{_category}</p>
+              <p>{_category.name}</p>
             </li>
           ))}
         </ul>

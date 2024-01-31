@@ -15,7 +15,7 @@
         @apply flex items-center gap-x-7;
 
         .image {
-          @apply aspect-square overflow-hidden rounded-lg shadow-lg;
+          @apply aspect-square max-w-[120px] overflow-hidden rounded-lg shadow-lg;
         }
 
         .text {
