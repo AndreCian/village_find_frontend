@@ -6,7 +6,7 @@ import {
   ZipCodeIcon,
 } from '@/components/icons';
 
-import { SERVER_ASSETS_URL } from '@/config/global';
+import { SERVER_URL } from '@/config/global';
 
 import styles from './HowItWorks.module.scss';
 
@@ -24,10 +24,7 @@ export function HowItWorks({ title, images }: IHowItWorksProps) {
   return (
     <div className={styles.root}>
       <div className={styles.image}>
-        <img
-          src={`${SERVER_ASSETS_URL}/${images[0]}`}
-          className={styles.topicImage}
-        />
+        <img src={`${SERVER_URL}/${images[0]}`} className={styles.topicImage} />
         <h1>{title}</h1>
       </div>
       <Container className={styles.container}>

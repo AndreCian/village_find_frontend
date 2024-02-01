@@ -12,7 +12,7 @@ import ExShopVComImage2 from '/assets/customer/backs/excom2.png';
 import ExShopVComImage3 from '/assets/customer/backs/excom3.png';
 
 import styles from './AboutCommunity.module.scss';
-import { SERVER_ASSETS_URL } from '@/config/global';
+import { SERVER_URL } from '@/config/global';
 
 interface ICommunity {
   avatar: string;
@@ -207,7 +207,7 @@ export function AboutCommunity({ community, ready }: IAboutCommunityProps) {
           {initialVendorTypes.map((vtype: IVendorType, index: number) => (
             <img
               key={`vendor-type-image-${index}`}
-              src={`${SERVER_ASSETS_URL}/${community.images[index]}`}
+              src={`${SERVER_URL}/${community.images[index]}`}
             />
           ))}
         </div>
@@ -217,7 +217,7 @@ export function AboutCommunity({ community, ready }: IAboutCommunityProps) {
         <div className={styles.linkImages}>
           {initialLinkImages.map((linkImage: ILinkImage, index: number) => (
             <div key={`link-image-${index}`} className={styles.linkImage}>
-              <img src={`${SERVER_ASSETS_URL}/${ready.images[index]}`} />
+              <img src={`${SERVER_URL}/${ready.images[index]}`} />
               <span className={styles.linkTitle}>{linkImage.title}</span>
             </div>
           ))}

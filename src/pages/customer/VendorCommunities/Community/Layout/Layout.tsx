@@ -12,7 +12,7 @@ import { Button, Select } from '@/components/forms';
 
 import { HttpService } from '@/services';
 
-import { SERVER_ASSETS_URL } from '@/config/global';
+import { SERVER_URL } from '@/config/global';
 
 import styles from './Layout.module.scss';
 
@@ -81,7 +81,7 @@ export function Layout() {
             <div className={styles.image}>
               <img
                 alt="Community logo image"
-                src={`${SERVER_ASSETS_URL}/${
+                src={`${SERVER_URL}/${
                   community.images && community.images.logoUrl
                 }`}
               />

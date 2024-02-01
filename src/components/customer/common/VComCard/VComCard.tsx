@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 
-import { SERVER_ASSETS_URL } from '@/config/global';
+import { SERVER_URL } from '@/config/global';
 
 import styles from './VComCard.module.scss';
 
@@ -29,13 +29,13 @@ export function VComCard({
     <div className={styles.root}>
       <img
         alt="Community background image"
-        src={`${SERVER_ASSETS_URL}/${backImage}`}
+        src={`${SERVER_URL}/${backImage}`}
       />
       <div className={styles.community}>
         <div className={styles.image}>
           <img
             alt="Community logo image"
-            src={`${SERVER_ASSETS_URL}/${logoImage}`}
+            src={`${SERVER_URL}/${logoImage}`}
             onClick={() => navigate(`/communities/${vcomId}`)}
           />
         </div>
