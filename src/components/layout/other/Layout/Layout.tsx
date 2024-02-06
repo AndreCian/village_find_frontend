@@ -1,4 +1,4 @@
-import { useContext, useEffect } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 
 import { Sidebar, Header } from '@/components/layout/other';
@@ -17,6 +17,7 @@ export function Layout() {
   const isVendor = location.pathname.startsWith('/vendor');
 
   const { isLogin, setIsLogin } = useContext(AuthContext);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (isLogin) return;
@@ -38,6 +39,9 @@ export function Layout() {
         .catch(err => {
           setupToken(null, userRole);
           navigate(userRole === 'vendor' ? '/login/vendor' : '');
+        })
+        .finally(() => {
+          setIsLoading(false);
         });
     } else {
       navigate(userRole === 'vendor' ? '/login/vendor' : '');
@@ -49,7 +53,7 @@ export function Layout() {
       <Sidebar />
       <div className={styles.container}>
         <Header />
-        <Outlet />
+        {!isLoading && <Outlet />}
       </div>
     </div>
   );

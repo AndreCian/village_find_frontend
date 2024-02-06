@@ -86,7 +86,7 @@ export function Store() {
               </div>
             </div>
             <div>
-              <p>Hero Image Slider</p>
+              <p className={styles.form}>Hero Image Slider</p>
               <div className={styles.horizon}>
                 <div className={styles.control}>
                   <ImageUpload

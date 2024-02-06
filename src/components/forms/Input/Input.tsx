@@ -14,6 +14,7 @@ export type SelectType = 'text' | 'none';
 export interface IAdornment {
   position: AdornmentType;
   content: React.ReactNode | string;
+  isText?: boolean;
 }
 
 export interface IInputProps {
@@ -76,6 +77,10 @@ export const Input = forwardRef((props: IInputProps, ref: any) => {
       : adornment && adornment.position === 'left'
       ? styles.adornmentLeft
       : '',
+    {
+      [styles.isText]:
+        adornment && adornment.isText && adornment.isText === true,
+    },
     className,
   );
 
@@ -100,9 +105,9 @@ export const Input = forwardRef((props: IInputProps, ref: any) => {
             adornment.position === 'left'
               ? styles.leftAdorn
               : styles.rightAdorn,
-            typeof adornment.content !== 'string'
-              ? styles.circleBar
-              : styles.textBar,
+            adornment.isText === true || typeof adornment.content === 'string'
+              ? styles.textBar
+              : styles.circleBar,
           )}
         >
           {adornment.content}

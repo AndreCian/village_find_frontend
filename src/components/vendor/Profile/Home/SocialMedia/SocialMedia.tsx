@@ -1,30 +1,52 @@
+import { useState } from 'react';
 import {
   FaFacebookF,
   FaTwitter,
   FaInstagram,
   FaYoutube,
   FaLinkedinIn,
+  FaPinterestP,
 } from 'react-icons/fa6';
-import clsx from 'clsx';
 
 import { Card } from '@/components/common';
 import { Input } from '@/components/forms';
 
-import { ISocialMediaUrls } from '@/stores/vendor/profile/homeStore';
-
 import styles from './SocialMedia.module.scss';
-import { useState } from 'react';
 
-export interface ISocialMediaProps {
-  data: ISocialMediaUrls;
-  className?: string;
+export interface ISocialMediaUrls {
+  facebook: string;
+  twitter: string;
+  instagram: string;
+  pinterest: string;
+  youtube: string;
+  linkedin: string;
 }
 
-export function SocialMedia({ className = '', data }: ISocialMediaProps) {
-  const [socialMedia, setSocialMedias] = useState<ISocialMediaUrls>(data);
+const initialSocialUrls: ISocialMediaUrls = {
+  facebook: 'http://facebook.com',
+  twitter: 'http://twitter.com',
+  instagram: 'http://instagram.com',
+  pinterest: 'http://pinterest.com',
+  youtube: 'http://youtube.com',
+  linkedin: 'http://linkedin.com',
+};
+
+export function SocialMedia() {
+  const [socialUrls, setSocialUrls] = useState(initialSocialUrls);
+
+  const onSocialUrlsChange = (e: any) => {
+    setSocialUrls({
+      ...socialUrls,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const onUpdateClick = () => {
+    
+  }
 
   return (
-    <Card title="Social Media" className={clsx(styles.root, className)}>
+    <Card title="Social Media" className={styles.root}>
       <div className={styles.container}>
         <p>Will be added to your story page</p>
         <div className={styles.form}>
@@ -33,13 +55,14 @@ export function SocialMedia({ className = '', data }: ISocialMediaProps) {
               <FaFacebookF fill="white" className={styles.icon} />
             </span>
             <Input
+              name="facebook"
               rounded="full"
               border="none"
               bgcolor="secondary"
               placeholder="URL"
               className={styles.urlInput}
-              disabled={false}
-              value={socialMedia.facebook}
+              value={socialUrls.facebook}
+              updateValue={onSocialUrlsChange}
             />
           </div>
           <div className={styles.control}>
@@ -47,13 +70,14 @@ export function SocialMedia({ className = '', data }: ISocialMediaProps) {
               <FaTwitter fill="white" className={styles.icon} />
             </span>
             <Input
+              name="twitter"
               rounded="full"
               border="none"
               bgcolor="secondary"
               placeholder="URL"
               className={styles.urlInput}
-              disabled={false}
-              value={socialMedia.twitter}
+              value={socialUrls.twitter}
+              updateValue={onSocialUrlsChange}
             />
           </div>
           <div className={styles.control}>
@@ -61,27 +85,29 @@ export function SocialMedia({ className = '', data }: ISocialMediaProps) {
               <FaInstagram fill="white" className={styles.icon} />
             </span>
             <Input
+              name="instagram"
               rounded="full"
               border="none"
               bgcolor="secondary"
               placeholder="URL"
               className={styles.urlInput}
-              disabled={false}
-              value={socialMedia.instagram}
+              value={socialUrls.instagram}
+              updateValue={onSocialUrlsChange}
             />
           </div>
           <div className={styles.control}>
             <span>
-              <FaFacebookF fill="white" className={styles.icon} />
+              <FaPinterestP fill="white" className={styles.icon} />
             </span>
             <Input
+              name="pinterest"
               rounded="full"
               border="none"
               bgcolor="secondary"
               placeholder="URL"
               className={styles.urlInput}
-              disabled={false}
-              value={socialMedia.facebook}
+              value={socialUrls.pinterest}
+              updateValue={onSocialUrlsChange}
             />
           </div>
           <div className={styles.control}>
@@ -89,13 +115,14 @@ export function SocialMedia({ className = '', data }: ISocialMediaProps) {
               <FaYoutube fill="white" className={styles.icon} />
             </span>
             <Input
+              name="youtube"
               rounded="full"
               border="none"
               bgcolor="secondary"
               placeholder="URL"
               className={styles.urlInput}
-              disabled={false}
-              value={socialMedia.youtube}
+              value={socialUrls.youtube}
+              updateValue={onSocialUrlsChange}
             />
           </div>
           <div className={styles.control}>
@@ -103,15 +130,19 @@ export function SocialMedia({ className = '', data }: ISocialMediaProps) {
               <FaLinkedinIn fill="white" className={styles.icon} />
             </span>
             <Input
+              name="linkedin"
               rounded="full"
               border="none"
               bgcolor="secondary"
               placeholder="URL"
               className={styles.urlInput}
-              disabled={false}
-              value={socialMedia.linkedin}
+              value={socialUrls.linkedin}
+              updateValue={onSocialUrlsChange}
             />
           </div>
+        </div>
+        <div className={styles.buttonBar}>
+          <button onClick={onUpdateClick}>Update</button>
         </div>
       </div>
     </Card>

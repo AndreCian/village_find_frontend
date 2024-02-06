@@ -63,9 +63,8 @@ export const vendorRoutes = [
     element: <Outlet />,
     children: [
       {
-        title: 'Home',
+        title: 'Business Profiles',
         path: '',
-        hide: true,
         element: <ProfileHome />,
       },
       {

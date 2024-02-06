@@ -1,4 +1,4 @@
-import { useState, useContext } from 'react';
+import { useState, useContext, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { enqueueSnackbar } from 'notistack';
 import clsx from 'clsx';
@@ -80,6 +80,29 @@ export function Login() {
         });
       });
   };
+
+  useEffect(() => {
+    const role = pathname.slice('/login/'.length);
+    const token = localStorage.getItem(`${role}_token`);
+    if (token) {
+      setupToken(token, role);
+      HttpService.post(`/user/${role}/login`, {}).then(response => {
+        const { status, profile } = response;
+        if (status === 200) {
+          setIsLogin(true);
+          setAccount({
+            role: role as RoleType,
+            profile,
+          });
+          navigate(role === 'customer' ? '/dashboard' : '/vendor');
+        } else {
+          setupToken(null, role);
+        }
+      });
+    } else {
+      setupToken(null, role);
+    }
+  }, [pathname]);
 
   return (
     <div className={styles.root}>
