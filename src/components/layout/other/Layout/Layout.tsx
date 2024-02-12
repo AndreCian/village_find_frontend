@@ -20,7 +20,10 @@ export function Layout() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (isLogin) return;
+    if (isLogin) {
+      setIsLoading(false);
+      return;
+    }
     const userRole = isVendor ? 'vendor' : 'admin';
     const tokenKey = `${userRole}_token`;
     const token = localStorage.getItem(tokenKey);

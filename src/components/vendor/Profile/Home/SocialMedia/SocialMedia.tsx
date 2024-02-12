@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   FaFacebookF,
   FaTwitter,
@@ -7,11 +7,13 @@ import {
   FaLinkedinIn,
   FaPinterestP,
 } from 'react-icons/fa6';
+import { enqueueSnackbar } from 'notistack';
 
 import { Card } from '@/components/common';
 import { Input } from '@/components/forms';
 
 import styles from './SocialMedia.module.scss';
+import { HttpService } from '@/services';
 
 export interface ISocialMediaUrls {
   facebook: string;
@@ -23,12 +25,12 @@ export interface ISocialMediaUrls {
 }
 
 const initialSocialUrls: ISocialMediaUrls = {
-  facebook: 'http://facebook.com',
-  twitter: 'http://twitter.com',
-  instagram: 'http://instagram.com',
-  pinterest: 'http://pinterest.com',
-  youtube: 'http://youtube.com',
-  linkedin: 'http://linkedin.com',
+  facebook: '',
+  twitter: '',
+  instagram: '',
+  pinterest: '',
+  youtube: '',
+  linkedin: '',
 };
 
 export function SocialMedia() {
@@ -42,8 +44,31 @@ export function SocialMedia() {
   };
 
   const onUpdateClick = () => {
-    
-  }
+    HttpService.put('/user/vendor/profile/social-urls', socialUrls)
+      .then(response => {
+        const { status } = response;
+        if (status === 200) {
+          enqueueSnackbar('Social url updated successfully!', {
+            variant: 'success',
+          });
+        } else {
+          enqueueSnackbar('Something went wrong with server.', {
+            variant: 'error',
+          });
+        }
+      })
+      .catch(err => {
+        enqueueSnackbar('Something went wrong with server.', {
+          variant: 'error',
+        });
+      });
+  };
+
+  useEffect(() => {
+    HttpService.get('/user/vendor/profile/social-urls').then(response => {
+      setSocialUrls(response ?? initialSocialUrls);
+    });
+  }, []);
 
   return (
     <Card title="Social Media" className={styles.root}>

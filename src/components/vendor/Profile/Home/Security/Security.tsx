@@ -1,4 +1,5 @@
 import { ChangeEvent, useState } from 'react';
+import { enqueueSnackbar } from 'notistack';
 import clsx from 'clsx';
 
 import { Card } from '@/components/common';
@@ -44,7 +45,31 @@ export function Security({ className = '' }: ISecurity) {
   };
 
   const onPassUpdate = () => {
-    HttpService.post('/user/vendor/update-password', { password: credential.password})
+    if (credential.password !== credential.confirm) {
+      return enqueueSnackbar("Password doesn't match!", {
+        variant: 'warning',
+      });
+    }
+    HttpService.put('/user/vendor/profile/update-password', {
+      password: credential.password,
+    })
+      .then(response => {
+        const { status } = response;
+        if (status === 200) {
+          enqueueSnackbar('Password reset successfully!', {
+            variant: 'success',
+          });
+        } else {
+          enqueueSnackbar('Something went wrong with server.', {
+            variant: 'error',
+          });
+        }
+      })
+      .catch(err => {
+        enqueueSnackbar('Something went wrong with server.', {
+          variant: 'error',
+        });
+      });
   };
 
   return (

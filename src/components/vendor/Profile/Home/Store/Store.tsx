@@ -1,9 +1,36 @@
+import { useEffect, useState } from 'react';
+
 import { Card } from '@/components/common';
 import { ImageUpload, Input, TagInput, TextField } from '@/components/forms';
 
+import { HttpService } from '@/services';
+
 import styles from './Store.module.scss';
 
+interface IStoreInfo {
+  orderCapacity: string;
+  tags: string[];
+  shortDesc: string;
+  longDesc: string;
+  radius: number;
+}
+
 export function Store() {
+  const [storeInfo, setStoreInfo] = useState<IStoreInfo | null>(null);
+
+  const onStoreChange = (e: any) => {
+    setStoreInfo({
+      ...(storeInfo ?? ({} as IStoreInfo)),
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  useEffect(() => {
+    HttpService.get('/user/vendor/profile/store').then(response => {
+      setStoreInfo(response ?? null);
+    });
+  }, []);
+
   return (
     <Card className={styles.root}>
       <div className={styles.container}>
@@ -14,16 +41,18 @@ export function Store() {
               <div className={styles.control}>
                 <p>Maximum Order Fulfillment Capacity</p>
                 <Input
+                  name="orderCapacity"
                   rounded="full"
                   border="none"
                   bgcolor="secondary"
                   placeholder="Maximum Order Fulfillment Capacity"
-                  disabled={true}
+                  value={storeInfo && storeInfo.orderCapacity}
+                  updateValue={onStoreChange}
                 />
               </div>
               <div className={styles.control}>
                 <p>Store Tags</p>
-                <TagInput options={['Hand Mode', 'Wood Working']} />
+                <TagInput options={(storeInfo && storeInfo.tags) ?? []} />
               </div>
             </div>
             <div className={styles.control}>
@@ -31,23 +60,29 @@ export function Store() {
                 Shop Short Description <span>48 Characters</span>
               </p>
               <TextField
+                name="shortDesc"
                 rows={2}
                 rounded="full"
                 border="none"
                 bgcolor="secondary"
                 className={styles.desc}
                 placeholder="Shop Short Description"
+                value={(storeInfo && storeInfo.shortDesc) ?? ''}
+                updateValue={onStoreChange}
               />
             </div>
             <div className={styles.control}>
               <p>Shop Long Description</p>
               <TextField
+                name="longDesc"
                 rows={3}
                 rounded="full"
                 border="none"
                 bgcolor="secondary"
                 className={styles.desc}
                 placeholder="Shop Long Description"
+                
+                updateValue={onStoreChange}
               />
             </div>
             <div className={styles.horizon}>
@@ -56,10 +91,12 @@ export function Store() {
                   Visible Radius In Miles <span>(for items sold near by)</span>
                 </p>
                 <Input
+                  name="radius"
                   rounded="full"
                   border="none"
                   bgcolor="secondary"
                   placeholder="Miles"
+                  updateValue={onStoreChange}
                 />
               </div>
             </div>
