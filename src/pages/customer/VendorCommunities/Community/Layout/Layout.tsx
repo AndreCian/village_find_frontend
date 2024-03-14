@@ -29,6 +29,7 @@ export function Layout() {
 
   const [community, setCommunity] = useState<any>({});
   const [currentTab, setCurrentTab] = useState('vendor');
+  const [products, setProducts] = useState<any[]>([]);
 
   const initialPath = `/communities/${slug}`;
 
@@ -47,20 +48,26 @@ export function Layout() {
 
   useEffect(() => {
     if (!slug) return;
-    HttpService.get(`/communities?slug=${slug}`).then(response => {
+    (async () => {
+      const response = await HttpService.get(`/communities?slug=${slug}`);
       const { status, community } = response;
-      if (status === 404) {
+      if (status === 200) {
+        setCommunity(community ?? {});
+        const products = await HttpService.get(
+          `/products?community=${community._id}`,
+        );
+        setProducts(products);
+      } else {
         enqueueSnackbar('Community not found!', { variant: 'error' });
         navigate('/communities');
         return;
       }
-      setCommunity(community ?? {});
-    });
+    })();
   }, [slug]);
 
   useEffect(() => {
     if (!searchParams) return;
-    const tab = searchParams.get('tab') ?? 'vendor';
+    const tab = searchParams.get('tab') || 'vendor';
     setCurrentTab(tab);
   }, [searchParams]);
 
@@ -111,6 +118,7 @@ export function Layout() {
         <CommunityVendors
           announcement={community.announcement ?? {}}
           vendors={community.vendors ?? []}
+          products={products}
           events={community.events ?? []}
         />
       ) : currentTab === 'about' ? (

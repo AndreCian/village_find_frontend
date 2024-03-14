@@ -33,17 +33,21 @@ interface IVendorsProps {
     text: string;
     updated_at: string;
   };
-  vendors: {
-    name: string;
-  }[];
+  vendors: any[];
   events: {
     fulfillment?: {
       date: string;
     };
   }[];
+  products: any[];
 }
 
-export function Vendors({ announcement, vendors, events }: IVendorsProps) {
+export function Vendors({
+  announcement,
+  vendors,
+  events,
+  products,
+}: IVendorsProps) {
   const { account } = useContext(AuthContext);
 
   const [panelType, setPanelType] = useState(true);
@@ -162,6 +166,8 @@ export function Vendors({ announcement, vendors, events }: IVendorsProps) {
             panel={panelType}
             title={panelType ? 'Products' : 'Vendors'}
             subtitle={panelType ? currentCategory : initialVendors[vendor]}
+            products={products}
+            vendors={vendors}
           />
         </div>
         <div className={styles.pagination}>

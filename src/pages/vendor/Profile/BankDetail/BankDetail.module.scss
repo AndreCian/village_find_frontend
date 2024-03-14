@@ -1,12 +1,40 @@
 .root {
+  p {
+    @apply text-[12.5px];
+  }
+
+  & > p {
+    @apply mb-9 max-w-[550px];
+  }
+
   .container {
-    @apply flex flex-row-reverse;
+    @apply flex justify-between;
+
+    .instruction {
+      @apply flex max-w-[550px] flex-col gap-y-4;
+
+      .step {
+        @apply flex flex-col gap-y-2;
+
+        h3 {
+          @apply font-bold;
+        }
+
+        .subHeading {
+          @apply text-base;
+        }
+      }
+    }
 
     .panel {
-      @apply space-y-12 pr-20;
+      @apply pr-20;
+
+      img {
+        @apply mb-2;
+      }
 
       p {
-        @apply mt-12 text-4xl font-bold;
+        @apply mb-7;
       }
 
       button {

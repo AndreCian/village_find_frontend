@@ -1,8 +1,9 @@
 import clsx from 'clsx';
 import { FaChevronRight } from 'react-icons/fa6';
 
-import styles from './ProductCard.module.scss';
 import { SERVER_URL } from '@/config/global';
+
+import styles from './ProductCard.module.scss';
 
 interface IProduct {
   image: string;
@@ -18,6 +19,7 @@ export interface IProductCardProps {
   isLoadMore?: boolean;
   isActive?: boolean;
   className?: string;
+  navigateToDetail: () => void;
 }
 
 const tagClass = {
@@ -29,6 +31,7 @@ export function ProductCard({
   isLoadMore = false,
   isActive = false,
   className = '',
+  navigateToDetail = () => {},
   product,
 }: IProductCardProps) {
   const { image, name, title, price, totprice, tags } = product;
@@ -40,6 +43,7 @@ export function ProductCard({
         isActive || isLoadMore ? styles.active : '',
         className,
       )}
+      onClick={navigateToDetail}
     >
       <div className={styles.image}>
         <object data={`${SERVER_URL}/${image}`} type="image/png">

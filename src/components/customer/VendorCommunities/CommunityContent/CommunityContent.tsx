@@ -5,82 +5,94 @@ import { TbListDetails } from 'react-icons/tb';
 
 import { Input } from '@/components/forms';
 import {
-  VendorCard,
-  ProductCard,
   FilterAndSortDialog,
   FindProductDialog,
   MobileSettingDialog,
 } from '@/components/customer/common';
+import { ShopList, ProductList } from '..';
 
 import { useWindowWidth } from '@/utils';
 
 import styles from './CommunityContent.module.scss';
 
+interface IVendor {
+  shopName: string;
+}
+
+interface IProduct {
+  vendor?: IVendor;
+  name: string;
+}
+
 interface ICommunityContentProps {
   panel: boolean;
   title: string;
   subtitle: string;
+  products: IProduct[];
+  vendors: IVendor[];
 }
 
-const initialProducts = [
-  {
-    name: 'Gyuto Chef Knife',
-    place: 'Forge2Table Knives',
-    price: 10.93,
-    image: '/assets/customer/products/product1.png',
-  },
-  {
-    name: 'Mystery Awesome Box',
-    place: 'Bills Boowls',
-    price: 80.0,
-    totprice: 160.0,
-    image: '/assets/customer/products/product10.png',
-    tags: ['Subscription'],
-  },
-  {
-    name: 'Mystery Awesome Box',
-    place: 'ToothyFoot',
-    price: 4.89,
-    image: '/assets/customer/products/product3.png',
-    tags: ['Near You'],
-  },
-  {
-    name: 'Mystery Awesome Box',
-    place: 'Soaps & More',
-    price: 22.98,
-    image: '/assets/customer/products/product5.png',
-    tags: ['Near You'],
-  },
-  {
-    name: 'Gyuto Chef Knife',
-    place: 'Forge2Table Knives',
-    price: 10.93,
-    image: '/assets/customer/products/product8.png',
-  },
-  {
-    name: 'Mystery Awesome Box',
-    place: 'Bills Boowls',
-    price: 80.0,
-    totprice: 160.0,
-    image: '/assets/customer/products/product9.png',
-  },
-];
+// const initialProducts = [
+//   {
+//     name: 'Gyuto Chef Knife',
+//     place: 'Forge2Table Knives',
+//     price: 10.93,
+//     image: '/assets/customer/products/product1.png',
+//   },
+//   {
+//     name: 'Mystery Awesome Box',
+//     place: 'Bills Boowls',
+//     price: 80.0,
+//     totprice: 160.0,
+//     image: '/assets/customer/products/product10.png',
+//     tags: ['Subscription'],
+//   },
+//   {
+//     name: 'Mystery Awesome Box',
+//     place: 'ToothyFoot',
+//     price: 4.89,
+//     image: '/assets/customer/products/product3.png',
+//     tags: ['Near You'],
+//   },
+//   {
+//     name: 'Mystery Awesome Box',
+//     place: 'Soaps & More',
+//     price: 22.98,
+//     image: '/assets/customer/products/product5.png',
+//     tags: ['Near You'],
+//   },
+//   {
+//     name: 'Gyuto Chef Knife',
+//     place: 'Forge2Table Knives',
+//     price: 10.93,
+//     image: '/assets/customer/products/product8.png',
+//   },
+//   {
+//     name: 'Mystery Awesome Box',
+//     place: 'Bills Boowls',
+//     price: 80.0,
+//     totprice: 160.0,
+//     image: '/assets/customer/products/product9.png',
+//   },
+// ];
 
-const initialVendors = [
-  {
-    vendorId: 'vendor1',
-    backImage: '/assets/customer/vcom/vendor1.png',
-    logoImage: '/assets/customer/vcom/vendorLogo1.png',
-    title: "Bill's Birds",
-    description: 'Over 600 artisans making unique one-of-a-kind items.',
-    interest: 'Jewelry',
-  },
-];
+// const initialVendors = [
+//   {
+//     vendorId: 'vendor1',
+//     backImage: '/assets/customer/vcom/vendor1.png',
+//     logoImage: '/assets/customer/vcom/vendorLogo1.png',
+//     title: "Bill's Birds",
+//     description: 'Over 600 artisans making unique one-of-a-kind items.',
+//     interest: 'Jewelry',
+//   },
+// ];
 
 export function CommunityContent({
   panel = true,
   title = '',
   subtitle = '',
+  products,
+  vendors,
 }: ICommunityContentProps) {
   const minBreakLists = ['none', 'xs'];
 
@@ -157,21 +169,9 @@ export function CommunityContent({
         <p>All Categories</p>
       </div>
       {panel ? (
-        <div className={styles.products}>
-          {initialProducts.map((product: any, index: number) => (
-            <ProductCard
-              key={`product-${index}`}
-              product={product}
-              isActive={isMobile}
-            />
-          ))}
-        </div>
+        <ProductList isMobile={isMobile} products={[]} />
       ) : (
-        <div className={styles.vendors}>
-          {initialVendors.map((vendor: any, index: number) => (
-            <VendorCard key={`vendor-${index}`} {...vendor} />
-          ))}
-        </div>
+        <ShopList shops={vendors} />
       )}
       <FindProductDialog
         open={findProductOpen}

@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useParams } from 'react-router-dom';
 import { FaChevronRight } from 'react-icons/fa6';
 
 import { Card } from '@/components/common';

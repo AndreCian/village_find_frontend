@@ -158,7 +158,7 @@ export const vendorRoutes = [
       },
       {
         title: 'Create & Edit',
-        path: ':id',
+        path: ':productId',
         element: <ProductLayout />,
         leaf: true,
         children: [
@@ -184,7 +184,7 @@ export const vendorRoutes = [
               },
               {
                 title: 'Create',
-                path: 'create',
+                path: ':styleId',
                 element: <StyleCreate />,
               },
             ],

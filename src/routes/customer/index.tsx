@@ -79,7 +79,7 @@ export const customerRoutes = [
     ],
   },
   {
-    path: 'productdetails/:id',
+    path: 'product-detail/:id',
     element: <ProductDetails />,
   },
   {

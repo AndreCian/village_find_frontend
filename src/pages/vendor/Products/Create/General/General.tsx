@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { FaChevronRight } from 'react-icons/fa6';
+import { enqueueSnackbar } from 'notistack';
 import clsx from 'clsx';
 
 import { Card } from '@/components/common';
@@ -20,7 +20,6 @@ import { HttpService } from '@/services';
 import { ICategory } from '@/interfaces';
 
 import styles from './General.module.scss';
-import { enqueueSnackbar } from 'notistack';
 
 type PayType = 'Shipping' | 'Near By' | 'Local Subscriptions';
 type TopicType =
@@ -112,32 +111,9 @@ export function General() {
 
   return (
     <div className={styles.root}>
-      <Card className={styles.blog}>
+      <div className={styles.information}>
         <div className={styles.container}>
-          <span className={styles.magicPanel}>
-            <MagicIcon className={styles.magicIcon} />
-          </span>
-          <div className={styles.desc}>
-            <h2>Using AI</h2>
-            <p>
-              If get stuck trying to create a product name or description, let
-              our AI do it for you!
-            </p>
-            <span>Learn More</span>
-          </div>
-        </div>
-      </Card>
-      <Card className={styles.information}>
-        <div className={styles.container}>
-          <div className={styles.thumbnail}>
-            <p>My Products</p>
-            <FaChevronRight className={styles.arrow} />
-            <span>General Information</span>
-          </div>
           <div className={styles.variant}>
-            <p>
-              <span>Products Name:</span> Black Polish Radish
-            </p>
             <div className={styles.paytype}>
               <RadioGroup
                 value={generalInfo.payment}
@@ -302,7 +278,7 @@ export function General() {
             </button>
           </div>
         </div>
-      </Card>
+      </div>
       <AIDialog
         open={productDialogOpen}
         topic={dialogTopic}

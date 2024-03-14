@@ -1,8 +1,12 @@
+import { useEffect } from 'react';
 import { Outlet, useLocation, useNavigate, useParams } from 'react-router-dom';
+import { enqueueSnackbar } from 'notistack';
 import clsx from 'clsx';
 
+import { Card } from '@/components/common';
+import { MagicIcon } from '@/components/icons';
+
 import styles from './ProductLayout.module.scss';
-import { useEffect } from 'react';
 
 interface INavItem {
   title: string;
@@ -35,7 +39,7 @@ const navItems: INavItem[] = [
 ];
 
 export function ProductLayout() {
-  const { id: productId } = useParams();
+  const { productId } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
   const pathname = location.pathname;
@@ -44,10 +48,43 @@ export function ProductLayout() {
     return `${pathPrefix}/${productId}/${childPath}`;
   };
 
+  const onNavItemClick = (item: INavItem) => {
+    if (productId === 'create' && item.path !== 'general') {
+      enqueueSnackbar('You should create product first.', {
+        variant: 'warning',
+      });
+      navigate(buildPath('general'));
+      return;
+    }
+    navigate(buildPath(item.path));
+  };
+
   return (
     <div className={styles.root}>
-      <div className={styles.content}>
-        <Outlet />
+      <div className={styles.leftBar}>
+        {
+          <Card className={styles.blog}>
+            <div className={styles.container}>
+              <span className={styles.magicPanel}>
+                <MagicIcon className={styles.magicIcon} />
+              </span>
+              <div className={styles.desc}>
+                <h2>Using AI</h2>
+                <p>
+                  If get stuck trying to create a product name or description,
+                  let our AI do it for you!
+                </p>
+                <span>Learn More</span>
+              </div>
+            </div>
+          </Card>
+        }
+        <Card className={styles.content}>
+          <div className={styles.breadcrumb}>
+            <p>My Products</p>
+          </div>
+          <Outlet />
+        </Card>
       </div>
       <ul className={styles.rightBar}>
         {navItems.map((navItem: INavItem) => (
@@ -57,7 +94,7 @@ export function ProductLayout() {
               styles.navItem,
               pathname === buildPath(navItem.path) ? styles.activeItem : '',
             )}
-            onClick={() => navigate(buildPath(navItem.path))}
+            onClick={() => onNavItemClick(navItem)}
           >
             {navItem.title}
           </li>

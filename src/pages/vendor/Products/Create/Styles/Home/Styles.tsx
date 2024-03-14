@@ -68,28 +68,16 @@ export function Styles() {
   ];
 
   return (
-    <Card className={styles.root}>
-      <div className={styles.container}>
-        <div className={styles.thumbnail}>
-          <p>My Products</p>
-          <FaChevronRight className={styles.arrow} />
-          <span>Product Styles</span>
-        </div>
-        <div className={styles.variant}>
-          <p>
-            <span>Products Name:</span> Black Polish Radish
-          </p>
-        </div>
-        <div className={styles.buttonBar}>
-          <button
-            className={styles.button}
-            onClick={() => navigate(styleCreatePath)}
-          >
-            New
-          </button>
-        </div>
-        <TableBody columns={stylesTableColumns} rows={productStyles} />
+    <div className={styles.container}>
+      <div className={styles.buttonBar}>
+        <button
+          className={styles.button}
+          onClick={() => navigate(styleCreatePath)}
+        >
+          New
+        </button>
       </div>
-    </Card>
+      <TableBody columns={stylesTableColumns} rows={productStyles} />
+    </div>
   );
 }
