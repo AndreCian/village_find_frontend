@@ -95,10 +95,10 @@ export function StyleCreate() {
       name: styleName,
       attributes,
     }).then(response => {
-      const { status } = response;
+      const { status, attrId } = response;
       if (status === 200) {
         enqueueSnackbar('Attributes saved!', { variant: 'success' });
-        navigate(pathname.replace('create', `${styleId}/attribute`));
+        navigate(pathname.replace('create', `${attrId}/attribute`));
       }
     });
   };
