@@ -17,8 +17,6 @@ import { MagicIcon } from '@/components/icons';
 
 import { HttpService } from '@/services';
 
-import { ICategory } from '@/interfaces';
-
 import styles from './General.module.scss';
 
 type PayType = 'Shipping' | 'Near By' | 'Local Subscriptions';
@@ -51,14 +49,14 @@ const initialInfo: IProductGeneralInfo = {
 };
 
 export function General() {
-  const { id: productId } = useParams();
+  const { productId } = useParams();
   const navigate = useNavigate();
 
   const [productDialogOpen, setProductDialogOpen] = useState(false);
   const [nutrition, setNutrition] = useState<File | null>(null);
   const [generalInfo, setGeneralInfo] =
     useState<IProductGeneralInfo>(initialInfo);
-  const [categories, setCategories] = useState<ICategory[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
   const [dialogTopic, setDialogTopic] = useState<TopicType>('product name');
 
   const onAnswerSelect = (answer: string) => {
@@ -99,15 +97,31 @@ export function General() {
       formData.append(key, (generalInfo as any)[key]);
     });
     if (nutrition) formData.append('nutrition', nutrition);
-    console.log(formData);
     HttpService.post('/products', formData).then(response => {});
   };
 
   useEffect(() => {
     HttpService.get('/settings/general/category').then(response => {
-      setCategories(response);
+      setCategories(
+        response.map((item: any) => ({
+          ...item,
+          value: item.name.toLowerCase(),
+        })),
+      );
     });
   }, []);
+
+  useEffect(() => {
+    if (productId === 'create') return;
+    HttpService.get(`/products/${productId}`, { role: 'vendor' }).then(
+      response => {
+        const { status, product } = response;
+        if (status === 200) {
+          setGeneralInfo(product);
+        }
+      },
+    );
+  }, [productId]);
 
   return (
     <div className={styles.root}>
@@ -152,7 +166,7 @@ export function General() {
               <p>Product Category</p>
               <Select
                 placeholder="Product category"
-                options={categories.map((item: ICategory) => item.name)}
+                options={categories}
                 className={styles.categories}
                 value={generalInfo.category}
                 updateValue={(category: string) =>

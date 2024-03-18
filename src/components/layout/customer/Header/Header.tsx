@@ -143,11 +143,14 @@ export function Header({
               <p>Hi, {account?.profile && account.profile.firstName}</p>
               <UserIcon className={styles.icon} />
             </div>
-            <div className={styles.navToCart}>
+            <div
+              className={styles.navToCart}
+              onClick={() => navigate('/checkout')}
+            >
               <CartIcon className={styles.icon} />
-              <div className={styles.badge}>
+              {/* <div className={styles.badge}>
                 <span>{cartItemCount}</span>
-              </div>
+              </div> */}
             </div>
           </>
         ) : (

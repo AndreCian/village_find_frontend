@@ -1,64 +1,44 @@
-.root {
-  .container {
-    @apply space-y-4;
+.container {
+  @apply space-y-4;
 
-    .thumbnail {
-      @apply flex items-center gap-x-2;
+  .form {
+    @apply w-full space-y-8 lg:w-2/3;
 
-      .arrow {
-        @apply h-3 w-3;
-      }
+    .subForm {
+      @apply space-y-4;
 
-      span {
+      h2 {
         @apply font-bold;
       }
-    }
 
-    h1 {
-      span {
-        @apply font-bold;
+      .horizon {
+        @apply grid grid-cols-1 gap-x-4 gap-y-2 lg:grid-cols-2;
       }
-    }
 
-    .form {
-      @apply w-full space-y-8 lg:w-2/3;
+      .control {
+        @apply space-y-2;
 
-      .subForm {
-        @apply space-y-4;
-
-        h2 {
-          @apply font-bold;
-        }
-
-        .horizon {
-          @apply grid grid-cols-1 gap-x-4 gap-y-2 lg:grid-cols-2;
-        }
-
-        .control {
-          @apply space-y-2;
-
-          p {
-            .optional {
-              @apply text-light;
-            }
+        p {
+          .optional {
+            @apply text-light;
           }
+        }
 
-          .button {
-            @apply rounded-full bg-success px-5 py-2;
+        .button {
+          @apply rounded-full bg-success px-5 py-2;
 
-            .btnRadio {
-              span {
-                @apply text-white;
-              }
+          .btnRadio {
+            span {
+              @apply text-white;
             }
           }
         }
       }
     }
+  }
 
-    .feeInput {
-      @apply w-fit min-w-0 text-base;
-    }
+  .feeInput {
+    @apply w-fit min-w-0 text-base;
   }
 
   .buttonBar {

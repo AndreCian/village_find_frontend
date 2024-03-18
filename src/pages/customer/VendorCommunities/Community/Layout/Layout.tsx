@@ -53,10 +53,14 @@ export function Layout() {
       const { status, community } = response;
       if (status === 200) {
         setCommunity(community ?? {});
-        const products = await HttpService.get(
-          `/products?community=${community._id}`,
-        );
-        setProducts(products);
+        // const products = await HttpService.get(
+        //   `/products?community=${community._id}`,
+        // );
+        // setProducts(products);
+        const products = await HttpService.get('/products/public', {
+          community: community._id,
+        });
+        setProducts(products || []);
       } else {
         enqueueSnackbar('Community not found!', { variant: 'error' });
         navigate('/communities');
@@ -121,10 +125,8 @@ export function Layout() {
           products={products}
           events={community.events ?? []}
         />
-      ) : currentTab === 'about' ? (
-        <CommunityAbout />
       ) : (
-        <></>
+        <CommunityAbout />
       )}
     </div>
   );

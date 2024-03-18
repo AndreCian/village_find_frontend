@@ -33,6 +33,8 @@ import {
   Customization,
   Subscription,
   SpecCreate,
+  Attributes,
+  StyleCreateLayout,
 } from '@/pages/vendor/Products';
 import { Financials } from '@/pages/vendor/Financials';
 import { Community } from '@/pages/vendor/Community';
@@ -163,8 +165,7 @@ export const vendorRoutes = [
         leaf: true,
         children: [
           {
-            title: 'Home',
-            path: '',
+            index: true,
             element: <Navigate to="general" />,
           },
           {
@@ -175,17 +176,32 @@ export const vendorRoutes = [
           {
             title: 'Styles',
             path: 'style',
-            element: <Outlet />,
+            element: <StyleCreateLayout />,
             children: [
               {
-                title: 'Home',
-                path: '',
+                index: true,
                 element: <Styles />,
               },
               {
                 title: 'Create',
                 path: ':styleId',
-                element: <StyleCreate />,
+                element: <Outlet />,
+                children: [
+                  {
+                    index: true,
+                    element: <StyleCreate />,
+                  },
+                  {
+                    title: 'Attributes',
+                    path: 'attribute',
+                    element: <Attributes />,
+                  },
+                ],
+              },
+              {
+                title: 'Attributes',
+                path: 'attribute',
+                element: <Attributes />,
               },
             ],
           },
@@ -195,8 +211,7 @@ export const vendorRoutes = [
             element: <Outlet />,
             children: [
               {
-                title: 'Home',
-                path: '',
+                index: true,
                 element: <Specifications />,
               },
               {

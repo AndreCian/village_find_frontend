@@ -1,18 +1,28 @@
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { Card, TableBody } from '@/components/common';
 import { Input, Select } from '@/components/forms';
 import { TrashIcon } from '@/components/icons';
 
-import { useProductStore } from '@/stores/vendor/product';
+// import { useProductStore } from '@/stores/vendor/product';
 
 import { ITableColumn } from '@/interfaces';
+import { HttpService } from '@/services';
 
 import styles from './Products.module.scss';
 
+interface IProductItem {
+  name: string;
+  sku?: string;
+  inventory?: string;
+  status: string;
+}
+
 export function Products() {
   const navigate = useNavigate();
-  const { products } = useProductStore();
+  // const { products } = useProductStore();
+  const [products, setProducts] = useState<IProductItem[]>([]);
 
   const productsTableColumns: ITableColumn[] = [
     {
@@ -66,7 +76,9 @@ export function Products() {
       width: 250,
       cell: (row: any) => (
         <div className={styles.actionCell}>
-          <button className={styles.button}>Edit</button>
+          <button className={styles.button} onClick={() => navigate(row._id)}>
+            Edit
+          </button>
           <span>
             <TrashIcon />
           </span>
@@ -74,6 +86,12 @@ export function Products() {
       ),
     },
   ];
+
+  useEffect(() => {
+    HttpService.get('/products/vendor').then(response => {
+      setProducts(response);
+    });
+  }, []);
 
   return (
     <Card title="My Products" className={styles.root}>

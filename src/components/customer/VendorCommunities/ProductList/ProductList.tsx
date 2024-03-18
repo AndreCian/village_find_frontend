@@ -17,6 +17,8 @@ function ProductList({ products, isMobile }: IProductListProps) {
     navigate(`/product-detail/${id}`);
   };
 
+  console.log(products);
+
   return (
     <div className={styles.products}>
       {products.map((product: any, index: number) => (

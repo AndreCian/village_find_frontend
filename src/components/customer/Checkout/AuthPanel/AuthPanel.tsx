@@ -12,12 +12,12 @@ interface IAuthPanelProps {
 }
 
 export function AuthPanel({ isLogin }: IAuthPanelProps) {
-  const context = useContext(AuthContext);
+  const { account } = useContext(AuthContext);
   const [isLoginPanel, setIsLoginPanel] = useState(false);
 
   return isLogin ? (
     <div className={styles.home}>
-      <p>Hi, Brandon!</p>
+      <p>Hi, {account?.profile.firstName}!</p>
     </div>
   ) : (
     <div className={styles.auth}>

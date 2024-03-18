@@ -1,3 +1,5 @@
+import { ChangeEvent } from 'react';
+
 export type ImageType = File | string;
 export type WeekdayType =
   | 'Monday'
@@ -28,3 +30,7 @@ export interface GetInfinitePagesInterface<T> {
   data: T;
   count: number;
 }
+
+export type ChangeInputEvent = ChangeEvent<
+  HTMLInputElement | HTMLTextAreaElement
+>;

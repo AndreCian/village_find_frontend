@@ -39,6 +39,22 @@
         }
       }
     }
+
+    .content {
+      @apply flex flex-col gap-y-4;
+
+      .breadcrumb {
+        @apply flex items-center gap-x-2;
+
+        .bold {
+          @apply font-bold;
+        }
+      }
+
+      .productName span {
+        @apply font-bold;
+      }
+    }
   }
 
   .rightBar {

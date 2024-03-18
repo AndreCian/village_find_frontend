@@ -1,34 +1,11 @@
-.root {
-  .container {
-    @apply space-y-4;
+.container {
+  @apply space-y-4;
 
-    .thumbnail {
-      @apply flex items-center gap-x-2;
+  .buttonBar {
+    @apply flex w-full justify-end;
 
-      .arrow {
-        @apply h-3 w-3;
-      }
-
-      span {
-        @apply font-bold;
-      }
-    }
-
-    .variant {
-      p {
-        @apply mb-8;
-        span {
-          @apply font-bold;
-        }
-      }
-    }
-
-    .buttonBar {
-      @apply flex w-full justify-end;
-
-      .button {
-        @apply rounded-full bg-dark px-12 py-2 text-white;
-      }
+    .button {
+      @apply rounded-full bg-dark px-12 py-2 text-white;
     }
   }
 }

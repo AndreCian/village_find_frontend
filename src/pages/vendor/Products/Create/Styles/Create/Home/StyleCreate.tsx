@@ -1,103 +1,197 @@
-import { useMemo } from 'react';
-import { useParams } from 'react-router-dom';
-import { FaChevronRight } from 'react-icons/fa6';
+import { useContext, useEffect, useState } from 'react';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 
-import { Card } from '@/components/common';
+import { StyleCreateContext } from '../Layout';
+
 import { Input } from '@/components/forms';
-
-import { useStyleStore } from '@/stores';
+import { ChangeInputEvent } from '@/interfaces';
 
 import styles from './StyleCreate.module.scss';
+import { HttpService } from '@/services';
+import { enqueueSnackbar } from 'notistack';
+
+export interface IAttribute {
+  _id?: string;
+  name: string;
+  values: string[];
+}
 
 export function StyleCreate() {
-  const id = '1';
-  const { styles: proStyles } = useStyleStore();
-  const curStyle = useMemo(() => {
-    return (
-      proStyles.find((style: any) => style.id === id) || {
-        attribute: {
-          size: [],
-          color: [],
-        },
-      }
+  const navigate = useNavigate();
+  const location = useLocation();
+  const pathname = location.pathname;
+  const { productId, styleId } = useParams();
+
+  const { attributes, setAttributes, styleName, setStyleName } =
+    useContext(StyleCreateContext);
+  const [currentAttrIndex, setCurrentAttrIndex] = useState(-1);
+  const [currentValueIndex, setCurrentValueIndex] = useState(-1);
+
+  const onCreateAttrClick = () => {
+    setAttributes([...attributes, { name: '', values: [] }]);
+  };
+
+  const onStyleNameChange = (e: ChangeInputEvent) => {
+    setStyleName(e.target.value);
+  };
+
+  const onAttrNameChange = (attrIndex: number) => (e: ChangeInputEvent) => {
+    setAttributes(
+      attributes.map((attribute: IAttribute, index: number) =>
+        index === attrIndex
+          ? { ...attribute, name: e.target.value }
+          : attribute,
+      ),
     );
-  }, [proStyles]);
+  };
+
+  const onAddValueClick = (attrIndex: number) => () => {
+    setAttributes(
+      attributes.map((attribute: IAttribute, index: number) =>
+        index === attrIndex
+          ? {
+              ...attribute,
+              values: [
+                ...attribute.values,
+                `${attribute.name}${attribute.values.length + 1}`,
+              ],
+            }
+          : attribute,
+      ),
+    );
+  };
+
+  const onEditValueClick = (attrIndex: number, vIndex: number) => {
+    setCurrentAttrIndex(attrIndex);
+    setCurrentValueIndex(vIndex);
+  };
+
+  const onAttrValueChange =
+    (attrIndex: number, vIndex: number) => (e: ChangeInputEvent) => {
+      setAttributes(
+        attributes.map((attribute: IAttribute, _attrIndex: number) =>
+          attrIndex === _attrIndex
+            ? {
+                ...attribute,
+                values: attribute.values.map((value: string, _vIndex: number) =>
+                  _vIndex === vIndex ? e.target.value : value,
+                ),
+              }
+            : attribute,
+        ),
+      );
+    };
+
+  const onAttrValueBlur = () => {
+    setCurrentAttrIndex(-1);
+    setCurrentValueIndex(-1);
+  };
+
+  const onNextClick = () => {
+    if (styleId !== 'create') {
+      return navigate('attribute');
+    }
+    HttpService.post(`/products/${productId}/attribute`, {
+      name: styleName,
+      attributes,
+    }).then(response => {
+      const { status } = response;
+      if (status === 200) {
+        enqueueSnackbar('Attributes saved!', { variant: 'success' });
+        navigate(pathname.replace('create', `${styleId}/attribute`));
+      }
+    });
+  };
+
+  useEffect(() => {
+    if (styleId === 'create') {
+      setAttributes([]);
+      setStyleName('');
+      setCurrentAttrIndex(-1);
+      setCurrentValueIndex(-1);
+      return;
+    }
+    HttpService.get(`/products/${productId}/style`, { styleId }).then(
+      response => {
+        const { status, style } = response;
+        if (status === 200) {
+          setAttributes(style.attributes || []);
+          setStyleName(style.name || '');
+        }
+      },
+    );
+  }, [productId, styleId]);
 
   return (
-    <Card className={styles.root}>
-      <div className={styles.container}>
-        <div className={styles.thumbnail}>
-          <p>My Products</p>
-          <FaChevronRight className={styles.arrow} />
-          <span>Product Styles</span>
+    <div className={styles.container}>
+      <div className={styles.addAttr}>
+        <div className={styles.control}>
+          <p>Style Name</p>
+          <Input
+            rounded="full"
+            border="none"
+            bgcolor="secondary"
+            placeholder="Beeded"
+            value={styleName}
+            updateValue={onStyleNameChange}
+          />
         </div>
-        <div className={styles.variant}>
-          <p>
-            <span>Products Name:</span> Black Polish Radish
-          </p>
-        </div>
-        <div className={styles.addAttr}>
-          <div className={styles.control}>
-            <p>Style Name</p>
-            <Input
-              rounded="full"
-              border="none"
-              bgcolor="secondary"
-              placeholder="Beeded"
-            />
-          </div>
-          <button className={styles.button}>New Attribute</button>
-        </div>
-        <div className={styles.form}>
-          <div className={styles.control}>
-            <p>Attribute Name</p>
-            <Input
-              rounded="full"
-              border="none"
-              bgcolor="secondary"
-              placeholder="Size"
-              disabled={true}
-              className={styles.attrNameInput}
-            />
-          </div>
-          <div className={styles.control}>
-            <p>Attribute Values</p>
-            <div className={styles.sizeBar}>
-              {curStyle.attribute.size.map((size: string) => (
-                <span key={size}>{size}</span>
-              ))}
-              <button className={styles.addButton}>
-                Add Sizes<span>+</span>
-              </button>
-            </div>
-          </div>
-          <div className={styles.control}>
-            <p>Attribute Name</p>
-            <Input
-              rounded="full"
-              border="none"
-              bgcolor="secondary"
-              placeholder="Color"
-              disabled={true}
-              className={styles.attrNameInput}
-            />
-          </div>
-          <div className={styles.control}>
-            <p>Attribute Values</p>
-            <div className={styles.colorBar}>
-              {curStyle.attribute.color.map((color: string) => (
-                <span key={color}>{color}</span>
-              ))}
-              <button className={styles.addButton}>
-                Add<span>+</span>
-              </button>
-            </div>
-          </div>
-        </div>
-        <div className={styles.buttonBar}>
-          <button className={styles.button}>Next</button>
-        </div>
+        <button className={styles.button} onClick={onCreateAttrClick}>
+          New Attribute
+        </button>
       </div>
-    </Card>
+      <div className={styles.form}>
+        {attributes.map((attribute: IAttribute, attrIndex: number) => (
+          <div className={styles.attribute} key={attrIndex}>
+            <div className={styles.control}>
+              <p>Attribute Name</p>
+              <Input
+                rounded="full"
+                border="none"
+                bgcolor="secondary"
+                placeholder="Size"
+                className={styles.attrNameInput}
+                value={attribute.name}
+                updateValue={onAttrNameChange(attrIndex)}
+              />
+            </div>
+            <div className={styles.control}>
+              <p>Attribute Values</p>
+              <div className={styles.sizeBar}>
+                {attribute.values.map((value: string, vIndex: number) =>
+                  currentAttrIndex === attrIndex &&
+                  currentValueIndex === vIndex ? (
+                    <Input
+                      value={value}
+                      updateValue={onAttrValueChange(attrIndex, vIndex)}
+                      onBlur={onAttrValueBlur}
+                    />
+                  ) : (
+                    <span
+                      key={value}
+                      onClick={() => onEditValueClick(attrIndex, vIndex)}
+                    >
+                      {value}
+                    </span>
+                  ),
+                )}
+                <button
+                  className={styles.addButton}
+                  onClick={onAddValueClick(attrIndex)}
+                >
+                  Add {attribute.name}
+                  <span>+</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className={styles.buttonBar}>
+        <button className={styles.button} onClick={onNextClick}>
+          Next
+        </button>
+      </div>
+    </div>
   );
 }

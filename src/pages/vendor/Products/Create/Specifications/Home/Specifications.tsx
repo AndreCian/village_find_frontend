@@ -1,28 +1,35 @@
-import { useNavigate } from 'react-router-dom';
-import { FaChevronRight } from 'react-icons/fa6';
+import { useNavigate, useParams } from 'react-router-dom';
 
-import { Card, TableBody } from '@/components/common';
+import { TableBody } from '@/components/common';
 import { GridIcon, TrashIcon } from '@/components/icons';
 
 import { ITableColumn } from '@/interfaces';
 
 import styles from './Specifications.module.scss';
+import { useEffect, useState } from 'react';
+import { HttpService } from '@/services';
 
-const specCreatePath = '/vendor/products/create/specifications/create';
+const subPath = '/vendor/products';
 
 interface ISpec {
   name: string;
 }
 
-const specs: ISpec[] = [
-  { name: 'Weight' },
-  { name: 'Height' },
-  { name: 'Ingredients' },
-  { name: 'Alergies' },
-];
+const specs = [
+  'SKU',
+  'UPC',
+  'Weight',
+  'Height',
+  'Width',
+  'Length',
+  'Package Quantity',
+].map((spec: string) => ({ name: spec, value: spec.toLowerCase() }));
 
 export function Specifications() {
   const navigate = useNavigate();
+  const { productId } = useParams();
+
+  const [specifications, setSpecifications] = useState<ISpec[]>([]);
 
   const stylesTableColumns: ITableColumn[] = [
     {
@@ -32,7 +39,7 @@ export function Specifications() {
       cell: (row: any) => (
         <div className={styles.name}>
           <GridIcon />
-          <span>{row.name}</span>
+          <span>{specs.find(spec => spec.value === row.name)?.name || ''}</span>
         </div>
       ),
     },
@@ -51,29 +58,28 @@ export function Specifications() {
     },
   ];
 
+  useEffect(() => {
+    HttpService.get(`/products/${productId}/specification`).then(response => {
+      const { status, specifications } = response;
+      if (status === 200) {
+        setSpecifications(specifications);
+      }
+    });
+  }, []);
+
   return (
-    <Card className={styles.root}>
-      <div className={styles.container}>
-        <div className={styles.thumbnail}>
-          <p>My Products</p>
-          <FaChevronRight className={styles.arrow} />
-          <span>Product Styles</span>
-        </div>
-        <div className={styles.variant}>
-          <p>
-            <span>Products Name:</span> Black Polish Radish
-          </p>
-        </div>
-        <div className={styles.buttonBar}>
-          <button
-            className={styles.button}
-            onClick={() => navigate(specCreatePath)}
-          >
-            New
-          </button>
-        </div>
-        <TableBody columns={stylesTableColumns} rows={specs} />
+    <div className={styles.container}>
+      <div className={styles.buttonBar}>
+        <button
+          className={styles.button}
+          onClick={() =>
+            navigate(`${subPath}/${productId}/specifications/create`)
+          }
+        >
+          New
+        </button>
       </div>
-    </Card>
+      <TableBody columns={stylesTableColumns} rows={specifications} />
+    </div>
   );
 }

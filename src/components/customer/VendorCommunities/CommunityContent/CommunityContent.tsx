@@ -32,61 +32,6 @@ interface ICommunityContentProps {
   vendors: IVendor[];
 }
 
-// const initialProducts = [
-//   {
-//     name: 'Gyuto Chef Knife',
-//     place: 'Forge2Table Knives',
-//     price: 10.93,
-//     image: '/assets/customer/products/product1.png',
-//   },
-//   {
-//     name: 'Mystery Awesome Box',
-//     place: 'Bills Boowls',
-//     price: 80.0,
-//     totprice: 160.0,
-//     image: '/assets/customer/products/product10.png',
-//     tags: ['Subscription'],
-//   },
-//   {
-//     name: 'Mystery Awesome Box',
-//     place: 'ToothyFoot',
-//     price: 4.89,
-//     image: '/assets/customer/products/product3.png',
-//     tags: ['Near You'],
-//   },
-//   {
-//     name: 'Mystery Awesome Box',
-//     place: 'Soaps & More',
-//     price: 22.98,
-//     image: '/assets/customer/products/product5.png',
-//     tags: ['Near You'],
-//   },
-//   {
-//     name: 'Gyuto Chef Knife',
-//     place: 'Forge2Table Knives',
-//     price: 10.93,
-//     image: '/assets/customer/products/product8.png',
-//   },
-//   {
-//     name: 'Mystery Awesome Box',
-//     place: 'Bills Boowls',
-//     price: 80.0,
-//     totprice: 160.0,
-//     image: '/assets/customer/products/product9.png',
-//   },
-// ];
-
-// const initialVendors = [
-//   {
-//     vendorId: 'vendor1',
-//     backImage: '/assets/customer/vcom/vendor1.png',
-//     logoImage: '/assets/customer/vcom/vendorLogo1.png',
-//     title: "Bill's Birds",
-//     description: 'Over 600 artisans making unique one-of-a-kind items.',
-//     interest: 'Jewelry',
-//   },
-// ];
-
 export function CommunityContent({
   panel = true,
   title = '',
@@ -169,7 +114,7 @@ export function CommunityContent({
         <p>All Categories</p>
       </div>
       {panel ? (
-        <ProductList isMobile={isMobile} products={[]} />
+        <ProductList isMobile={isMobile} products={products} />
       ) : (
         <ShopList shops={vendors} />
       )}

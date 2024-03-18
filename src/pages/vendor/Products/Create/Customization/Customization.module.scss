@@ -1,50 +1,48 @@
-.root {
-  .container {
-    @apply space-y-4;
+.container {
+  @apply space-y-4;
 
-    .thumbnail {
-      @apply flex items-center gap-x-2;
+  .thumbnail {
+    @apply flex items-center gap-x-2;
 
-      .arrow {
-        @apply h-3 w-3;
-      }
-
-      span {
-        @apply font-bold;
-      }
+    .arrow {
+      @apply h-3 w-3;
     }
 
-    h1 {
-      span {
-        @apply font-bold;
-      }
+    span {
+      @apply font-bold;
     }
+  }
 
-    .form {
-      @apply space-y-4 pt-4;
+  h1 {
+    span {
+      @apply font-bold;
+    }
+  }
 
-      .control {
-        @apply space-y-2;
+  .form {
+    @apply space-y-4 pt-4;
 
-        .button {
-          @apply rounded-full bg-success px-5 py-2;
+    .control {
+      @apply space-y-2;
 
-          .btnRadio {
-            span {
-              @apply text-white;
-            }
+      .button {
+        @apply rounded-full bg-success px-5 py-2;
+
+        .btnRadio {
+          span {
+            @apply text-white;
           }
         }
       }
     }
+  }
 
-    .feeInput {
-      @apply w-fit min-w-0 text-base;
-    }
+  .feeInput {
+    @apply w-fit min-w-0 text-base;
   }
 
   .buttonBar {
-    @apply flex justify-end gap-x-8;
+    @apply flex justify-end gap-x-4;
 
     button {
       @apply rounded-full border border-primary bg-white px-8 py-3 text-xs;

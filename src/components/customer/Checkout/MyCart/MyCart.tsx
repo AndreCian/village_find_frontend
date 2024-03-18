@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import clsx from 'clsx';
 
 import { Button } from '@/components/forms';
+import { HttpService } from '@/services';
 
 import {
   CartItem,
@@ -77,14 +78,37 @@ interface IMyCartProps {
   onNextStep: () => void;
 }
 
+interface ICartItem {
+  vendor: {
+    shopName: string;
+    logo: string;
+  };
+}
+
 export function MyCart({ isLogin, onNextStep }: IMyCartProps) {
+  const [cartItems, setCartItems] = useState<ICartItem[]>([]);
+
+  useEffect(() => {
+    HttpService.get('/cart').then(response => {
+      const { status, cartItems } = response;
+      if (status === 200) {
+        setCartItems(cartItems);
+      }
+    });
+  }, []);
+
   return (
     <div className={styles.root}>
       <div className={styles.cart}>
         <p className={styles.title}>My Cart</p>
         <div className={styles.cartItemList}>
-          {initialCartItems.map((cartItem: any, index: number) => (
-            <CartItem key={index} {...cartItem} />
+          {cartItems.map((cartItem: any, index: number) => (
+            <CartItem
+              key={index}
+              {...cartItem}
+              orderId={index + 1}
+              deliveryOptions={[]}
+            />
           ))}
         </div>
       </div>

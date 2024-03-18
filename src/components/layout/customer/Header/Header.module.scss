@@ -50,7 +50,7 @@
     }
 
     .navToCart {
-      @apply relative;
+      @apply relative cursor-pointer;
 
       .badge {
         @apply absolute left-1/2 top-1/2 flex h-3 w-3 -translate-x-1/2 transform items-center justify-center rounded-full bg-success;

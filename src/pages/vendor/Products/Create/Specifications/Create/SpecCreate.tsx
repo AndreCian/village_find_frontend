@@ -1,9 +1,13 @@
+import { useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import clsx from 'clsx';
-import { FaChevronRight } from 'react-icons/fa6';
 
-import { Card, Select, TextField } from '@/components';
+import { Select, TextField } from '@/components';
+import { ChangeInputEvent } from '@/interfaces';
+import { HttpService } from '@/services';
 
 import styles from './SpecCreate.module.scss';
+import { enqueueSnackbar } from 'notistack';
 
 const specs = [
   'SKU',
@@ -13,56 +17,81 @@ const specs = [
   'Width',
   'Length',
   'Package Quantity',
-];
+].map((spec: string) => ({ name: spec, value: spec.toLowerCase() }));
+const subPath = '/vendor/products';
 
 export function SpecCreate() {
-  const productName = 'Black Polish Radish';
+  const navigate = useNavigate();
+  const { productId } = useParams();
+
+  const [specName, setSpecName] = useState('');
+  const [specValue, setSpecValue] = useState('');
+
+  const onSpecNameChange = (value: string) => {
+    setSpecName(value);
+  };
+
+  const onSpecValueChange = (e: ChangeInputEvent) => {
+    setSpecValue(e.target.value);
+  };
+
+  const onUpdateClick = () => {
+    HttpService.post(`/products/${productId}/specification`, {
+      name: specName,
+      value: specValue,
+    }).then(response => {
+      const { status } = response;
+      if (status === 200) {
+        navigate(`${subPath}/${productId}/specifications`);
+        enqueueSnackbar('Specification added successfully!', {
+          variant: 'success',
+        });
+      } else if (status === 404) {
+      }
+    });
+  };
 
   return (
-    <Card className={styles.root}>
-      <div className={styles.container}>
-        <div className={styles.thumbnail}>
-          <p>My Products</p>
-          <FaChevronRight />
-          <p>Specifications</p>
-          <FaChevronRight />
-          <span>Subscription</span>
+    <div className={styles.container}>
+      <div className={styles.form}>
+        <div className={styles.control}>
+          <p>Add Specification</p>
+          <Select
+            rounded="full"
+            border="none"
+            bgcolor="primary"
+            placeholder="SKU"
+            options={specs}
+            value={specName}
+            updateValue={onSpecNameChange}
+          />
         </div>
-        <div className={styles.header}>
-          <h1>
-            <span>Products Name: </span>
-            {productName}
-          </h1>
-          <button className={styles.button}>New</button>
-        </div>
-        <div className={styles.form}>
-          <div className={styles.control}>
-            <p>Add Specification</p>
-            <Select
-              rounded="full"
-              border="none"
-              bgcolor="primary"
-              placeholder="SKU"
-              options={specs}
-            />
-          </div>
-          <div className={styles.values}>
-            <TextField
-              rows={1}
-              rounded="full"
-              border="none"
-              bgcolor="primary"
-              placeholder="Enter Specification Values"
-            />
-          </div>
-        </div>
-        <div className={styles.buttonBar}>
-          <button className={styles.button}>Cancel</button>
-          <button className={clsx(styles.button, styles.updateBtn)}>
-            Update
-          </button>
+        <div className={styles.values}>
+          <TextField
+            rows={1}
+            rounded="full"
+            border="none"
+            bgcolor="primary"
+            placeholder="Enter Specification Values"
+            value={specValue}
+            updateValue={onSpecValueChange}
+          />
         </div>
       </div>
-    </Card>
+      <div className={styles.buttonBar}>
+        <button
+          className={styles.button}
+          onClick={() => navigate(`${subPath}/${productId}/specifications`)}
+        >
+          Cancel
+        </button>
+        <button
+          className={clsx(styles.button, styles.updateBtn)}
+          onClick={onUpdateClick}
+        >
+          Add
+        </button>
+      </div>
+    </div>
   );
 }

@@ -7,37 +7,43 @@ import { TrashIcon } from '@/components/icons';
 import { PickDateDialog } from '@/components/customer/common';
 
 import styles from './CartItem.module.scss';
+import Logo from '/assets/customer/checkout/vendor1.png';
+import Image from '/assets/customer/checkout/product.png';
 
 type MarketType = 'Shipping' | 'Near By' | 'Subscription';
 
 interface ICartItemProps {
-  vendorName: string;
+  vendor: {
+    shopName: string;
+    logo: string;
+  };
   orderId: number;
-  logo: string;
   products: [
     {
-      name: string;
-      marketType: MarketType;
-      subscription?: {
-        frequency: string; // Weekly, Monthly
-        discount: number;
-        duration: number; // number of weeks
-        start_date: Date;
-        end_date: Date;
-      };
-      style?: {
-        name: string;
-        size: string;
-        color: string;
-      };
-      personalization?: {
-        fee: number;
-        message: string;
-      };
-      price: number;
       quantity: number;
-      soldUnit: string; // default - cnt
-      image: string;
+      product: {
+        name: string;
+        marketType: MarketType;
+        subscription?: {
+          frequency: string; // Weekly, Monthly
+          discount: number;
+          duration: number; // number of weeks
+          start_date: Date;
+          end_date: Date;
+        };
+        style?: {
+          name: string;
+          size: string;
+          color: string;
+        };
+        personalization?: {
+          fee: number;
+          message: string;
+        };
+        price: number;
+        soldUnit: string; // default - cnt
+        image: string;
+      };
     },
   ];
   deliveryOptions: string[];
@@ -51,10 +57,9 @@ const initialFrequencies = [
 ];
 
 export function CartItem({
-  vendorName,
-  orderId,
-  logo,
+  vendor,
   products,
+  orderId,
   deliveryOptions,
 }: ICartItemProps) {
   const marketTypes = useMemo(() => {
@@ -81,9 +86,9 @@ export function CartItem({
     <div className={styles.root}>
       <div className={styles.header}>
         <div className={styles.vendor}>
-          <img src={logo} />
+          <img src={vendor.logo || Logo} />
           <div className={styles.order}>
-            <p className={styles.name}>{vendorName}</p>
+            <p className={styles.name}>{vendor.shopName}</p>
             <p className={styles.orderId}>
               Order ID: <span>{orderId}</span>
             </p>
@@ -95,20 +100,20 @@ export function CartItem({
         </div>
         <div className={styles.subtotal}>
           <p className={styles.title}>Subtotal</p>
-          <p className={styles.body}>${subTotal.toFixed(2)}</p>
+          <p className={styles.body}>${(subTotal || 0).toFixed(2)}</p>
         </div>
       </div>
       <div className={styles.products}>
-        {products.map((product: any, index: number) => (
+        {products.map(({ quantity, product }: any, index: number) => (
           <div key={index} className={styles.product}>
             <div className={styles.main}>
               <div className={styles.imageBar}>
-                <img src={product.image} alt="The Product Image" />
+                <img src={product.image || Image} alt="The Product Image" />
                 <div className={styles.quantity}>
                   <span className={styles.minus}>
                     <FaMinus fill="#3F3F3F" />
                   </span>
-                  <p>{product.quantity}</p>
+                  <p>{quantity}</p>
                   <span className={styles.plus}>
                     <FaPlus fill="white" />
                   </span>
@@ -118,8 +123,8 @@ export function CartItem({
                 <div className={styles.heading}>
                   <p className={styles.title}>{product.name}</p>
                   <p className={styles.pricePerUnit}>
-                    Minimum {product.quantity} Bunch at $
-                    {product.price.toFixed(2)}/{product.soldUnit}
+                    Minimum {quantity} Bunch at $
+                    {(product.price || 0).toFixed(2)}/{product.soldUnit}
                   </p>
                 </div>
                 <div className={styles.price}>
@@ -127,9 +132,9 @@ export function CartItem({
                   <p className={styles.body}>
                     $
                     {(
-                      product.price +
+                      (product.price || 0) +
                         (product.personalization &&
-                          product.personalization.fee) ?? 0
+                          product.personalization.fee) || 0
                     ).toFixed(2)}
                   </p>
                 </div>
@@ -227,14 +232,16 @@ export function CartItem({
                   <span className={styles.minus}>
                     <FaMinus fill="#3F3F3F" />
                   </span>
-                  <p>{product.quantity}</p>
+                  <p>{quantity}</p>
                   <span className={styles.plus}>
                     <FaPlus fill="white" />
                   </span>
                 </div>
                 <div className={styles.price}>
                   <p className={styles.title}>Price</p>
-                  <p className={styles.body}>${product.price.toFixed(2)}</p>
+                  <p className={styles.body}>
+                    ${(product.price || 0).toFixed(2)}
+                  </p>
                 </div>
               </div>
             </div>

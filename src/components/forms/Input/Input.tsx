@@ -36,6 +36,7 @@ export interface IInputProps {
 
   onClick?: () => void;
   onFocus?: () => void;
+  onBlur?: () => void;
   onKeyDown?: (e: any) => void;
 }
 
@@ -56,6 +57,7 @@ export const Input = forwardRef((props: IInputProps, ref: any) => {
     defaultValue = '',
     updateValue = () => {},
     onClick = () => {},
+    onBlur = () => {},
     onFocus = () => {},
     onKeyDown = () => {},
     ...nativeAttrs
@@ -95,8 +97,9 @@ export const Input = forwardRef((props: IInputProps, ref: any) => {
         onChange={updateValue}
         onClick={onClick}
         onFocus={onFocus}
-        ref={ref}
+        onBlur={onBlur}
         onKeyDown={onKeyDown}
+        ref={ref}
         {...nativeAttrs}
       />
       {adornment ? (

@@ -59,8 +59,18 @@
         @apply text-[13px] leading-[18px];
       }
 
-      .shape {
-        @apply flex gap-x-3;
+      .style {
+        @apply flex flex-wrap gap-3;
+
+        .styleSelect {
+          & div:nth-child(2) {
+            @apply mt-1 px-0 py-2;
+
+            span {
+              @apply py-0 pl-4 text-left text-[14px] hover:rounded-none;
+            }
+          }
+        }
       }
     }
 

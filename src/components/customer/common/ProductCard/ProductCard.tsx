@@ -4,12 +4,13 @@ import { FaChevronRight } from 'react-icons/fa6';
 import { SERVER_URL } from '@/config/global';
 
 import styles from './ProductCard.module.scss';
+import FallbackImage from '/assets/customer/backs/about.png';
 
 interface IProduct {
   image: string;
-  title: string;
+  shopName: string;
   name: string;
-  price: number;
+  price?: number;
   totprice?: number;
   tags?: string[];
 }
@@ -34,7 +35,7 @@ export function ProductCard({
   navigateToDetail = () => {},
   product,
 }: IProductCardProps) {
-  const { image, name, title, price, totprice, tags } = product;
+  const { image, name, shopName, price, totprice, tags } = product;
 
   return (
     <div
@@ -47,7 +48,7 @@ export function ProductCard({
     >
       <div className={styles.image}>
         <object data={`${SERVER_URL}/${image}`} type="image/png">
-          <img src={image} alt="Fallback image" />
+          <img src={image || FallbackImage} alt="Fallback image" />
         </object>
         {isLoadMore && (
           <p className={styles.moreContext}>
@@ -58,15 +59,15 @@ export function ProductCard({
           </p>
         )}
       </div>
-      <h1>{title}</h1>
-      <p>{name}</p>
+      <h1>{name}</h1>
+      <p>{shopName}</p>
       <div className={styles.prices}>
-        <span className={styles.price}>${price.toFixed(2)}</span>
+        <span className={styles.price}>${(price || 0).toFixed(2)}</span>
         {totprice && (
           <>
             <span className={styles.totprice}>${totprice.toFixed(2)}</span>
             <span className={styles.discount}>{`${Math.round(
-              (price / totprice) * 100,
+              ((price || 0) / (totprice || 1)) * 100,
             )}% off`}</span>
           </>
         )}

@@ -1,21 +1,36 @@
-import { useNavigate } from 'react-router-dom';
-import { FaChevronRight } from 'react-icons/fa6';
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 
-import { Card, TableBody } from '@/components/common';
+import { TableBody } from '@/components/common';
 import { Input, Select } from '@/components/forms';
 import { GridIcon, TrashIcon } from '@/components/icons';
 
 import { ITableColumn } from '@/interfaces';
 
-import { useStyleStore } from '@/stores/vendor';
+// import { useStyleStore } from '@/stores/vendor';
 
 import styles from './Styles.module.scss';
+import { HttpService } from '@/services';
 
-const styleCreatePath = '/vendor/products/create/style/create';
+const subPath = '/vendor/products';
+
+interface IStyle {
+  _id: string;
+  name: string;
+  discount: number;
+  status: string;
+}
 
 export function Styles() {
   const navigate = useNavigate();
-  const { styles: productStyles } = useStyleStore();
+  const { productId } = useParams();
+
+  const [productStyles, setProductStyles] = useState<IStyle[]>([]);
+
+  const onEditClick = (id: string) => () => {
+    navigate(id);
+  };
+
   const stylesTableColumns: ITableColumn[] = [
     {
       title: 'Style Name',
@@ -58,7 +73,9 @@ export function Styles() {
       width: 250,
       cell: (row: any) => (
         <div className={styles.action}>
-          <button className={styles.button}>Edit</button>
+          <button className={styles.button} onClick={onEditClick(row._id)}>
+            Edit
+          </button>
           <span>
             <TrashIcon />
           </span>
@@ -67,12 +84,22 @@ export function Styles() {
     },
   ];
 
+  useEffect(() => {
+    HttpService.get(`/products/${productId}/style`).then(response => {
+      const { status, styles } = response;
+      if (status === 200) {
+        setProductStyles(styles);
+      } else {
+      }
+    });
+  }, []);
+
   return (
     <div className={styles.container}>
       <div className={styles.buttonBar}>
         <button
           className={styles.button}
-          onClick={() => navigate(styleCreatePath)}
+          onClick={() => navigate(`${subPath}/${productId}/style/create`)}
         >
           New
         </button>
