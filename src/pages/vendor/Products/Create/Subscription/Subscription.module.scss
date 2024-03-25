@@ -19,6 +19,8 @@
         @apply space-y-2;
 
         p {
+          @apply font-medium;
+
           .optional {
             @apply text-light;
           }

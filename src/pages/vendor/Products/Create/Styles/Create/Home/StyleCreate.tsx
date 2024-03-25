@@ -26,13 +26,17 @@ export function StyleCreate() {
     useContext(StyleCreateContext);
   const [currentAttrIndex, setCurrentAttrIndex] = useState(-1);
   const [currentValueIndex, setCurrentValueIndex] = useState(-1);
+  const [isDirty, setIsDirty] = useState(false);
+  // const [isAttr]
 
   const onCreateAttrClick = () => {
     setAttributes([...attributes, { name: '', values: [] }]);
+    setIsDirty(true);
   };
 
   const onStyleNameChange = (e: ChangeInputEvent) => {
     setStyleName(e.target.value);
+    setIsDirty(true);
   };
 
   const onAttrNameChange = (attrIndex: number) => (e: ChangeInputEvent) => {
@@ -43,6 +47,7 @@ export function StyleCreate() {
           : attribute,
       ),
     );
+    setIsDirty(true);
   };
 
   const onAddValueClick = (attrIndex: number) => () => {
@@ -59,11 +64,13 @@ export function StyleCreate() {
           : attribute,
       ),
     );
+    setIsDirty(true);
   };
 
   const onEditValueClick = (attrIndex: number, vIndex: number) => {
     setCurrentAttrIndex(attrIndex);
     setCurrentValueIndex(vIndex);
+    setIsDirty(true);
   };
 
   const onAttrValueChange =
@@ -80,6 +87,7 @@ export function StyleCreate() {
             : attribute,
         ),
       );
+      setIsDirty(true);
     };
 
   const onAttrValueBlur = () => {
@@ -89,16 +97,32 @@ export function StyleCreate() {
 
   const onNextClick = () => {
     if (styleId !== 'create') {
-      return navigate('attribute');
+      if (!isDirty) {
+        return navigate('attribute');
+      }
+      return HttpService.put(`/styles/${styleId}`, {
+        name: styleName,
+        attributes,
+      }).then(response => {
+        const { status } = response;
+        if (status === 200) {
+          enqueueSnackbar('Attributes saved!', { variant: 'success' });
+          return navigate('attribute');
+        }
+      });
     }
-    HttpService.post(`/products/${productId}/attribute`, {
-      name: styleName,
-      attributes,
-    }).then(response => {
-      const { status, attrId } = response;
+    HttpService.post(
+      `/styles`,
+      {
+        name: styleName,
+        attributes,
+      },
+      { productId },
+    ).then(response => {
+      const { status, styleId } = response;
       if (status === 200) {
         enqueueSnackbar('Attributes saved!', { variant: 'success' });
-        navigate(pathname.replace('create', `${attrId}/attribute`));
+        navigate(pathname.replace('create', `${styleId}/attribute`));
       }
     });
   };
@@ -111,15 +135,13 @@ export function StyleCreate() {
       setCurrentValueIndex(-1);
       return;
     }
-    HttpService.get(`/products/${productId}/style`, { styleId }).then(
-      response => {
-        const { status, style } = response;
-        if (status === 200) {
-          setAttributes(style.attributes || []);
-          setStyleName(style.name || '');
-        }
-      },
-    );
+    HttpService.get(`/styles/${styleId}`).then(response => {
+      const { status, style } = response;
+      if (status === 200) {
+        setAttributes(style.attributes || []);
+        setStyleName(style.name || '');
+      }
+    });
   }, [productId, styleId]);
 
   return (

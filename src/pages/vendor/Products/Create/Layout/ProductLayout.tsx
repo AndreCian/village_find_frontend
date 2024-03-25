@@ -89,10 +89,7 @@ export function ProductLayout() {
 
   useEffect(() => {
     if (productId === 'create') return;
-    HttpService.get(`/products/${productId}`, {
-      role: 'vendor',
-      id: productId,
-    }).then(response => {
+    HttpService.get(`/products/vendor/${productId}`).then(response => {
       const { status, product } = response;
       if (status === 200) {
         const { name } = product;

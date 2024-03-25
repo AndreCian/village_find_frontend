@@ -5,7 +5,7 @@
     @apply relative overflow-hidden rounded-md;
 
     img {
-      @apply aspect-auto w-full scale-125;
+      @apply aspect-[4/3] w-full scale-125;
     }
 
     .moreContext {

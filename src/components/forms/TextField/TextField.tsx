@@ -22,12 +22,14 @@ export interface ITextFieldProps {
 export function TextField({
   rows = 4,
   name = '',
+  value = '',
   placeholder = '',
   className = '',
   updateValue,
   rounded = 'small',
   border = 'solid',
   bgcolor = 'primary',
+  disabled = false,
   adornment,
   ...nativeAttrs
 }: ITextFieldProps) {
@@ -49,8 +51,10 @@ export function TextField({
       <textarea
         rows={rows}
         name={name}
+        value={value}
         placeholder={placeholder}
         onChange={updateValue}
+        disabled={disabled}
         {...nativeAttrs}
       />
       {adornment ? (

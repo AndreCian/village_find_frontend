@@ -1,14 +1,16 @@
 import React from 'react';
 
 export interface IRadioContext {
-  value: string;
+  value: string | string[];
   color: string;
+  multiple: boolean;
   updateValue: (_value: string) => void;
 }
 
 export const initialContext: IRadioContext = {
   value: '',
   color: 'primary',
+  multiple: false,
   updateValue: () => {},
 };
 

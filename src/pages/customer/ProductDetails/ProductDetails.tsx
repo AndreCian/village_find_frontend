@@ -11,24 +11,31 @@ import { HttpService } from '@/services';
 
 import styles from './ProductDetails.module.scss';
 
-interface IProductInfo {
+export interface IMoreDetail {
+  category?: string;
+  shortDesc: string;
+  longDesc: string;
+  disclaimer: string;
+  specifications: {
+    _id: string;
+    name: string;
+    value: string;
+  }[];
+  vendorStory?: string;
+}
+
+export interface IOrderDetail {
   name: string;
-  shopName: string;
-  community?: {
+  vendor: {
+    _id: string;
+    shopName: string;
+  };
+  community: {
+    _id: string;
     name: string;
     slug: string;
   };
-  price: number;
-  discount: number;
-  minimumCnt: number;
-  pricePerCnt: number;
-  isPersonalize: boolean;
-  custom?: {
-    text: string;
-    fee: number;
-  };
-  images: string[];
-  productStyles: {
+  styles: {
     _id: string;
     name: string;
     attributes: {
@@ -36,52 +43,74 @@ interface IProductInfo {
       name: string;
       values: string[];
     }[];
-    inventories: {
-      _id: string;
-      attrs: any;
-    }[];
+    discount?: number;
   }[];
+  inventories: {
+    _id: string;
+    attrs: object;
+    image: string;
+    price: number;
+  }[];
+  customization?: {
+    customText: string;
+    fee: number;
+  };
+  subscription?: {
+    frequency: string;
+    discount: number;
+    duration?: number;
+    startDate?: string;
+    endDate?: string;
+  };
+  soldByUnit: string;
+  deliveryTypes: string[];
 }
 
-const initialProductInfo: IProductInfo = {
+const initialMoreDetail: IMoreDetail = {
+  shortDesc: '',
+  longDesc: '',
+  disclaimer: '',
+  specifications: [],
+};
+
+const initialOrderDetail: IOrderDetail = {
   name: '',
-  shopName: '',
-  price: 0,
-  discount: 0,
-  minimumCnt: 0,
-  pricePerCnt: 0,
-  isPersonalize: false,
-  images: [],
-  productStyles: [],
+  vendor: {
+    _id: '',
+    shopName: '',
+  },
+  community: {
+    _id: '',
+    name: '',
+    slug: '',
+  },
+  styles: [],
+  inventories: [],
+  soldByUnit: '',
+  deliveryTypes: [],
 };
 
 export function ProductDetails() {
   const { id: productId } = useParams();
-  const [productInfo, setProductInfo] =
-    useState<IProductInfo>(initialProductInfo);
+  const [moreDetail, setMoreDetail] = useState<IMoreDetail>(initialMoreDetail);
+  const [orderDetail, setOrderDetail] =
+    useState<IOrderDetail>(initialOrderDetail);
 
   useEffect(() => {
     HttpService.get(`/products/customer/${productId}`).then(response => {
       const { status, product } = response;
       if (status === 200) {
-        setProductInfo({
-          ...product,
-          price: 0,
-          discount: 0,
-          minimumCnt: 0,
-          pricePerCnt: 0,
-          isPersonalize: !!product.customization,
-          images: [],
-          productStyles: product.styles,
-        });
+        const { more, order } = product;
+        setMoreDetail(more);
+        setOrderDetail(order);
       }
     });
   }, []);
 
   return (
     <Container className={styles.root}>
-      <ProductInfo {...productInfo} />
-      <ProductMoreDetail />
+      <ProductInfo {...orderDetail} />
+      <ProductMoreDetail {...moreDetail} />
       <AuthenticReviews />
     </Container>
   );

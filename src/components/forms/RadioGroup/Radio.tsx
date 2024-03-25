@@ -27,12 +27,13 @@ export function Radio({
     >
       <span
         className={
-          context.value === value
+          (context.multiple && Object.values(context.value).includes(value)) ||
+          (!context.multiple && context.value === value)
             ? clsx(
                 styles.radio,
                 styles.active,
                 size === 'small' ? styles.small : '',
-                context.color === 'secondary' ? styles.secondary : ''
+                context.color === 'secondary' ? styles.secondary : '',
               )
             : styles.radio
         }

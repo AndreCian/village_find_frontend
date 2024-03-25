@@ -1,53 +1,14 @@
-import { useMemo, useState } from 'react';
 import { FaMinus, FaPlus } from 'react-icons/fa6';
 import clsx from 'clsx';
 
 import { Button, Select } from '@/components/forms';
 import { TrashIcon } from '@/components/icons';
-import { PickDateDialog } from '@/components/customer/common';
+import { IOrder } from './MyCart';
+import { SERVER_URL } from '@/config/global';
 
 import styles from './CartItem.module.scss';
-import Logo from '/assets/customer/checkout/vendor1.png';
-import Image from '/assets/customer/checkout/product.png';
-
-type MarketType = 'Shipping' | 'Near By' | 'Subscription';
-
-interface ICartItemProps {
-  vendor: {
-    shopName: string;
-    logo: string;
-  };
-  orderId: number;
-  products: [
-    {
-      quantity: number;
-      product: {
-        name: string;
-        marketType: MarketType;
-        subscription?: {
-          frequency: string; // Weekly, Monthly
-          discount: number;
-          duration: number; // number of weeks
-          start_date: Date;
-          end_date: Date;
-        };
-        style?: {
-          name: string;
-          size: string;
-          color: string;
-        };
-        personalization?: {
-          fee: number;
-          message: string;
-        };
-        price: number;
-        soldUnit: string; // default - cnt
-        image: string;
-      };
-    },
-  ];
-  deliveryOptions: string[];
-}
+import { HttpService } from '@/services';
+import { enqueueSnackbar } from 'notistack';
 
 const initialFrequencies = [
   'Every month',
@@ -57,22 +18,15 @@ const initialFrequencies = [
 ];
 
 export function CartItem({
-  vendor,
   products,
   orderId,
+  shopName,
+  orderTotalPrice,
   deliveryOptions,
-}: ICartItemProps) {
-  const marketTypes = useMemo(() => {
-    return [...new Set(products.map((item: any) => item.marketType as string))];
-  }, [products]);
-
-  const subTotal = useMemo(() => {
-    return products.reduce(
-      (tot: number, item: any, index: number) =>
-        tot + item.price * item.quantity,
-      0,
-    );
-  }, [products]);
+}: IOrder) {
+  // const marketTypes = useMemo(() => {
+  //   return [...new Set(products.map((item: any) => item.marketType as string))];
+  // }, [products]);
 
   const formatDate = (date: Date) => {
     return date.toLocaleDateString('en-US', {
@@ -82,13 +36,45 @@ export function CartItem({
     });
   };
 
+  const onMinusClick = (product: any) => () => {
+    if (product.quantity === 0) return;
+    HttpService.put(`/cart/${product.cartId}`, {
+      quantity: product.quantity - 1,
+    }).then(response => {
+      const { status } = response;
+      if (status === 200) {
+        enqueueSnackbar('Quantity updated.', { variant: 'success' });
+      }
+    });
+  };
+
+  const onPlusClick = (product: any) => () => {
+    HttpService.put(`/cart/${product.cartId}`, {
+      quantity: product.quantity + 1,
+    }).then(response => {
+      const { status } = response;
+      if (status === 200) {
+        enqueueSnackbar('Quantity updated.', { variant: 'success' });
+      }
+    });
+  };
+
+  const onRemoveClick = (product: any) => () => {
+    HttpService.delete(`/cart/${product.cartId}`).then(response => {
+      const { status } = response;
+      if (status === 200) {
+        enqueueSnackbar('Product deleted in the cart.', { variant: 'success' });
+      }
+    });
+  };
+
   return (
     <div className={styles.root}>
       <div className={styles.header}>
         <div className={styles.vendor}>
-          <img src={vendor.logo || Logo} />
+          {/* <img src={`${SERVER_URL}/${shopLogoPath}`} /> */}
           <div className={styles.order}>
-            <p className={styles.name}>{vendor.shopName}</p>
+            <p className={styles.name}>{shopName}</p>
             <p className={styles.orderId}>
               Order ID: <span>{orderId}</span>
             </p>
@@ -96,25 +82,31 @@ export function CartItem({
         </div>
         <div className={styles.delivery}>
           <p className={styles.title}>Delivery Options</p>
-          <p className={styles.body}>{marketTypes.join(', ')}</p>
+          <p className={styles.body}></p>
         </div>
         <div className={styles.subtotal}>
           <p className={styles.title}>Subtotal</p>
-          <p className={styles.body}>${(subTotal || 0).toFixed(2)}</p>
+          <p className={styles.body}>${(orderTotalPrice || 0).toFixed(2)}</p>
         </div>
       </div>
       <div className={styles.products}>
-        {products.map(({ quantity, product }: any, index: number) => (
+        {products.map((product: any, index: number) => (
           <div key={index} className={styles.product}>
             <div className={styles.main}>
               <div className={styles.imageBar}>
-                <img src={product.image || Image} alt="The Product Image" />
+                <img
+                  src={`${SERVER_URL}/${product.image}`}
+                  alt="The Product Image"
+                />
                 <div className={styles.quantity}>
-                  <span className={styles.minus}>
+                  <span
+                    className={styles.minus}
+                    onClick={onMinusClick(product)}
+                  >
                     <FaMinus fill="#3F3F3F" />
                   </span>
-                  <p>{quantity}</p>
-                  <span className={styles.plus}>
+                  <p>{product.quantity}</p>
+                  <span className={styles.plus} onClick={onPlusClick(product)}>
                     <FaPlus fill="white" />
                   </span>
                 </div>
@@ -123,22 +115,21 @@ export function CartItem({
                 <div className={styles.heading}>
                   <p className={styles.title}>{product.name}</p>
                   <p className={styles.pricePerUnit}>
-                    Minimum {quantity} Bunch at $
-                    {(product.price || 0).toFixed(2)}/{product.soldUnit}
+                    Minimum 1 Bunch at ${(product.price || 0).toFixed(2)}/
+                    {product.soldByUnit}
                   </p>
                 </div>
                 <div className={styles.price}>
                   <p className={styles.title}>Price</p>
                   <p className={styles.body}>
                     $
-                    {(
-                      (product.price || 0) +
-                        (product.personalization &&
-                          product.personalization.fee) || 0
-                    ).toFixed(2)}
+                    {(product.price || 0)
+                      // (product.personalization &&
+                      //   product.personalization.fee) || 0
+                      .toFixed(2)}
                   </p>
                 </div>
-                {product.marketType === 'Shipping' ? (
+                {(product.deliveryTypes || []).includes('Shipping') && (
                   <div className={styles.shipping}>
                     <div className={styles.gift}>
                       <div className={styles.heading}>
@@ -161,18 +152,14 @@ export function CartItem({
                       </div>
                     </div>
                     <div className={styles.extra}>
-                      {product.style && (
-                        <div className={styles.style}>
-                          <p className={styles.size}>
-                            <span>Size: </span>
-                            {product.style.size}
+                      <div className={styles.style}>
+                        {product.attrModels.map((attribute: any) => (
+                          <p className={styles.attr} key={attribute._id}>
+                            <span>{attribute.name}: </span>
+                            {product.attrValues[attribute._id]}
                           </p>
-                          <p className={styles.color}>
-                            <span>Color: </span>
-                            {product.style.color}
-                          </p>
-                        </div>
-                      )}
+                        ))}
+                      </div>
                       {product.personalization && (
                         <div className={styles.personalization}>
                           <p className={styles.title}>Personalized: </p>
@@ -184,20 +171,21 @@ export function CartItem({
                       )}
                     </div>
                   </div>
-                ) : product.marketType === 'Subscription' ? (
+                )}
+                {/* {product.subscription && (
                   <div className={styles.subscription}>
                     <p className={styles.head}>Would you like to</p>
                     <div className={styles.body}>
                       <div className={styles.text}>
                         <span>Subscribed:</span>
-                        <p>{product.subscription.subscribed}</p>
+                        <p>{product.subscription?.subscribed}</p>
                       </div>
                       <div className={clsx(styles.text, styles.duration)}>
                         <span>Subscription Duration:</span>
                         <p>
                           {product.subscription.duration} weeks from{' '}
-                          {formatDate(product.subscription.start_date)} -{' '}
-                          {formatDate(product.subscription.end_date)}
+                          {formatDate(product.subscription.startDate)} -{' '}
+                          {formatDate(product.subscription.endDate)}
                         </p>
                       </div>
                       <div className={clsx(styles.text, styles.frequency)}>
@@ -207,21 +195,18 @@ export function CartItem({
                       <p className={styles.text}>
                         Your card will be charged{' '}
                         <span>
-                          {product.price *
-                            product.subscription.duration.toFixed(2)}{' '}
-                          every {product.subscription.frequency} weeks
+                          {product.price * product.subscription.duration} every{' '}
+                          {product.subscription.duration} weeks
                         </span>{' '}
                         or until cancelation
                       </p>
                     </div>
                   </div>
-                ) : (
-                  <></>
-                )}
+                )} */}
               </div>
             </div>
             <div className={styles.action}>
-              <p className={styles.removeBtn}>
+              <p className={styles.removeBtn} onClick={onRemoveClick(product)}>
                 Remove
                 <span>
                   <TrashIcon />
@@ -229,11 +214,14 @@ export function CartItem({
               </p>
               <div className={styles.pricing}>
                 <div className={styles.quantity}>
-                  <span className={styles.minus}>
+                  <span
+                    className={styles.minus}
+                    onClick={onMinusClick(product)}
+                  >
                     <FaMinus fill="#3F3F3F" />
                   </span>
-                  <p>{quantity}</p>
-                  <span className={styles.plus}>
+                  <p>{product.quantity}</p>
+                  <span className={styles.plus} onClick={onPlusClick(product)}>
                     <FaPlus fill="white" />
                   </span>
                 </div>
@@ -251,7 +239,7 @@ export function CartItem({
       <div className={styles.footer}>
         <p className={styles.title}>Delivery Options</p>
         <div className={styles.buttons}>
-          {['Shipping', 'Home Delivery', 'Pickup Location', 'Safe Pickup'].map(
+          {/* {['Shipping', 'Home Delivery', 'Pickup Location', 'Safe Pickup'].map(
             (item: string, index: number) => (
               <Button
                 key={index}
@@ -263,7 +251,7 @@ export function CartItem({
                 {item}
               </Button>
             ),
-          )}
+          )} */}
         </div>
       </div>
     </div>

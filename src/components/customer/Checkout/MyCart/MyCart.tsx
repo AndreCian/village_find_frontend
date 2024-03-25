@@ -78,21 +78,24 @@ interface IMyCartProps {
   onNextStep: () => void;
 }
 
-interface ICartItem {
-  vendor: {
-    shopName: string;
-    logo: string;
-  };
+interface IProduct {}
+
+export interface IOrder {
+  orderId: number;
+  shopName: string;
+  orderTotalPrice: number;
+  deliveryOptions: [];
+  products: IProduct[];
 }
 
 export function MyCart({ isLogin, onNextStep }: IMyCartProps) {
-  const [cartItems, setCartItems] = useState<ICartItem[]>([]);
+  const [orders, setOrders] = useState<IOrder[]>([]);
 
   useEffect(() => {
     HttpService.get('/cart').then(response => {
-      const { status, cartItems } = response;
+      const { status, orders } = response;
       if (status === 200) {
-        setCartItems(cartItems);
+        setOrders(orders);
       }
     });
   }, []);
@@ -102,13 +105,8 @@ export function MyCart({ isLogin, onNextStep }: IMyCartProps) {
       <div className={styles.cart}>
         <p className={styles.title}>My Cart</p>
         <div className={styles.cartItemList}>
-          {cartItems.map((cartItem: any, index: number) => (
-            <CartItem
-              key={index}
-              {...cartItem}
-              orderId={index + 1}
-              deliveryOptions={[]}
-            />
+          {orders.map((order: IOrder) => (
+            <CartItem key={order.orderId} {...order} deliveryOptions={[]} />
           ))}
         </div>
       </div>

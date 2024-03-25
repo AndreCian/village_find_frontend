@@ -43,11 +43,15 @@
 .action {
   @apply flex gap-x-6;
 
-  .button {
-    @apply rounded-full bg-dark px-7 py-2 text-white;
-  }
-
   span {
-    @apply flex h-10 w-10 items-center justify-center rounded-full border border-primary bg-warning;
+    @apply flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-primary bg-warning;
   }
+}
+
+.button {
+  @apply rounded-full bg-dark px-7 py-2 text-white;
+}
+
+.discountCell {
+  @apply flex items-center gap-x-2;
 }

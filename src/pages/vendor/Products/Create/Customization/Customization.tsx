@@ -12,18 +12,23 @@ import styles from './Customization.module.scss';
 const subPath = '/vendor/products';
 
 interface ICustomization {
-  customText: string;
-  fee: Number;
+  customText?: string;
+  fee?: Number;
 }
+
+const initialCustomization: ICustomization = {
+  customText: '',
+  fee: 0,
+};
 
 export function Customization() {
   const navigate = useNavigate();
   const { productId } = useParams();
 
-  const [customization, setCustomization] = useState<ICustomization>({
-    customText: '',
-    fee: 0,
-  });
+  const [isActivated, setIsActivated] = useState(false);
+  const [customization, setCustomization] = useState<ICustomization | null>(
+    null,
+  );
 
   const onUpdateClick = () => {
     HttpService.post(
@@ -42,14 +47,22 @@ export function Customization() {
   };
 
   const onCustomChange = (e: ChangeInputEvent) => {
-    setCustomization({ ...customization, [e.target.name]: e.target.value });
+    setCustomization({
+      ...(customization || {}),
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const onActivateClick = () => {
+    setIsActivated(!isActivated);
   };
 
   useEffect(() => {
     HttpService.get(`/products/${productId}/customization`).then(response => {
       const { status, customization } = response;
       if (status === 200) {
-        setCustomization(customization);
+        if (customization) setIsActivated(true);
+        setCustomization(customization || initialCustomization);
       }
     });
   }, []);
@@ -59,8 +72,13 @@ export function Customization() {
       <div className={styles.form}>
         <div className={styles.control}>
           <p>Add Product Customization</p>
-          <button className={styles.button}>
-            <Radio label="Activate" className={styles.btnRadio} />
+          <button
+            className={clsx(styles.button, {
+              [styles.buttonChecked]: isActivated,
+            })}
+            onClick={onActivateClick}
+          >
+            <Radio label="Activate" className={styles.radio} />
           </button>
         </div>
         <div className={styles.control}>
@@ -71,8 +89,9 @@ export function Customization() {
             border="none"
             bgcolor="secondary"
             placeholder="Share how to customize"
-            value={customization.customText}
+            value={isActivated ? customization?.customText : ''}
             updateValue={onCustomChange}
+            disabled={!isActivated}
           />
         </div>
         <div className={styles.control}>
@@ -89,8 +108,9 @@ export function Customization() {
               content: '$',
             }}
             className={styles.feeInput}
-            value={customization.fee}
+            value={customization?.fee}
             updateValue={onCustomChange}
+            disabled={!isActivated}
           />
         </div>
       </div>

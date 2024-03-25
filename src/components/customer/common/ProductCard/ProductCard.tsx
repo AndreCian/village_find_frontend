@@ -47,9 +47,7 @@ export function ProductCard({
       onClick={navigateToDetail}
     >
       <div className={styles.image}>
-        <object data={`${SERVER_URL}/${image}`} type="image/png">
-          <img src={image || FallbackImage} alt="Fallback image" />
-        </object>
+        <img src={`${SERVER_URL}/${image}`} alt="Product image" />
         {isLoadMore && (
           <p className={styles.moreContext}>
             Load More

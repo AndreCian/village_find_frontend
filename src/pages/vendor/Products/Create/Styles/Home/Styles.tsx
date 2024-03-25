@@ -1,16 +1,15 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { enqueueSnackbar } from 'notistack';
 
 import { TableBody } from '@/components/common';
 import { Input, Select } from '@/components/forms';
 import { GridIcon, TrashIcon } from '@/components/icons';
 
-import { ITableColumn } from '@/interfaces';
-
-// import { useStyleStore } from '@/stores/vendor';
+import { ChangeInputEvent, ITableColumn } from '@/interfaces';
+import { HttpService } from '@/services';
 
 import styles from './Styles.module.scss';
-import { HttpService } from '@/services';
 
 const subPath = '/vendor/products';
 
@@ -31,6 +30,28 @@ export function Styles() {
     navigate(id);
   };
 
+  const onDiscountChange = (id: string) => (e: ChangeInputEvent) => {
+    setProductStyles(
+      productStyles.map((style: IStyle) =>
+        style._id === id
+          ? { ...style, discount: Number(e.target.value) }
+          : style,
+      ),
+    );
+  };
+
+  const onDiscountUpdateClick = (styleId: string) => () => {
+    const style = productStyles.find((style: IStyle) => style._id === styleId);
+    HttpService.put(`/styles/${styleId}/discount`, {
+      discount: style?.discount || 0,
+    }).then(response => {
+      const { status } = response;
+      if (status === 200) {
+        enqueueSnackbar('Discount updated!', { variant: 'success' });
+      }
+    });
+  };
+
   const stylesTableColumns: ITableColumn[] = [
     {
       title: 'Style Name',
@@ -48,15 +69,26 @@ export function Styles() {
       name: 'discount',
       width: 400,
       cell: (row: any) => (
-        <Input
-          rounded="full"
-          placeholder="Discount"
-          adornment={{
-            position: 'right',
-            content: '%',
-          }}
-          className={styles.discount}
-        />
+        <div className={styles.discountCell}>
+          <Input
+            type="number"
+            rounded="full"
+            placeholder="Discount"
+            adornment={{
+              position: 'right',
+              content: '%',
+            }}
+            className={styles.discount}
+            value={row.discount}
+            updateValue={onDiscountChange(row._id)}
+          />
+          <button
+            className={styles.button}
+            onClick={onDiscountUpdateClick(row._id)}
+          >
+            Update
+          </button>
+        </div>
       ),
     },
     {
@@ -85,11 +117,10 @@ export function Styles() {
   ];
 
   useEffect(() => {
-    HttpService.get(`/products/${productId}/style`).then(response => {
+    HttpService.get('/styles/vendor', { productId }).then(response => {
       const { status, styles } = response;
       if (status === 200) {
         setProductStyles(styles);
-      } else {
       }
     });
   }, []);

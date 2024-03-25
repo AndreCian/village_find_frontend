@@ -3,7 +3,6 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { enqueueSnackbar } from 'notistack';
 import clsx from 'clsx';
 
-import { Card } from '@/components/common';
 import {
   Radio,
   RadioGroup,
@@ -28,23 +27,23 @@ type TopicType =
 
 interface IProductGeneralInfo {
   name: string;
-  payment: PayType;
+  deliveryTypes: PayType[];
   category: string;
   shortDesc: string;
   longDesc: string;
   disclaimer: string;
-  unit: string;
+  soldByUnit: string;
   tax: number;
 }
 
 const initialInfo: IProductGeneralInfo = {
   name: '',
-  payment: 'Shipping',
+  deliveryTypes: [],
   category: '',
   shortDesc: '',
   longDesc: '',
   disclaimer: '',
-  unit: '',
+  soldByUnit: '',
   tax: 0,
 };
 
@@ -87,17 +86,62 @@ export function General() {
     setNutrition(e.target.files[0]);
   };
 
+  const onDeliveryTypeChange = (value: string) => {
+    const deliveryTypes = generalInfo.deliveryTypes;
+    const isExist = deliveryTypes.includes(value as PayType);
+    if (isExist) {
+      setGeneralInfo({
+        ...generalInfo,
+        deliveryTypes: deliveryTypes.filter(item => (item as string) !== value),
+      });
+      return;
+    }
+    if (
+      (value === 'Shipping' && deliveryTypes.includes('Local Subscriptions')) ||
+      (value === 'Local Subscriptions' && deliveryTypes.includes('Shipping'))
+    )
+      return;
+    setGeneralInfo({
+      ...generalInfo,
+      deliveryTypes: [...deliveryTypes, value as PayType],
+    });
+  };
+
   const onCancelClick = () => {
     navigate('/vendor/products');
   };
 
   const onSubmitClick = () => {
     const formData = new FormData();
-    Object.keys(generalInfo).forEach((key: string) => {
-      formData.append(key, (generalInfo as any)[key]);
-    });
+    formData.append('name', generalInfo.name);
+    formData.append('category', generalInfo.category);
+    formData.append('deliveryTypes', JSON.stringify(generalInfo.deliveryTypes));
+    formData.append('shortDesc', generalInfo.shortDesc);
+    formData.append('longDesc', generalInfo.longDesc);
+    formData.append('disclaimer', generalInfo.disclaimer);
+    formData.append('soldByUnit', generalInfo.soldByUnit);
+    formData.append('tax', `${generalInfo.tax}`);
     if (nutrition) formData.append('nutrition', nutrition);
-    HttpService.post('/products', formData).then(response => {});
+
+    if (productId === 'create') {
+      HttpService.post('/products', formData).then(response => {
+        const { status } = response;
+        if (status === 200) {
+          enqueueSnackbar('One product added.', { variant: 'success' });
+        } else {
+          enqueueSnackbar('Something went wrong!', { variant: 'error' });
+        }
+      });
+      return;
+    }
+    HttpService.put(`/products/${productId}`, formData).then(response => {
+      const { status } = response;
+      if (status === 200) {
+        enqueueSnackbar('Product updated!', { variant: 'success' });
+      } else {
+        enqueueSnackbar('Something went wrong!', { variant: 'error' });
+      }
+    });
   };
 
   useEffect(() => {
@@ -113,14 +157,12 @@ export function General() {
 
   useEffect(() => {
     if (productId === 'create') return;
-    HttpService.get(`/products/${productId}`, { role: 'vendor' }).then(
-      response => {
-        const { status, product } = response;
-        if (status === 200) {
-          setGeneralInfo(product);
-        }
-      },
-    );
+    HttpService.get(`/products/vendor/${productId}`).then(response => {
+      const { status, product } = response;
+      if (status === 200) {
+        setGeneralInfo(product);
+      }
+    });
   }, [productId]);
 
   return (
@@ -130,10 +172,9 @@ export function General() {
           <div className={styles.variant}>
             <div className={styles.paytype}>
               <RadioGroup
-                value={generalInfo.payment}
-                updateValue={(value: string) =>
-                  setGeneralInfo({ ...generalInfo, payment: value as PayType })
-                }
+                multiple={true}
+                value={generalInfo.deliveryTypes}
+                updateValue={onDeliveryTypeChange}
               >
                 {['Shipping', 'Near By', 'Local Subscriptions'].map(
                   (type: string) => (
@@ -141,14 +182,11 @@ export function General() {
                       key={type}
                       className={clsx(
                         styles.radioPanel,
-                        generalInfo.payment === type ? styles.active : '',
+                        generalInfo.deliveryTypes.includes(type as PayType)
+                          ? styles.active
+                          : '',
                       )}
-                      onClick={() =>
-                        setGeneralInfo({
-                          ...generalInfo,
-                          payment: type as PayType,
-                        })
-                      }
+                      onClick={() => onDeliveryTypeChange(type)}
                     >
                       <Radio
                         value={type}
@@ -267,7 +305,8 @@ export function General() {
                 rounded="full"
                 border="none"
                 bgcolor="primary"
-                placeholder="Sold By Units"
+                placeholder="unit"
+                value={generalInfo.soldByUnit}
               />
             </div>
             <div className={styles.control}>

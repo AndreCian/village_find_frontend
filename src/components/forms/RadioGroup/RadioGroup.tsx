@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import clsx from 'clsx';
 
 import { RadioContext } from './RadioContext';
@@ -6,18 +6,20 @@ import { RadioContext } from './RadioContext';
 import styles from './RadioGroup.module.scss';
 
 export interface IRadioGroupProps {
-  value?: string;
+  value?: string | string[];
+  updateValue?: (_value: string) => void;
   color?: string;
   className?: string;
-  updateValue?: (_value: string) => void;
+  multiple?: boolean;
   children: React.ReactNode;
 }
 
 export function RadioGroup({
   value = '',
+  updateValue = () => {},
   color = 'primary',
   className = '',
-  updateValue = () => {},
+  multiple = true,
   children,
 }: IRadioGroupProps) {
   return (
@@ -25,6 +27,7 @@ export function RadioGroup({
       value={{
         value,
         color,
+        multiple,
         updateValue,
       }}
     >

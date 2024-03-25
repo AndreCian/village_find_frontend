@@ -17,8 +17,8 @@ const subPath = '/vendor/products';
 
 export function Attributes() {
   const navigate = useNavigate();
-  const { productId, styleId } = useParams();
-  const { styleName, attributes, setAttributes } =
+  const { styleId, productId } = useParams();
+  const { styleName, setStyleName, attributes, setAttributes } =
     useContext(StyleCreateContext);
 
   const [rows, setRows] = useState<any[]>([]);
@@ -161,9 +161,7 @@ export function Attributes() {
   );
 
   const onUpdateClick = () => {
-    HttpService.post(`/products/${productId}/inventory`, rows, {
-      styleId,
-    }).then(response => {
+    HttpService.put(`/styles/${styleId}/inventory`, rows).then(response => {
       const { status, ids } = response;
       if (status === 200) {
         const imageWithIDs = new FormData();
@@ -174,57 +172,55 @@ export function Attributes() {
             imageWithIDs.append('images', image);
           }
         });
-        imageWithIDs.append('ids', JSON.stringify(liveIDs));
-        console.log(imageWithIDs);
-        HttpService.post(`/products/${productId}/style/image`, imageWithIDs, {
+        imageWithIDs.append('inventIDs', JSON.stringify(liveIDs));
+
+        HttpService.put(`/inventories/image`, imageWithIDs, {
           styleId,
         }).then(response => {
           const { status } = response;
           if (status === 200) {
-            navigate(`${subPath}/${productId}/style`);
-            enqueueSnackbar('Style added successfully!', {
+            enqueueSnackbar('Inventories saved.', {
               variant: 'success',
             });
+              navigate(`${subPath}/${productId}/style`);
           } else if (status === 404) {
             navigate(`${subPath}`);
             enqueueSnackbar('Product is not valid!', { variant: 'warning' });
           }
         });
       }
-      console.log(ids);
     });
   };
 
   useEffect(() => {
-    HttpService.get(`/products/${productId}/style`, { styleId }).then(
-      response => {
-        const { status, style } = response;
-        if (status === 200) {
-          const { attributes, inventories } = style;
-          setAttributes(attributes);
-          if (inventories.length === 0) {
-            const subRows = getSubRows(attributes, 0, { attrs: {} }).map(
-              (row: any, index: number) => ({
-                ...row,
-                id: index,
-                inventory: 0,
-                price: 0,
-              }),
-            );
-            setRows(subRows);
-            setImages(Array(subRows.length).fill(null));
-          } else {
-            setRows(
-              inventories.map((inventory: any, index: number) => ({
-                ...inventory,
-                id: index,
-              })),
-            );
-            setImages(Array(inventories.length).fill(null));
-          }
+    HttpService.get(`/styles/${styleId}`).then(response => {
+      const { status, style } = response;
+      if (status === 200) {
+        const { name, attributes, inventories } = style;
+        setStyleName(name);
+        setAttributes(attributes);
+        if (inventories.length === 0) {
+          const subRows = getSubRows(attributes, 0, { attrs: {} }).map(
+            (row: any, index: number) => ({
+              ...row,
+              id: index,
+              inventory: 0,
+              price: 0,
+            }),
+          );
+          setRows(subRows);
+          setImages(Array(subRows.length).fill(null));
+        } else {
+          setRows(
+            inventories.map((inventory: any, index: number) => ({
+              ...inventory,
+              id: index,
+            })),
+          );
+          setImages(Array(inventories.length).fill(null));
         }
-      },
-    );
+      }
+    });
   }, []);
 
   return (

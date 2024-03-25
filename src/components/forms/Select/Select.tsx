@@ -40,6 +40,7 @@ export function Select({
 }: ISelectProps) {
   const [anchor, setAnchor] = useState<boolean>(false);
   const currentName = useMemo(() => {
+    if (disabled) return placeholder;
     const currentOption = options.find(item =>
       typeof item === 'object'
         ? item.value.toLowerCase() === value?.toLowerCase()
@@ -97,13 +98,16 @@ export function Select({
 
   return (
     <div className={classes} ref={selectRef}>
-      <div className={styles.selectBox} onClick={() => setAnchor(!anchor)}>
-        <span className={clsx({ [styles.placeholder]: !value })}>
+      <div
+        className={styles.selectBox}
+        onClick={() => !disabled && setAnchor(!anchor)}
+      >
+        <span className={clsx({ [styles.placeholder]: !value || disabled })}>
           {currentName}
         </span>
         {anchor ? <FaChevronUp /> : <FaChevronDown />}
       </div>
-      {anchor && options.length !== 0 && (
+      {anchor && !disabled && options.length !== 0 && (
         <div className={styles.viewBox}>
           {options.map(
             (
@@ -117,7 +121,11 @@ export function Select({
                     typeof option === 'object' ? option.value : option,
                   )
                 }
-                className={option === value ? styles.activeItem : ''}
+                className={
+                  option === value || (option as any).value === value
+                    ? styles.activeItem
+                    : ''
+                }
               >
                 {typeof option === 'object' ? option.name : option}
               </span>

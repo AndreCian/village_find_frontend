@@ -17,10 +17,14 @@
     @apply flex gap-2.5 xl:col-span-3;
 
     .smallImages {
-      @apply flex flex-col gap-2.5;
+      @apply flex max-w-[84px] flex-col gap-2.5;
 
       img {
-        @apply w-full;
+        @apply w-full rounded-sm opacity-30;
+      }
+
+      img.active {
+        @apply opacity-100;
       }
     }
 
@@ -47,7 +51,7 @@
 
       .realPrice {
         .totalPrice {
-          @apply text-[13px] leading-[18px] line-through;
+          @apply text-[13px] leading-[18px] text-warning line-through;
         }
 
         .discount {
@@ -97,13 +101,11 @@
     .personalization {
       @apply flex items-center justify-between;
 
-      .personalSelect {
-        div {
-          @apply bg-[#F5F5F5] px-2.5 py-1 text-[16px] font-bold leading-[25px];
-        }
+      .dropdown {
+        @apply flex items-center gap-x-2 rounded-full bg-[#F5F5F5] px-2.5 py-1 text-[16px] font-bold leading-[25px];
       }
 
-      p {
+      > p {
         @apply text-[13px] leading-[18px];
 
         span {
@@ -122,8 +124,24 @@
       .msgInput {
         @apply flex flex-col items-end;
 
-        .letters {
-          @apply text-[8px] leading-[12px] text-primary;
+        .dangerMessage {
+          @apply border-red-500;
+        }
+
+        .alerts {
+          @apply flex w-full justify-end;
+
+          .invalidLength {
+            @apply text-[11px] leading-[15px] text-red-500;
+          }
+
+          .letterLength {
+            @apply text-[8px] leading-[12px] text-primary;
+          }
+        }
+
+        .warning {
+          @apply justify-between;
         }
       }
     }
@@ -141,7 +159,7 @@
 
       .minus,
       .plus {
-        @apply flex h-10 w-10 items-center justify-center rounded-md border-1 border-primary;
+        @apply flex h-10 w-10 cursor-pointer items-center justify-center rounded-md border-1 border-primary;
       }
 
       .plus {
@@ -155,6 +173,26 @@
 
     .addToCartBtn {
       @apply w-full bg-dark py-2 text-[16px] font-semibold leading-[25px];
+    }
+
+    .local {
+      @apply flex flex-col gap-y-2;
+
+      .header {
+        @apply text-base font-bold;
+      }
+
+      p {
+        @apply text-[13px] font-bold leading-[18px];
+
+        span {
+          @apply font-normal;
+        }
+      }
+
+      .concern span {
+        @apply underline;
+      }
     }
   }
 }

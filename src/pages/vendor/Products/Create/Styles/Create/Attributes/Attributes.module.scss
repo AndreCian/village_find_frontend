@@ -42,7 +42,7 @@
     @apply mt-1 gap-y-1 rounded-md px-0 py-2;
 
     span {
-      @apply px-2 py-0.5 text-left text-[13px] leading-[18px] hover:rounded-sm hover:font-medium;
+      @apply px-2 py-0.5 text-left text-[13px] leading-[18px] hover:rounded-sm;
     }
   }
 }

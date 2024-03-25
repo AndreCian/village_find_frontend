@@ -1,34 +1,59 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { enqueueSnackbar } from 'notistack';
 
 import { Card, TableBody } from '@/components/common';
 import { Input, Select } from '@/components/forms';
 import { TrashIcon } from '@/components/icons';
 
-// import { useProductStore } from '@/stores/vendor/product';
-
-import { ITableColumn } from '@/interfaces';
 import { HttpService } from '@/services';
+import { ITableColumn } from '@/interfaces';
+import { SERVER_URL } from '@/config/global';
+import { capitalizeFirstLetter } from '@/utils';
 
 import styles from './Products.module.scss';
 
 interface IProductItem {
+  _id: string;
   name: string;
   sku?: string;
   inventory?: string;
   status: string;
 }
 
+const statusList = ['Active', 'Inactive', 'Delete'];
+
 export function Products() {
   const navigate = useNavigate();
-  // const { products } = useProductStore();
   const [products, setProducts] = useState<IProductItem[]>([]);
+
+  const onStatusChange = (productId: string) => (value: string) => {
+    HttpService.put(`/products/${productId}`, { status: value }).then(
+      response => {
+        const { status } = response;
+        if (status === 200) {
+          enqueueSnackbar(
+            `Product status changed to ${capitalizeFirstLetter(value)}.`,
+            { variant: 'success' },
+          );
+          setProducts(
+            products.map((product: IProductItem) =>
+              product._id === productId
+                ? { ...product, status: value }
+                : product,
+            ),
+          );
+        }
+      },
+    );
+  };
 
   const productsTableColumns: ITableColumn[] = [
     {
       title: 'Image',
       name: 'image',
       width: 100,
+      cell: (row: any) => <img src={`${SERVER_URL}/${row.image}`} />,
     },
     {
       title: 'Product Name',
@@ -65,8 +90,13 @@ export function Products() {
           rounded="full"
           bgcolor="white"
           border="solid"
-          value={row.status}
           className={styles.statusSelect}
+          options={statusList.map(item => ({
+            name: item,
+            value: item.toLowerCase(),
+          }))}
+          value={row.status.toLowerCase()}
+          updateValue={onStatusChange(row._id)}
         />
       ),
     },

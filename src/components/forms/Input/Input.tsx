@@ -53,6 +53,7 @@ export const Input = forwardRef((props: IInputProps, ref: any) => {
     select = 'text',
     className = '',
     value = '',
+    disabled = false,
     adornment = null,
     defaultValue = '',
     updateValue = () => {},
@@ -91,7 +92,8 @@ export const Input = forwardRef((props: IInputProps, ref: any) => {
       <input
         name={name}
         type={type}
-        value={value}
+        value={disabled ? '' : value}
+        disabled={disabled}
         placeholder={placeholder}
         className={styles.input}
         onChange={updateValue}
