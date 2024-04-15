@@ -29,7 +29,7 @@ export function Navbar() {
     },
     {
       title: 'Subscriptions',
-      path: '/communities',
+      path: '/market?type=subscription',
     },
     {
       title: 'About',

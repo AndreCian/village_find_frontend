@@ -1,5 +1,5 @@
 .root {
-  @apply flex flex-col items-center space-y-20 py-10 xl:py-20;
+  @apply flex flex-col space-y-20 py-10 xl:py-20;
 
   .head {
     @apply max-w-[650px];
@@ -24,7 +24,7 @@
       @apply flex w-full gap-x-4 overflow-x-auto pb-2;
 
       .shopvcom {
-        @apply flex w-[90%] shrink-0 gap-x-2 rounded-lg p-2 hover:shadow-md md:w-[50%] xl:w-[30%];
+        @apply flex w-[90%] shrink-0 cursor-pointer items-center gap-x-2 rounded-lg p-2 hover:shadow-md md:w-[50%] xl:w-[30%];
 
         img {
           @apply aspect-square h-full;

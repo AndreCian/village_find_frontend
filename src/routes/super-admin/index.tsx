@@ -1,4 +1,4 @@
-import { Outlet } from 'react-router-dom';
+import { Navigate, Outlet } from 'react-router-dom';
 
 import {
   DashboardIcon,
@@ -45,6 +45,11 @@ import { VillageCommunity, VillageEdit } from '@/pages/super-admin/Communities';
 import { Transactions } from '@/pages/super-admin/Financials';
 
 export const superAdminRoutes = [
+  {
+    index: true,
+    element: <Navigate to="dashboard" />,
+    hide: true,
+  },
   {
     title: 'Dashboard',
     path: 'dashboard',

@@ -2,6 +2,9 @@ import { Container } from '@/components/layout/customer';
 
 import ShopVComImage from '/assets/customer/backs/shopvcom.png';
 import styles from './VCommunities.module.scss';
+import { useEffect, useState } from 'react';
+import { HttpService } from '@/services';
+import { Link, useNavigate } from 'react-router-dom';
 
 const initialCommunities = [
   {
@@ -30,7 +33,26 @@ const initialCommunities = [
   },
 ];
 
+interface ICommunity {
+  name: string;
+  slug: string;
+  images: {
+    logoUrl: string;
+    backgroundUrl: string;
+  };
+  shortDesc: string;
+}
+
 export function VCommunities() {
+  const navigate = useNavigate();
+  const [communities, setCommunities] = useState<ICommunity[]>([]);
+
+  useEffect(() => {
+    HttpService.get('/communities').then(response => {
+      setCommunities(response || []);
+    });
+  }, []);
+
   return (
     <Container className={styles.root}>
       <div className={styles.head}>
@@ -45,14 +67,18 @@ export function VCommunities() {
       <div className={styles.container}>
         <p className={styles.title}>Shop Vendor Communities</p>
         <div className={styles.communities}>
-          {initialCommunities.map((community: any, index: number) => (
-            <div key={`shop-v-com-${index}`} className={styles.shopvcom}>
-              <img src={community.image} />
+          {communities.map((community: ICommunity, index: number) => (
+            <div
+              key={`shop-v-com-${index}`}
+              className={styles.shopvcom}
+              onClick={() => navigate(`/communities/${community.slug}`)}
+            >
+              <img src={community.images.logoUrl} />
               <div className={styles.vcomText}>
                 <p className={styles.name}>{community.name}</p>
-                <span className={styles.detail}>{community.detail}</span>
+                <span className={styles.detail}>{community.shortDesc}</span>
                 <p className={styles.catLabel}>Category</p>
-                <span className={styles.category}>{community.category}</span>
+                <span className={styles.category}>{}</span>
               </div>
             </div>
           ))}

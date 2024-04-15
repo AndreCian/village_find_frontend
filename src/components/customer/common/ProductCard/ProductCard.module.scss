@@ -1,5 +1,5 @@
 .root {
-  @apply relative flex max-w-[300px] cursor-pointer flex-col gap-y-2 rounded-md p-2 hover:shadow-lg;
+  @apply relative flex w-full max-w-[300px] cursor-pointer flex-col gap-y-2 rounded-md p-2 hover:shadow-lg;
 
   .image {
     @apply relative overflow-hidden rounded-md;
