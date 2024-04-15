@@ -37,7 +37,7 @@ export function DashPage({ title, subtitle, images }: IDashPageProps) {
 
   const onSearchDown = (e: any) => {
     if (e.keyCode === 13) {
-      navigate('/market');
+      navigate(`/market?search=${search}`);
     }
   };
 

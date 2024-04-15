@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState, MouseEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 
 import {
   FaMagnifyingGlass,
@@ -32,6 +32,9 @@ export function Header({
   switchToScreen = () => {},
 }: IHeaderProps) {
   const navigate = useNavigate();
+  const location = useLocation();
+  const pathname = location.pathname;
+  const [searchParams, setSearchParams] = useSearchParams();
 
   // const shopLoc: string = 'Waterbury';
   // const shopZipcode: string = '06705';
@@ -47,6 +50,7 @@ export function Header({
   const [categories, setCategories] = useState<{ _id: string; name: string }[]>(
     [],
   );
+  const [search, setSearch] = useState('');
   const [zipcodeInput, setZipcodeInput] = useState('');
   const [_, breakpoint] = useWindowWidth();
 
@@ -92,6 +96,17 @@ export function Header({
   const onZipcodeInputKeydown = (e: KeyboardEvent) => {
     if (e.keyCode === 13) {
       changeZipcode(zipcodeInput);
+    }
+  };
+
+  const onSearchKeyDown = (e: KeyboardEvent) => {
+    if (e.keyCode === 13) {
+      if (pathname === '/market') {
+        searchParams.set('search', search);
+        setSearchParams(searchParams);
+      } else {
+        navigate(`/market?search=${search}`);
+      }
     }
   };
 
@@ -148,6 +163,9 @@ export function Header({
               position: 'right',
               content: <MagnifierIcon />,
             }}
+            value={search}
+            updateValue={(e: ChangeInputEvent) => setSearch(e.target.value)}
+            onKeyDown={onSearchKeyDown}
           />
         </div>
         {isLogin ? (
