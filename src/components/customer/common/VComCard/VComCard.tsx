@@ -27,10 +27,12 @@ export function VComCard({
 
   return (
     <div className={styles.root}>
-      <img
-        alt="Community background image"
-        src={`${SERVER_URL}/${backImage}`}
-      />
+      <div className={styles.imgwrapper}>
+        <img
+          alt="Community background image"
+          src={`${SERVER_URL}/${backImage}`}
+        />
+      </div>
       <div className={styles.community}>
         <div className={styles.image}>
           <img

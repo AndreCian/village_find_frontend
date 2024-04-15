@@ -29,6 +29,15 @@
 
   .statusSelector {
     @apply w-fit min-w-0 text-base;
+    > div:nth-child(1) {
+      @apply bg-primary;
+      * {
+        @apply text-dark;
+      }
+    }
+    > div:nth-child(2) {
+      @apply max-w-[250px];
+    }
   }
 
   .actionCell {

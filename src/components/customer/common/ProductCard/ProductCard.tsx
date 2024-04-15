@@ -1,12 +1,13 @@
 import clsx from 'clsx';
+import { useNavigate } from 'react-router-dom';
 import { FaChevronRight } from 'react-icons/fa6';
 
 import { SERVER_URL } from '@/config/global';
 
 import styles from './ProductCard.module.scss';
-import FallbackImage from '/assets/customer/backs/about.png';
 
 interface IProduct {
+  _id: string;
   image: string;
   shopName: string;
   name: string;
@@ -20,7 +21,6 @@ export interface IProductCardProps {
   isLoadMore?: boolean;
   isActive?: boolean;
   className?: string;
-  navigateToDetail: () => void;
 }
 
 const tagClass = {
@@ -32,10 +32,10 @@ export function ProductCard({
   isLoadMore = false,
   isActive = false,
   className = '',
-  navigateToDetail = () => {},
   product,
 }: IProductCardProps) {
-  const { image, name, shopName, price, totprice, tags } = product;
+  const { _id, image, name, shopName, price, totprice, tags } = product;
+  const navigate = useNavigate();
 
   return (
     <div
@@ -44,7 +44,7 @@ export function ProductCard({
         isActive || isLoadMore ? styles.active : '',
         className,
       )}
-      onClick={navigateToDetail}
+      onClick={() => navigate(`/product-detail/${_id}`)}
     >
       <div className={styles.image}>
         <img src={`${SERVER_URL}/${image}`} alt="Product image" />

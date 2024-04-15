@@ -9,14 +9,14 @@
 
   .store,
   .images {
-    @apply space-y-6;
+    @apply flex flex-col gap-y-6;
   }
 
   .form {
     @apply space-y-4;
 
     & > p,
-    & > .control p {
+    & .control p {
       @apply font-medium;
     }
 
@@ -41,5 +41,9 @@
     .desc {
       @apply w-full;
     }
+  }
+
+  .updateBtn {
+    @apply self-end rounded-full bg-dark px-6 py-2 text-xs text-white;
   }
 }

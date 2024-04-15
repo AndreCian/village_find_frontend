@@ -1,12 +1,13 @@
-import { ChangeEvent, useState } from 'react';
+import { ChangeEvent, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { enqueueSnackbar } from 'notistack';
 import clsx from 'clsx';
 
 import { Card, TableBody, TableToolbar } from '@/components';
 import { Select, Input } from '@/components/forms';
 import { PrintIcon } from '@/components/icons';
-
 import { IRange, ITableColumn } from '@/interfaces';
+import { HttpService } from '@/services';
 
 import { formatDate, formatNumber } from '@/utils';
 
@@ -21,43 +22,54 @@ const initialRange = {
   to: '',
 };
 
-export interface IOrder {
-  customer: string;
-  vendor: string;
-  fulfilment: string;
-  date: Date;
-  total: number;
-  status: 'Under Process' | 'Pause' | 'Canceld';
+export interface IVendorOrder {
+  _id: string;
+  customerID: {
+    firstName: string;
+    lastName: string;
+  };
+  vendorID: {
+    shopName: string;
+  };
+  orderInfo: {
+    deliveryType: string;
+  };
+  product: {
+    price: number;
+    quantity: number;
+    discount: number;
+  };
+  createdAt: string;
+  status: string;
 }
 
-const initialTableData: any[] = [
+const statusList = [
   {
-    customer: 'Bill Billerson',
-    vendor: 'Bowls of Puter',
-    fulfillment: 'Safe Pickup',
-    date: new Date('04/07/2023'),
-    total: 1758.87,
-    status: 'Under Process',
+    title: 'Pending',
+    name: 'pending',
+    color: 'success',
   },
   {
-    customer: 'Bowls of Puter',
-    vendor: 'Jacobs Well Best Stuff',
-    fulfillment: 'Safe Pickup',
-    date: new Date('04/07/2023'),
-    total: 1758.87,
-    status: 'Canceled',
+    title: 'Under Process',
+    name: 'under process',
+    color: 'blue',
   },
   {
-    customer: 'Nathan Bargatzbe',
-    vendor: 'Jacobs Well Best Stuff',
-    fulfillment: 'Home Delivery',
-    date: new Date('04/07/2023'),
-    total: 80.57,
-    status: 'Pause',
+    title: 'Pause',
+    name: 'pause',
+    color: 'primary',
+  },
+  {
+    title: 'Canceled',
+    name: 'canceled',
+    color: 'red',
+  },
+  {
+    title: 'Complete',
+    name: 'complete',
+    color: 'light',
   },
 ];
-
-const orderViewPath = '/admin/orders/home/detail';
 
 export function OrderHome() {
   const navigate = useNavigate();
@@ -65,37 +77,49 @@ export function OrderHome() {
   const [sort, setSort] = useState('');
   const [category, setCategory] = useState('');
   const [range, setRange] = useState<IRange>(initialRange);
-  const [tableData, setTableData] = useState(initialTableData);
+  const [tableData, setTableData] = useState<IVendorOrder[]>([]);
+
+  useEffect(() => {
+    HttpService.get('/order/vendor').then(response => {
+      setTableData(response);
+    });
+  }, []);
 
   const columns: ITableColumn[] = [
     {
       title: 'Customer Name',
       name: 'customer',
       width: 200,
-      cell: (row: any) => <span className={styles.cell}>{row.customer}</span>,
+      cell: (row: IVendorOrder) => (
+        <span className={styles.cell}>
+          {row.customerID.firstName} {row.customerID.lastName}
+        </span>
+      ),
     },
     {
       title: 'Vendor',
       name: 'vendor',
       width: 150,
-      cell: (row: any) => <span className={styles.cell}>{row.vendor}</span>,
+      cell: (row: IVendorOrder) => (
+        <span className={styles.cell}>{row.vendorID.shopName}</span>
+      ),
     },
     {
       title: 'Fulfillment Type',
       name: 'fulfillment',
       width: 200,
-      cell: (row: any) => (
-        <span className={styles.cell}>{row.fulfillment}</span>
+      cell: (row: IVendorOrder) => (
+        <span className={styles.cell}>{row.orderInfo.deliveryType}</span>
       ),
     },
     {
       title: 'Order Date',
       name: 'date',
       width: 150,
-      cell: (row: any) => (
+      cell: (row: IVendorOrder) => (
         <Input
           type="date"
-          value={formatDate(row.date)}
+          value={formatDate(row.createdAt)}
           rounded="full"
           bgcolor="secondary"
         />
@@ -105,27 +129,42 @@ export function OrderHome() {
       title: 'Order Total',
       name: 'total',
       width: 150,
-      cell: (row: any) => <span>${formatNumber(row.total)}</span>,
+      cell: (row: IVendorOrder) => (
+        <span>
+          $
+          {formatNumber(
+            (row.product.price *
+              row.product.quantity *
+              (100 - row.product.discount)) /
+              100,
+          )}
+        </span>
+      ),
     },
     {
       title: 'Status',
       name: 'status',
       width: 200,
-      cell: (row: any) => (
+      cell: (row: IVendorOrder) => (
         <Select
           rounded="full"
           border="none"
           bgcolor={
-            row.status === 'Under Process'
+            row.status === 'under process'
               ? 'blue'
-              : row.status === 'Canceled'
+              : row.status === 'canceled'
               ? 'red'
-              : row.status === 'Pause'
+              : row.status === 'pause'
               ? 'primary'
               : 'white'
           }
           value={row.status}
-          options={statusOpts}
+          updateValue={onStatusChange(row._id)}
+          options={statusList.map(item => ({
+            ...item,
+            name: item.title,
+            value: item.name,
+          }))}
           className={styles.statusSelector}
         />
       ),
@@ -134,11 +173,11 @@ export function OrderHome() {
       title: 'Action',
       name: 'action',
       width: 250,
-      cell: (row: any) => (
+      cell: (row: IVendorOrder) => (
         <div className={styles.actionCell}>
           <button
             className={styles.actionButton}
-            onClick={() => navigate(orderViewPath)}
+            onClick={() => navigate(row._id)}
           >
             View
           </button>
@@ -156,6 +195,20 @@ export function OrderHome() {
     (which: string) => (e: ChangeEvent<HTMLInputElement>) => {
       setRange({ ...range, [which]: new Date(e.target.value) });
     };
+
+  const onStatusChange = (id: string) => (value: string) => {
+    HttpService.put(`/order/vendor/${id}`, { status: value }).then(response => {
+      const { status } = response;
+      if (status === 200) {
+        setTableData(
+          tableData.map((item: IVendorOrder) =>
+            item._id === id ? { ...item, status: value } : item,
+          ),
+        );
+        enqueueSnackbar('Status changed.', { variant: 'success' });
+      }
+    });
+  };
 
   return (
     <Card title="All Orders" className={styles.root}>

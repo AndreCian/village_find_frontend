@@ -12,41 +12,13 @@ export interface ITimeInputProps {
 
 export function TimeInput({ value = '', active = false }: ITimeInputProps) {
   const [inIndex, setInIndex] = useState(-1);
-  const [pieces, setPieces] = useState<string[]>([]);
+  const [pieces, setPieces] = useState<string[]>(Array(6).fill(''));
 
   useEffect(() => {
-    const colonStrs = value.split(':');
-    const emptyPieces = Array(6).fill('');
-    if (colonStrs.length !== 2) {
-      setPieces(emptyPieces);
-      return;
+    if (active && inIndex === -1) {
+      setInIndex(0);
     }
-    const spaceStrs = colonStrs[1].split(' ');
-    if (spaceStrs.length !== 2) {
-      setPieces(emptyPieces);
-      return;
-    }
-    const hourStr = colonStrs[0],
-      minStr = spaceStrs[0],
-      apmStr = spaceStrs[1];
-    if (
-      Number(hourStr) >= 0 &&
-      Number(hourStr) <= 12 &&
-      hourStr.length === 2 &&
-      Number(minStr) >= 0 &&
-      Number(minStr) <= 12 &&
-      minStr.length === 2 &&
-      (apmStr === 'AM' || apmStr === 'PM')
-    ) {
-      setPieces([
-        ...hourStr.split(''),
-        ...minStr.split(''),
-        ...apmStr.split(''),
-      ]);
-    } else {
-      setPieces(emptyPieces);
-    }
-  }, [value]);
+  }, [active]);
 
   return (
     <div className={clsx(styles.root, styles.active)}>
@@ -59,7 +31,7 @@ export function TimeInput({ value = '', active = false }: ITimeInputProps) {
               index === 3 ? styles.minute : '',
               active ? styles.active : '',
             )}
-            focused={inIndex === index}
+            focused={active && inIndex === index}
             onFocus={() => setInIndex(index)}
           />
           {index === 1 && <span className={styles.colon}>:</span>}

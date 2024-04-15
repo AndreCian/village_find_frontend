@@ -1,15 +1,15 @@
 .root {
-  @apply space-y-10;
+  @apply flex flex-col gap-y-10;
 
   .cart {
-    @apply space-y-6;
+    @apply flex flex-col gap-y-6;
 
     .title {
       @apply text-[20px] font-bold leading-[30px];
     }
 
     .cartItemList {
-      @apply space-y-10;
+      @apply flex flex-col gap-y-10;
     }
   }
 

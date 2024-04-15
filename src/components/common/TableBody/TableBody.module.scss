@@ -14,7 +14,7 @@
   }
 
   .body {
-    @apply mb-8 flex w-fit flex-col;
+    @apply mb-8 flex h-fit w-fit flex-col;
 
     .row {
       @apply flex h-16 items-center;

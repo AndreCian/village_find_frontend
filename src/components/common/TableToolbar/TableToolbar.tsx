@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import clsx from 'clsx';
 
 import { Input, Select } from '@/components/forms';
@@ -39,6 +39,9 @@ export interface ITableToolbarProps {
   className?: string;
 }
 
+export interface IOrder {
+}
+
 export function TableToolbar({
   searchable = true,
   searchTitle = 'Search',
@@ -66,6 +69,7 @@ export function TableToolbar({
     border: 'none' as BorderType,
     bgcolor: 'secondary' as BgColorType,
   };
+  // const [orders, setOrders] = useState<IOrder
 
   return (
     <div className={clsx(styles.root, className)}>
@@ -118,31 +122,15 @@ export function TableToolbar({
         <>
           <div className={clsx(styles.control, styles.download)}>
             <p>Print</p>
-            <Input
-              value="Print"
-              select="none"
-              adornment={{
-                position: 'right',
-                content: <PrintIcon />,
-              }}
-              className={styles.downloadButton}
-              disabled={true}
-              {...commonProps}
-            />
+            <span>
+              <PrintIcon />
+            </span>
           </div>
           <div className={clsx(styles.control, styles.download)}>
             <p>Export</p>
-            <Input
-              value="Export"
-              select="none"
-              adornment={{
-                position: 'right',
-                content: <ExportIcon />,
-              }}
-              className={styles.downloadButton}
-              disabled={true}
-              {...commonProps}
-            />
+            <span>
+              <ExportIcon />
+            </span>
           </div>
         </>
       )}

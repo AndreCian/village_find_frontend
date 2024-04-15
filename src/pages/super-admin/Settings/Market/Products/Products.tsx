@@ -2,7 +2,7 @@ import { useState, ChangeEvent } from 'react';
 import { enqueueSnackbar } from 'notistack';
 
 import { Card } from '@/components/common';
-import { ImageUpload, Input, TextField } from '@/components/forms';
+import { ImageUpload, Input, TagInput, TextField } from '@/components/forms';
 
 import { HttpService } from '@/services';
 
@@ -24,7 +24,7 @@ const initialProduct = {
   title: '',
   name: '',
   price: 0,
-  tags: ['Gluten Free', 'Heavy Weight'],
+  tags: [],
   image: '',
   description: '',
   link: '',
@@ -41,16 +41,6 @@ export function Products() {
     setProduct({
       ...product,
       [field]: field === 'price' ? Number(value) : e.target.value,
-    });
-  };
-
-  const onUpdateTags = (e: ChangeEvent<HTMLInputElement>) => {
-    const tags = e.target.value.split(', ');
-    // if (tags.length !== product.tags.length) return;
-    setProduct({
-      ...product,
-      // tags: tags.filter((tag: string) => tag !== ''),
-      tags,
     });
   };
 
@@ -126,11 +116,10 @@ export function Products() {
         </div>
         <div className={styles.section}>
           <p>Product Tags</p>
-          <Input
-            value={product.tags.join(', ')}
-            placeholder="Product Tags"
-            updateValue={onUpdateTags}
-            className={styles.input}
+          <TagInput
+            rounded="small"
+            tags={product.tags}
+            updateTags={(tags: string[]) => setProduct({ ...product, tags })}
           />
         </div>
         <div className={styles.section}>

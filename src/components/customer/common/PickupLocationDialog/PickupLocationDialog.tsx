@@ -1,74 +1,57 @@
 import { useState, useEffect, useRef } from 'react';
 import { FaTimes } from 'react-icons/fa';
-
 import clsx from 'clsx';
 
 import { Button, Radio, RadioGroup } from '@/components/forms';
-
-import { useOnClickOutside } from '@/utils';
+import { formatUsDate, useOnClickOutside } from '@/utils';
 
 import styles from './PickupLocationDialog.module.scss';
 
+interface ILocation {
+  name: string;
+  address: string;
+  eventDate: string;
+  pickup?: {
+    weekday: number;
+    from: string;
+    to: string;
+  };
+  charge: number;
+}
+
 interface IPickupLocationDialogProps {
   open: boolean;
+  locations: ILocation[];
   onClose?: () => void;
   onUpdate?: (pickup: any) => void;
 }
-
-const initialLocations = [
-  {
-    name: "George's Gym",
-    location: '313 Capitol Avenue Waterbury, Ct 06704',
-  },
-  {
-    name: "George's Gym",
-    location: '313 Capitol Avenue Waterbury, Ct 06704',
-  },
-  {
-    name: "George's Gym",
-    location: '313 Capitol Avenue Waterbury, Ct 06704',
-  },
-];
-
-const initialPickTime = [
-  {
-    date: new Date('02/27/2023'),
-    time: '4pm - 5pm',
-  },
-  {
-    date: new Date('02/27/2023'),
-    time: '4pm - 5pm',
-  },
-  {
-    date: new Date('02/27/2023'),
-    time: '4pm - 5pm',
-  },
-  {
-    date: new Date('02/27/2023'),
-    time: '4pm - 5pm',
-  },
-];
 
 export function PickupLocationDialog({
   open,
   onClose = () => {},
   onUpdate = () => {},
+  locations: pickupLocations,
 }: IPickupLocationDialogProps) {
   const [isLocPanel, setIsLocPanel] = useState(true);
   const [locIndex, setLocIndex] = useState('0');
   const [dateIndex, setDateIndex] = useState('0');
+
   const dialogRef = useRef<HTMLDivElement>(null);
 
-  const formatDate = (date: Date) => {
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-    });
-  };
-
   const onUpdateClick = () => {
-    // onUpdate();
+    const location = pickupLocations[Number(locIndex)];
+    onUpdate({
+      location: {
+        name: location.name,
+        address: location.address,
+        charge: location.charge,
+      },
+      fulfillday: {
+        day: pickupLocations[Number(locIndex)].eventDate,
+        from: '',
+        to: '',
+      },
+    });
   };
 
   useEffect(() => {
@@ -105,7 +88,7 @@ export function PickupLocationDialog({
                 updateValue={(index: string) => setLocIndex(index)}
                 className={styles.locPanel}
               >
-                {initialLocations.map((location: any, index: number) => (
+                {pickupLocations.map((location: any, index: number) => (
                   <div
                     key={index}
                     className={clsx(styles.location, {
@@ -115,7 +98,7 @@ export function PickupLocationDialog({
                   >
                     <div className={styles.text}>
                       <p className={styles.name}>{location.name}</p>
-                      <p className={styles.position}>{location.location}</p>
+                      <p className={styles.position}>{location.address}</p>
                     </div>
                     <Radio value={index.toString()} />
                   </div>
@@ -126,10 +109,10 @@ export function PickupLocationDialog({
                 <div className={styles.location}>
                   <div className={styles.text}>
                     <p className={styles.name}>
-                      {initialLocations[Number(locIndex)].name}
+                      {pickupLocations[Number(locIndex)].name}
                     </p>
                     <p className={styles.position}>
-                      {initialLocations[Number(locIndex)].location}
+                      {pickupLocations[Number(locIndex)].address}
                     </p>
                   </div>
                 </div>
@@ -138,31 +121,38 @@ export function PickupLocationDialog({
                   updateValue={(index: string) => setDateIndex(index)}
                   className={styles.timePanel}
                 >
-                  {initialPickTime.map((dateTime: any, index: number) => (
-                    <div
-                      className={clsx(styles.timeCell, {
-                        [styles.active]: dateIndex === index.toString(),
-                      })}
-                      onClick={() => setDateIndex(index.toString())}
-                    >
-                      <div className={styles.pickupdate} key={index}>
-                        <div className={styles.element}>
-                          <p className={styles.title}>Pickup date</p>
-                          <p className={styles.text}>
-                            {formatDate(dateTime.date)}
-                          </p>
-                        </div>
-                        <div className={styles.element}>
-                          <p className={styles.title}>Pickup Between</p>
-                          <p className={styles.text}>{dateTime.time}</p>
-                        </div>
+                  <div
+                    className={clsx(styles.timeCell, {
+                      // [styles.active]: dateIndex === index.toString(),
+                      [styles.active]: true,
+                    })}
+                    // onClick={() => setDateIndex(index.toString())}
+                  >
+                    <div className={styles.pickupdate}>
+                      <div className={styles.element}>
+                        <p className={styles.title}>Pickup date</p>
+                        <p className={styles.text}>
+                          {/* {formatDate(dateTime.weekday)} */}
+                          {pickupLocations[Number(locIndex)].eventDate
+                            ? formatUsDate(
+                                pickupLocations[Number(locIndex)].eventDate,
+                              )
+                            : ''}
+                        </p>
                       </div>
-                      <Radio
-                        value={index.toString()}
-                        className={styles.radio}
-                      />
+                      <div className={styles.element}>
+                        <p className={styles.title}>Pickup Between</p>
+                        <p className={styles.text}>
+                          {pickupLocations[Number(locIndex)].pickup?.from}{' '}
+                          {pickupLocations[Number(locIndex)].pickup?.to}
+                        </p>
+                      </div>
                     </div>
-                  ))}
+                    <Radio
+                      // value={index.toString()}
+                      className={styles.radio}
+                    />
+                  </div>
                 </RadioGroup>
               </div>
             )}

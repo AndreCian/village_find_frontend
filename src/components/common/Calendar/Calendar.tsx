@@ -48,6 +48,10 @@ export function Calendar({
     const dayList = [];
     const firstDayOfMonth = new Date(date.getFullYear(), date.getMonth(), 1);
     const lastDayOfMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+    if (firstDayOfMonth.getDay() === 0)
+      firstDayOfMonth.setDate(firstDayOfMonth.getDate() - 7);
+    if (lastDayOfMonth.getDay() === 6)
+      lastDayOfMonth.setDate(lastDayOfMonth.getDate() + 7);
 
     let iterator = firstDayOfMonth;
     if (iterator.getDay()) {
@@ -105,7 +109,7 @@ export function Calendar({
                       ? styles.currentDay
                       : isDaySame(day, new Date())
                       ? styles.today
-                      : !!dates.find(available => isDaySame(day, available))
+                      : dates.find(available => isDaySame(day, available))
                       ? styles.availableDay
                       : '',
                   )}

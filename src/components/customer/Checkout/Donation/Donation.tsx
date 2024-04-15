@@ -1,12 +1,15 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { FaCheck } from 'react-icons/fa6';
 import clsx from 'clsx';
 
-import { Radio } from '@/components/forms';
-
 import styles from './Donation.module.scss';
 
-export function Donation() {
+interface IDonationProps {
+  donation: number;
+  setDonation: (_: number) => void;
+}
+
+export function Donation({ donation, setDonation }: IDonationProps) {
   const [donIndex, setDonIndex] = useState(1);
   const [donText, setDonText] = useState('__.__');
 
@@ -32,6 +35,21 @@ export function Donation() {
       setDonText(buildDonText(trimText));
     }
   };
+
+  useEffect(() => {
+    if (donIndex === 3) return;
+    setDonation([1, 3, 5][donIndex]);
+  }, [donIndex]);
+
+  useEffect(() => {
+    if (!donText.includes('_')) {
+      setDonation(Number(donText));
+    }
+  }, [donText]);
+
+  useEffect(() => {
+    console.log(donation);
+  }, [donation]);
 
   return (
     <div className={styles.root}>

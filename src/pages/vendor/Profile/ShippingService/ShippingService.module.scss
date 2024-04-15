@@ -30,4 +30,14 @@
   .radioGroup {
     @apply flex flex-col text-xs;
   }
+
+  .buttons {
+    @apply flex justify-end gap-x-4;
+    > button {
+      @apply rounded-full border-1 border-primary px-8 py-2;
+    }
+    > button.updateBtn {
+      @apply bg-dark text-white;
+    }
+  }
 }

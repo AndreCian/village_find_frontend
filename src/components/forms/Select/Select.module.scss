@@ -2,7 +2,7 @@
   @apply relative  min-w-0 select-none lg:min-w-[250px];
 
   .selectBox {
-    @apply flex w-full items-center justify-between rounded-md border border-0.5 border-primary bg-white px-4 py-3 text-xs font-medium outline-none;
+    @apply flex w-full cursor-pointer items-center justify-between rounded-md border border-0.5 border-primary bg-white px-4 py-3 text-xs font-medium outline-none;
 
     span {
       @apply mr-4;
@@ -14,7 +14,7 @@
   }
 
   .viewBox {
-    @apply absolute z-50 mt-2 flex w-full w-full flex-col rounded-md border-0.5 border-primary bg-white px-4 py-5 text-base shadow-lg;
+    @apply fixed z-30 mt-2 flex max-h-[400px] flex-col overflow-y-auto rounded-md border-0.5 border-primary bg-white px-4 py-5 text-base shadow-lg;
 
     span {
       @apply select-none py-1 text-center hover:rounded-md hover:bg-secondary hover:font-bold;

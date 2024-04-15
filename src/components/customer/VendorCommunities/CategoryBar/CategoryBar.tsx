@@ -17,6 +17,7 @@ const initialVendors = [
 ];
 
 interface ICategoryBarProps {
+  isVendorPanel?: boolean;
   panel: boolean;
   category: string;
   categories: { name: string; value: string }[];
@@ -26,6 +27,7 @@ interface ICategoryBarProps {
 }
 
 export function CategoryBar({
+  isVendorPanel = true,
   panel = true,
   category = '',
   categories = [],
@@ -65,21 +67,23 @@ export function CategoryBar({
           </div>
         </div>
       </div>
-      <div className={styles.categoryList}>
-        <p>By Vendor</p>
-        <ul className={styles.categories}>
-          {initialVendors.map((_vendor: string, index: number) => (
-            <li
-              key={`vendor-category-${index}`}
-              onClick={() => changeVendor(index)}
-              className={!panel && vendor === index ? styles.active : ''}
-            >
-              <span />
-              <p>{_vendor}</p>
-            </li>
-          ))}
-        </ul>
-      </div>
+      {isVendorPanel && (
+        <div className={styles.categoryList}>
+          <p>By Vendor</p>
+          <ul className={styles.categories}>
+            {initialVendors.map((_vendor: string, index: number) => (
+              <li
+                key={`vendor-category-${index}`}
+                onClick={() => changeVendor(index)}
+                className={!panel && vendor === index ? styles.active : ''}
+              >
+                <span />
+                <p>{_vendor}</p>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 }

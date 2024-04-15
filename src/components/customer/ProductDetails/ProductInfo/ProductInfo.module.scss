@@ -7,6 +7,13 @@
     p {
       @apply cursor-pointer text-[13px] leading-[18px] underline;
     }
+
+    .comInfo {
+      @apply flex items-center gap-x-4;
+      > img {
+        @apply aspect-square w-6 shrink-0;
+      }
+    }
   }
 
   .blank {
@@ -102,7 +109,7 @@
       @apply flex items-center justify-between;
 
       .dropdown {
-        @apply flex items-center gap-x-2 rounded-full bg-[#F5F5F5] px-2.5 py-1 text-[16px] font-bold leading-[25px];
+        @apply flex cursor-pointer items-center gap-x-2 rounded-full bg-[#F5F5F5] px-2.5 py-1 text-[16px] font-bold leading-[25px];
       }
 
       > p {
@@ -156,18 +163,21 @@
 
     .quantity {
       @apply flex h-10 w-full items-center rounded-md border-b-0.5 border-t-0.5 border-primary;
-
       .minus,
       .plus {
         @apply flex h-10 w-10 cursor-pointer items-center justify-center rounded-md border-1 border-primary;
       }
-
       .plus {
         @apply bg-dark;
       }
-
       p {
         @apply grow text-center;
+      }
+      > span > svg {
+        @apply text-2xl;
+      }
+      > .plus > svg {
+        @apply fill-white;
       }
     }
 

@@ -1,10 +1,9 @@
-import { useRoutes } from 'react-router-dom';
 import { SnackbarProvider, MaterialDesignContent } from 'notistack';
 import styled from 'styled-components';
 
-import { routes as appRoutes } from '@/routes';
+import Routes from '@/routes';
 
-import { AuthProvider, CategoryProvider, SearchbarProvider } from '@/providers';
+import { AuthProvider, CategoryProvider, SearchbarProvider, ZipcodeProvider } from '@/providers';
 
 const StyledMaterialDesignContent = styled(MaterialDesignContent)(() => ({
   '&.notistack-MuiContent-success': {
@@ -16,13 +15,15 @@ const StyledMaterialDesignContent = styled(MaterialDesignContent)(() => ({
 }));
 
 function App() {
-  const routes = useRoutes(appRoutes);
-
   return (
     <>
       <AuthProvider>
         <CategoryProvider>
-          <SearchbarProvider>{routes}</SearchbarProvider>
+          <SearchbarProvider>
+            <ZipcodeProvider>
+              <Routes />
+            </ZipcodeProvider>
+          </SearchbarProvider>
         </CategoryProvider>
       </AuthProvider>
       <SnackbarProvider

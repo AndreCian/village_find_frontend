@@ -10,18 +10,18 @@
   @apply border-1 border-success px-4 py-5;
 
   .infoPanel {
-    @apply space-y-10;
+    @apply flex flex-col gap-y-10;
   }
 
   .loginPanel {
-    @apply space-y-4;
+    @apply flex flex-col gap-y-4;
 
     .title {
       @apply text-[32px] font-bold leading-[48px];
     }
 
     .inputs {
-      @apply space-y-4;
+      @apply flex flex-col gap-y-4;
 
       .input {
         @apply w-full xl:w-1/2;

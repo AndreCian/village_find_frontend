@@ -13,6 +13,8 @@ import {
 import {
   Home as CommunityHome,
   CommunityLayout,
+  Vendor,
+  VendorAbout,
 } from '@/pages/customer/VendorCommunities';
 
 export const customerRoutes = [
@@ -75,6 +77,26 @@ export const customerRoutes = [
       {
         path: ':slug',
         element: <CommunityLayout />,
+      },
+    ],
+  },
+  {
+    path: 'vendors',
+    element: <Outlet />,
+    children: [
+      {
+        path: ':id',
+        element: <Outlet />,
+        children: [
+          {
+            path: '',
+            element: <Vendor />,
+          },
+          {
+            path: 'about',
+            element: <VendorAbout />,
+          },
+        ],
       },
     ],
   },

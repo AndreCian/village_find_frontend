@@ -19,6 +19,7 @@ export function Radio({
   className = '',
 }: IRadio) {
   const context = useContext(RadioContext);
+  console.log(context.multiple);
 
   return (
     <div
@@ -26,17 +27,15 @@ export function Radio({
       onClick={() => context.updateValue(value)}
     >
       <span
-        className={
-          (context.multiple && Object.values(context.value).includes(value)) ||
-          (!context.multiple && context.value === value)
-            ? clsx(
-                styles.radio,
-                styles.active,
-                size === 'small' ? styles.small : '',
-                context.color === 'secondary' ? styles.secondary : '',
-              )
-            : styles.radio
-        }
+        className={clsx(styles.radio, {
+          [styles.active]:
+            (context.multiple &&
+              Object.values(context.value).includes(value)) ||
+            (!context.multiple && context.value === value),
+          [styles.small]: size === 'small',
+          [styles.secondary]: context.color === 'secondary',
+        })}
+        onClick={() => context.updateValue(value)}
       />
       <p>{label}</p>
     </div>

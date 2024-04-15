@@ -1,3 +1,5 @@
+import { useRoutes } from 'react-router-dom';
+
 import {
   CommunityLayout,
   CustomerLayout,
@@ -9,7 +11,7 @@ import { customerRoutes } from '@/routes/customer';
 import { vendorRoutes } from '@/routes/vendor';
 import { communityRoutes } from '@/routes/community';
 
-export const routes = [
+const routes = [
   {
     path: 'admin',
     element: <OtherLayout />,
@@ -32,4 +34,10 @@ export const routes = [
   },
 ];
 
-export { superAdminRoutes, customerRoutes, vendorRoutes };
+function Routes() {
+  return useRoutes(routes);
+}
+
+export { superAdminRoutes, customerRoutes, vendorRoutes, routes };
+
+export default Routes;

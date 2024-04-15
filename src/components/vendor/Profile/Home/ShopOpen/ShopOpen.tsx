@@ -1,21 +1,39 @@
 import { Card } from '@/components/common';
 import { Radio, RadioGroup } from '@/components/forms';
+import { HttpService } from '@/services';
+import { enqueueSnackbar } from 'notistack';
+import { useEffect, useState } from 'react';
 
-export interface IShopOpenProps {
-  isOpen: boolean;
-  setOpen: (_isOpen: boolean) => void;
-}
+export function ShopOpen() {
+  const [status, setStatus] = useState('closed');
 
-export function ShopOpen({ isOpen, setOpen }: IShopOpenProps) {
-  const onShopOpen = (value: string) => {
-    setOpen(value === 'open' ? true : false);
+  const onShopOpenClick = (value: string) => {
+    HttpService.put('/user/vendor/profile/open', {
+      open: status === 'opened',
+    }).then(response => {
+      const { status } = response;
+      if (status === 200) {
+        setStatus(value);
+        enqueueSnackbar(`Shop ${value}.`, { variant: 'success' });
+      } else {
+        enqueueSnackbar('Invalid user.', {
+          variant: 'warning',
+        });
+      }
+    });
   };
+
+  useEffect(() => {
+    HttpService.get('/user/vendor/profile/open').then(response => {
+      setStatus(!!response ? 'opened' : 'closed');
+    });
+  }, []);
 
   return (
     <Card title="Shop Open">
-      <RadioGroup value={isOpen ? 'open' : 'close'} updateValue={onShopOpen}>
-        <Radio value="close" label="Closed" />
-        <Radio value="open" label="Open" />
+      <RadioGroup value={status} updateValue={onShopOpenClick}>
+        <Radio value="closed" label="Closed" />
+        <Radio value="opened" label="Open" />
       </RadioGroup>
     </Card>
   );

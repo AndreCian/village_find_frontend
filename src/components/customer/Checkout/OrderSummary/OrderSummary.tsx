@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import clsx from 'clsx';
 
 import { Button, Input } from '@/components/forms';
+import { ICartItem, ISummary } from '@/pages/customer';
 
 import styles from './OrderSummary.module.scss';
 
@@ -15,7 +16,11 @@ const initialSummary = {
   subtotal: 174.41,
 };
 
-export function OrderSummary() {
+interface IOrderSummaryProps {
+  summary: ISummary;
+}
+
+export function OrderSummary({ summary }: IOrderSummaryProps) {
   const onCouponApply = () => {};
 
   const formatText = (price: number | string) => {
@@ -47,7 +52,7 @@ export function OrderSummary() {
         <div className={styles.body}>
           <div className={clsx(styles.row, styles.total)}>
             <p className={styles.title}>Order Total</p>
-            <p className={styles.text}>{formatText(initialSummary.total)}</p>
+            <p className={styles.text}>{formatText(summary.orderTotal)}</p>
           </div>
           <div className={clsx(styles.row, styles.pickup)}>
             <p className={styles.title}>
@@ -55,18 +60,20 @@ export function OrderSummary() {
               <span>(Vendors Near Me Fee)</span>
             </p>
             <p className={styles.text}>
-              {formatText(initialSummary.pickupFee)}
+              {formatText(summary.pickupLocationFee)}
             </p>
           </div>
           <div className={clsx(styles.row, styles.safePickup)}>
+            <p className={styles.title}>Delivery Fee</p>
+            <p className={styles.text}>{formatText(summary.deliveryFee)}</p>
+          </div>
+          <div className={clsx(styles.row, styles.safePickup)}>
             <p className={styles.title}>Safe Pickup Fee</p>
-            <p className={styles.text}>
-              {formatText(initialSummary.safePickupFee)}
-            </p>
+            <p className={styles.text}>{formatText(summary.safePickupFee)}</p>
           </div>
           <div className={styles.row}>
             <p className={styles.title}>Shipping</p>
-            <p className={styles.text}>{formatText(initialSummary.shipping)}</p>
+            <p className={styles.text}>{formatText(summary.shippingFee)}</p>
           </div>
           <div className={styles.row}>
             <p className={styles.title}>Gift Shipping</p>
@@ -76,11 +83,11 @@ export function OrderSummary() {
           </div>
           <div className={clsx(styles.row, styles.coupon)}>
             <p className={styles.title}>Coupon</p>
-            <p className={styles.text}>{formatText(initialSummary.coupon)}</p>
+            <p className={styles.text}>{formatText(summary.giftShippingFee)}</p>
           </div>
           <div className={clsx(styles.row, styles.total)}>
             <p className={styles.title}>Sub Total</p>
-            <p className={styles.text}>{formatText(initialSummary.subtotal)}</p>
+            <p className={styles.text}>{formatText(summary.orderTotal)}</p>
           </div>
         </div>
       </div>

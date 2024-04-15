@@ -1,17 +1,20 @@
 .root {
   @apply w-full space-y-6 p-4 shadow-md;
 
-  & > img {
-    @apply w-full;
+  .imgwrapper {
+    @apply relative flex aspect-[3/1] w-full items-center overflow-hidden rounded-md;
+    > img {
+      @apply absolute w-full;
+    }
   }
 
   .community {
     @apply flex items-center gap-x-2.5;
 
     .image {
-      @apply aspect-square max-w-[120px] shrink-0 cursor-pointer rounded-md shadow-lg;
+      @apply aspect-square max-w-[120px] shrink-0 cursor-pointer overflow-hidden rounded-md shadow-lg;
 
-      img {
+      > img {
         @apply aspect-square h-full w-full;
       }
     }

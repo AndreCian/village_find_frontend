@@ -8,6 +8,9 @@
 
     .control {
       @apply space-y-2;
+      > p {
+        @apply font-medium;
+      }
     }
   }
 

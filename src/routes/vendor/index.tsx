@@ -15,6 +15,7 @@ import {
   BankDetail,
   FulfillDetail,
   Pickup,
+  Delivery,
   PickupLocation,
   PickupLocationCreate,
   ShippingService,
@@ -41,9 +42,9 @@ import { Community } from '@/pages/vendor/Community';
 import { Customers } from '@/pages/vendor/Customers';
 import { GoalLayout, GoalHome, Rewards } from '@/pages/vendor/Goals';
 import { SupportDetail, SupportHome } from '@/pages/vendor/Support';
+import { OrderHome, OrderDetail } from '@/pages/vendor/Orders';
 
 import { Coupons } from '@/pages';
-import { OrderHome } from '@/pages';
 
 export const vendorRoutes = [
   {
@@ -81,6 +82,10 @@ export const vendorRoutes = [
         leaf: true,
         children: [
           {
+            index: true,
+            element: <Navigate to="pickup" />,
+          },
+          {
             title: 'Pickup',
             path: 'pickup',
             element: <Pickup />,
@@ -88,7 +93,7 @@ export const vendorRoutes = [
           {
             title: 'Delivery',
             path: 'delivery',
-            element: <Pickup />,
+            element: <Delivery />,
           },
           {
             title: 'Partnered Pickup Location',
@@ -103,7 +108,7 @@ export const vendorRoutes = [
               },
               {
                 title: 'Create',
-                path: 'create',
+                path: ':id',
                 element: <PickupLocationCreate />,
               },
             ],
@@ -133,7 +138,7 @@ export const vendorRoutes = [
           },
           {
             title: 'Create',
-            path: 'create',
+            path: ':id',
             element: <ParcelCreate />,
           },
         ],
@@ -239,7 +244,18 @@ export const vendorRoutes = [
     title: 'Orders',
     path: 'order',
     icon: <UserIcon />,
-    element: <OrderHome />,
+    element: <Outlet />,
+    children: [
+      {
+        index: true,
+        element: <OrderHome />,
+      },
+      {
+        title: 'Detail',
+        path: ':id',
+        element: <OrderDetail />,
+      },
+    ],
   },
   {
     title: 'Financials',

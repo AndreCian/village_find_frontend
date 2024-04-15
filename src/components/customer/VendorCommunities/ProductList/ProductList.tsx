@@ -1,5 +1,3 @@
-import { useNavigate } from 'react-router-dom';
-
 import { ProductCard } from '@/components/customer/common';
 
 import styles from './ProductList.module.scss';
@@ -10,13 +8,6 @@ interface IProductListProps {
 }
 
 function ProductList({ products, isMobile }: IProductListProps) {
-  const navigate = useNavigate();
-
-  const onProductClick = (id: string) => {
-    if (!id) return;
-    navigate(`/product-detail/${id}`);
-  };
-
   return (
     <div className={styles.products}>
       {products.map((product: any, index: number) => (
@@ -24,7 +15,6 @@ function ProductList({ products, isMobile }: IProductListProps) {
           key={`product-${index}`}
           product={product}
           isActive={isMobile}
-          navigateToDetail={() => onProductClick(product._id)}
         />
       ))}
     </div>

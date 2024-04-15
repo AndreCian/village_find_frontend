@@ -1,9 +1,9 @@
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import clsx from 'clsx';
 
 import { FaChevronDown, FaChevronUp } from 'react-icons/fa6';
 
-import { useOnClickOutside } from '@/utils';
+import { useOnClickOutside, useWindowScroll, useWindowResize } from '@/utils';
 
 import styles from './Select.module.scss';
 
@@ -39,6 +39,15 @@ export function Select({
   colors = [],
 }: ISelectProps) {
   const [anchor, setAnchor] = useState<boolean>(false);
+  const [position, setPosition] = useState<{
+    left: number;
+    top: number;
+    width?: number;
+    height?: number;
+  }>({
+    left: 0,
+    top: 0,
+  });
   const currentName = useMemo(() => {
     if (disabled) return placeholder;
     const currentOption = options.find(item =>
@@ -54,6 +63,7 @@ export function Select({
   }, [value]);
 
   const selectRef = useRef<HTMLDivElement>(null);
+  const boxRef = useRef<HTMLDivElement>(null);
 
   const colorClasses = () => {
     const currentColor = colors.find(
@@ -94,21 +104,43 @@ export function Select({
     setAnchor(false);
   };
 
+  const onPositionFix = () => {
+    if (!boxRef.current) return;
+    const { left, top, width, height } = boxRef.current.getBoundingClientRect();
+    setPosition({ left, top: top + height, width, height });
+  };
+
+  const onSelectBoxClick = () => {
+    if (disabled) return;
+    onPositionFix();
+    setAnchor(!anchor);
+  };
+
   useOnClickOutside(selectRef, () => setAnchor(false), 'mousedown');
+  useWindowScroll(onPositionFix);
+  useWindowResize(onPositionFix);
+
+  useEffect(() => {
+    onPositionFix();
+  }, []);
 
   return (
     <div className={classes} ref={selectRef}>
-      <div
-        className={styles.selectBox}
-        onClick={() => !disabled && setAnchor(!anchor)}
-      >
+      <div className={styles.selectBox} onClick={onSelectBoxClick} ref={boxRef}>
         <span className={clsx({ [styles.placeholder]: !value || disabled })}>
           {currentName}
         </span>
         {anchor ? <FaChevronUp /> : <FaChevronDown />}
       </div>
-      {anchor && !disabled && options.length !== 0 && (
-        <div className={styles.viewBox}>
+      {anchor && !disabled && options.length > 0 && (
+        <div
+          className={styles.viewBox}
+          style={{
+            width: (boxRef.current && boxRef.current.clientWidth) || 150,
+            left: position.left,
+            top: position.top,
+          }}
+        >
           {options.map(
             (
               option: string | { _id?: string; name: string; value: string },

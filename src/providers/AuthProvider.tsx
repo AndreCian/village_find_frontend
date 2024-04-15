@@ -34,14 +34,12 @@ interface IAccount {
 interface IAuthContext {
   isLogin: boolean;
   account?: IAccount;
-  userName: string;
   setIsLogin: (_: boolean) => void;
   setAccount: (_: IAccount) => void;
 }
 
 export const AuthContext = React.createContext<IAuthContext>({
   isLogin: false,
-  userName: '',
   setIsLogin: () => {},
   setAccount: () => {},
 });
@@ -53,12 +51,9 @@ interface IAuthProviderProps {
 export function AuthProvider({ children }: IAuthProviderProps) {
   const [isLogin, setIsLogin] = useState(false);
   const [account, setAccount] = useState<IAccount>({} as IAccount);
-  const [userName, setUserName] = useState('Brandon');
 
   return (
-    <AuthContext.Provider
-      value={{ isLogin, setIsLogin, userName, account, setAccount }}
-    >
+    <AuthContext.Provider value={{ isLogin, setIsLogin, account, setAccount }}>
       {children}
     </AuthContext.Provider>
   );

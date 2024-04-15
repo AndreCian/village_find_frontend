@@ -60,7 +60,7 @@ export function Sidebar() {
         <p
           onClick={() => navigate(buildPath(currentPath, route.path))}
           className={
-            pathname === buildPath(currentPath, route.path)
+            (!route.path && pathname === currentPath) || (route.path && pathname.startsWith(buildPath(currentPath, route.path)))
               ? clsx(styles.leafItem, styles.activeLeafItem)
               : styles.leafItem
           }

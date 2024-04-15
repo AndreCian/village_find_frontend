@@ -6,6 +6,7 @@ import {
   ProductInfo,
   ProductMoreDetail,
   AuthenticReviews,
+  ProductsAndCommunities,
 } from '@/components/customer/ProductDetails';
 import { HttpService } from '@/services';
 
@@ -34,6 +35,9 @@ export interface IOrderDetail {
     _id: string;
     name: string;
     slug: string;
+    images: {
+      logoUrl: string;
+    };
   };
   styles: {
     _id: string;
@@ -83,6 +87,9 @@ const initialOrderDetail: IOrderDetail = {
     _id: '',
     name: '',
     slug: '',
+    images: {
+      logoUrl: '',
+    },
   },
   styles: [],
   inventories: [],
@@ -112,6 +119,7 @@ export function ProductDetails() {
       <ProductInfo {...orderDetail} />
       <ProductMoreDetail {...moreDetail} />
       <AuthenticReviews />
+      <ProductsAndCommunities />
     </Container>
   );
 }

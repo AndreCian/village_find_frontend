@@ -33,6 +33,10 @@
         .horizon {
           @apply flex;
 
+          > .element {
+            @apply grow;
+          }
+
           .hdivider {
             @apply border-r-1 border-primary;
           }
@@ -40,6 +44,10 @@
 
         .vdivider {
           @apply w-full border-t-1 border-primary;
+        }
+
+        .element {
+          @apply px-4 py-3;
         }
       }
 

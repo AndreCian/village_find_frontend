@@ -1,18 +1,19 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { Container } from '@/components/layout/customer';
 import { Button } from '@/components/forms';
+import { SERVER_URL } from '@/config/global';
+import { HttpService } from '@/services';
 
 import CommunityImage1 from '/assets/customer/vendors/community1.svg';
 import CommunityImage2 from '/assets/customer/vendors/community2.svg';
 import PatternImage from '/assets/customer/backs/pattern.png';
-import ShopVComImage from '/assets/customer/backs/shopvcom.png';
 import ExShopVComImage1 from '/assets/customer/backs/excom1.png';
 import ExShopVComImage2 from '/assets/customer/backs/excom2.png';
 import ExShopVComImage3 from '/assets/customer/backs/excom3.png';
 
 import styles from './AboutCommunity.module.scss';
-import { SERVER_URL } from '@/config/global';
 
 interface ICommunity {
   avatar: string;
@@ -34,6 +35,7 @@ interface IShopVCommunity {
   detail: string;
   category: string;
   image: string;
+  slug: string;
 }
 
 const initialCommunities: ICommunity[] = [
@@ -87,33 +89,6 @@ const initialShopVendorCategories: string[] = [
   'Glass',
 ];
 
-const initialShopVendorCommunities: IShopVCommunity[] = [
-  {
-    name: 'Field Of Artisans',
-    detail: 'Over 600 artisans making unique one-of-a-kind items.',
-    category: 'Wood Working',
-    image: ShopVComImage,
-  },
-  {
-    name: 'Field Of Artisans',
-    detail: 'Over 600 artisans making unique one-of-a-kind items.',
-    category: 'Wood Working',
-    image: ShopVComImage,
-  },
-  {
-    name: 'Field Of Artisans',
-    detail: 'Over 600 artisans making unique one-of-a-kind items.',
-    category: 'Wood Working',
-    image: ShopVComImage,
-  },
-  {
-    name: 'Field Of Artisans',
-    detail: 'Over 600 artisans making unique one-of-a-kind items.',
-    category: 'Wood Working',
-    image: ShopVComImage,
-  },
-];
-
 export interface ICommunityProps {
   images: string[];
 }
@@ -140,12 +115,24 @@ export interface IAboutCommunityProps {
 }
 
 export function AboutCommunity({ community, ready }: IAboutCommunityProps) {
-  const [communities, setCommunities] =
-    useState<ICommunity[]>(initialCommunities);
+  const navigate = useNavigate();
+
+  const [communities] = useState<ICommunity[]>(initialCommunities);
   const [shopVCategory, setShopVCategory] = useState('');
   const [shopVCommunities, setShopVCommunities] = useState<IShopVCommunity[]>(
-    initialShopVendorCommunities,
+    [],
   );
+
+  useEffect(() => {
+    HttpService.get('/communities').then(response => {
+      const communities = (response || []).map((item: any) => ({
+        ...item,
+        detail: item.shortDesc,
+        image: item.images.logoUrl,
+      }));
+      setShopVCommunities(communities);
+    });
+  }, []);
 
   return (
     <div className={styles.root}>
@@ -245,8 +232,14 @@ export function AboutCommunity({ community, ready }: IAboutCommunityProps) {
           <div className={styles.communities}>
             {shopVCommunities.map(
               (shopVCommunity: IShopVCommunity, index: number) => (
-                <div key={`shop-v-com-${index}`} className={styles.shopvcom}>
-                  <img src={shopVCommunity.image} />
+                <div
+                  key={`shop-v-com-${index}`}
+                  className={styles.shopvcom}
+                  onClick={() =>
+                    navigate(`/communities/${shopVCommunity.slug}`)
+                  }
+                >
+                  <img src={`${SERVER_URL}/${shopVCommunity.image}`} />
                   <div className={styles.vcomText}>
                     <p className={styles.name}>{shopVCommunity.name}</p>
                     <span className={styles.detail}>

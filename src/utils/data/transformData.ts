@@ -18,8 +18,8 @@ export const formatDate = (date: string | Date, deliminator: string = '-') => {
   return [year, month, day].join(deliminator);
 };
 
-export const formatUsDate = (date: Date) => {
-  return date.toLocaleDateString('en-US', {
+export const formatUsDate = (date: string | Date) => {
+  return new Date(date).toLocaleDateString('en-US', {
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',

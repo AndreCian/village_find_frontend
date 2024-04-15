@@ -1,11 +1,17 @@
+import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { enqueueSnackbar } from 'notistack';
+
 import { Card } from '@/components';
-
-import styles from './BankDetail.module.scss';
-import StripeLogo from '/assets/customer/logos/stripe.png';
-
 import { HttpService } from '@/services';
 
+import StripeLogo from '/assets/customer/logos/stripe.png';
+import styles from './BankDetail.module.scss';
+
 export function BankDetail() {
+  const [searchParams] = useSearchParams();
+  const [isBankActive, setIsBankActive] = useState(false);
+
   const onConnectClick = () => {
     HttpService.get('/user/vendor/stripe/on-board').then(response => {
       const { url, status } = response;
@@ -20,8 +26,40 @@ export function BankDetail() {
     });
   };
 
+  useEffect(() => {
+    const accountID = searchParams.get('accountID');
+    if (!accountID) return;
+    HttpService.get('/user/vendor/profile/bank-detail/verify', {
+      accountID,
+    }).then(response => {
+      const { status } = response;
+      if (status === 200) {
+        enqueueSnackbar('Bank detail verified.', { variant: 'success' });
+        setIsBankActive(true);
+      } else {
+        enqueueSnackbar('Bank not verified.', { variant: 'warning' });
+      }
+    });
+  }, [searchParams]);
+
+  useEffect(() => {
+    HttpService.get('/user/vendor/profile/bank-detail/verified').then(
+      response => {
+        setIsBankActive(response);
+      },
+    );
+  }, []);
+
   return (
-    <Card title="Create your Stripe Account" className={styles.root}>
+    <Card
+      title={
+        <p className={styles.title}>
+          Create your Stripe Account{' '}
+          {isBankActive && <span>Bank verified</span>}
+        </p>
+      }
+      className={styles.root}
+    >
       <p>
         Village Finds partners with Stripe, the leading payments gateway which
         provides secure and simple direct deposits for your business. In-order

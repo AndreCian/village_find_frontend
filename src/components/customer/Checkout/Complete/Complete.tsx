@@ -9,14 +9,13 @@ import { AuthContext } from '@/providers';
 import styles from './Complete.module.scss';
 
 export function Complete() {
-  const context = useContext(AuthContext);
+  const { account } = useContext(AuthContext);
+  const userName = account?.profile.owner.name || '';
 
   return (
     <div className={styles.root}>
       <div className={styles.head}>
-        <p className={styles.title}>
-          Thank you for your order, {context.userName}!
-        </p>
+        <p className={styles.title}>Thank you for your order, {userName}!</p>
         <p className={styles.text}>
           An order confirmation will be sent to your email. You can also click
           the link below to view your recent orders

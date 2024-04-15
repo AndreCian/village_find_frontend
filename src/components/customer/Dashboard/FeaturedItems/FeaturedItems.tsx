@@ -31,17 +31,18 @@ export function FeaturedItems({ items }: { items: IFeaturedItem[] }) {
       <Container className={styles.container}>
         <h1>Featured Items</h1>
         <div className={styles.featuredItems}>
-          {items
-            .slice(0, items.length - 1)
-            .map((product: any, index: number) => (
-              <ProductCard
-                key={`${product.name}-${index}`}
-                product={product}
-                isActive={isMobile}
-                className={styles.featuredItem}
-              />
-            ))}
-          {!isMobile && !!items.length && (
+          {items.length > 1 &&
+            items
+              .slice(0, items.length - 1)
+              .map((product: any, index: number) => (
+                <ProductCard
+                  key={`${product.name}-${index}`}
+                  product={product}
+                  isActive={isMobile}
+                  className={styles.featuredItem}
+                />
+              ))}
+          {!isMobile && items.length > 0 && (
             <ProductCard isLoadMore={true} product={items.reverse()[0]} />
           )}
         </div>
@@ -49,16 +50,17 @@ export function FeaturedItems({ items }: { items: IFeaturedItem[] }) {
           <>
             <h1>More To Discover</h1>
             <div className={styles.moreItems}>
-              {items
-                .slice(0, items.length - 1)
-                .map((product: any, index: number) => (
-                  <ProductCard
-                    key={`${product.name}-${index}`}
-                    product={product}
-                    isActive={true}
-                  />
-                ))}
-              {!!items.length && (
+              {items.length > 1 &&
+                items
+                  .slice(0, items.length - 1)
+                  .map((product: any, index: number) => (
+                    <ProductCard
+                      key={`${product.name}-${index}`}
+                      product={product}
+                      isActive={true}
+                    />
+                  ))}
+              {items.length > 0 && (
                 <ProductCard isLoadMore={true} product={items.reverse()[0]} />
               )}
             </div>

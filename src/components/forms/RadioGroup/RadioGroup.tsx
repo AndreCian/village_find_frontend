@@ -19,7 +19,7 @@ export function RadioGroup({
   updateValue = () => {},
   color = 'primary',
   className = '',
-  multiple = true,
+  multiple = false,
   children,
 }: IRadioGroupProps) {
   return (

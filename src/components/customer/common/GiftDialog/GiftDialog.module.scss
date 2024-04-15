@@ -9,7 +9,7 @@
     }
 
     .existing {
-      @apply space-y-40;
+      @apply flex flex-col gap-y-40;
 
       .text {
         @apply text-[20px] font-medium leading-[30px];
@@ -17,7 +17,7 @@
     }
 
     .receiver {
-      @apply space-y-8;
+      @apply flex flex-col gap-y-8;
 
       .text {
         @apply text-[20px] font-medium leading-[30px];
@@ -30,7 +30,7 @@
       }
 
       .elements {
-        @apply space-y-4;
+        @apply flex flex-col gap-y-4;
 
         .horizon {
           @apply grid grid-cols-1 gap-x-4 xl:grid-cols-2;
@@ -47,10 +47,10 @@
     }
 
     .message {
-      @apply space-y-10;
+      @apply flex flex-col gap-y-10;
 
       .element {
-        @apply space-y-4;
+        @apply flex flex-col gap-y-4;
 
         .text {
           @apply text-[20px] font-medium leading-[30px];
@@ -67,14 +67,14 @@
     }
 
     .giftAddr {
-      @apply space-y-40;
+      @apply flex flex-col gap-y-40;
     }
 
     .shippingAddr {
-      @apply space-y-9;
+      @apply flex flex-col gap-y-9;
 
       .section {
-        @apply space-y-4;
+        @apply flex flex-col gap-y-4;
 
         .title {
           @apply text-[20px] font-medium leading-[30px];

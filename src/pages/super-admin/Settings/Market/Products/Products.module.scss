@@ -3,15 +3,15 @@
     @apply mt-8 flex w-full flex-col gap-y-4 lg:w-2/3;
 
     .section {
-      p {
+      > p {
         @apply mb-4;
       }
 
-      .emphasize {
+      > .emphasize {
         @apply font-bold;
       }
 
-      .input {
+      > .input {
         @apply w-full;
       }
     }

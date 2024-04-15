@@ -1,4 +1,5 @@
-import { ChangeEvent, useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { FaChevronDown, FaChevronUp, FaMinus, FaPlus } from 'react-icons/fa6';
 import { enqueueSnackbar } from 'notistack';
 
@@ -29,6 +30,8 @@ export function ProductInfo({
   soldByUnit,
   deliveryTypes,
 }: IOrderDetail) {
+  const navigate = useNavigate();
+
   const [cartProduct, setCartProduct] = useState<ICartProduct>({
     styleID: '',
     quantity: 0,
@@ -131,25 +134,49 @@ export function ProductInfo({
       return;
     }
 
-    const cartForm = new FormData();
-    cartForm.append('inventoryId', selectedInvent._id);
-    cartForm.append('vendorId', vendor._id);
-    cartForm.append('price', `${productOffPrice}`);
-    cartForm.append('quantity', cartProduct.quantity.toString());
-    cartForm.append('isPersonalized', `${isPersonalized}`);
+    const reqJson: any = {
+      inventoryId: selectedInvent._id,
+      vendorId: vendor._id,
+      price: productOffPrice + (isPersonalized ? customization.fee : 0),
+      quantity: cartProduct.quantity,
+    };
     if (isPersonalized) {
-      cartForm.append('personFee', customization.fee.toString());
-      cartForm.append('personMessage', customMessage);
+      reqJson.personalization = {
+        fee: customization.fee,
+        message: customMessage,
+      };
     }
-    cartForm.append('image', cartProduct.image as File);
-    HttpService.post('/cart', cartForm).then(response => {
+    if (subscription) {
+      reqJson.subscription = {
+        duration: subscription.duration,
+        discount: subscription.discount,
+        startDate: subscription.startDate,
+        endDate: subscription.endDate,
+      };
+      if (deliveryTypes.includes('Local Subscriptions')) {
+        reqJson.subscription.issubscribed = true;
+        reqJson.subscription.iscsa = true;
+        reqJson.subscription.frequency = {
+          unit:
+            subscription.frequency.toLowerCase() === 'weekly'
+              ? 'week'
+              : subscription.frequency === 'monthly'
+              ? 'month'
+              : '',
+          interval: subscription.duration,
+        };
+      }
+    }
+
+    HttpService.post('/cart', reqJson).then(response => {
       const { status } = response;
       if (status === 200) {
         enqueueSnackbar(`Product: ${name} added to cart.`, {
           variant: 'success',
         });
+        navigate('/checkout');
       } else if (status === 400) {
-        enqueueSnackbar('Alrady purchased same product type.', {
+        enqueueSnackbar('Already purchased same product type.', {
           variant: 'warning',
         });
       } else {
@@ -175,9 +202,13 @@ export function ProductInfo({
     setCustomMessage(e.target.value);
   };
 
-  const onVendorClick = () => {};
+  const onVendorClick = () => {
+    navigate(`/vendors/${vendor._id}`);
+  };
 
-  const onCommunityClick = () => {};
+  const onCommunityClick = () => {
+    navigate(`/communities/${community.slug}`);
+  };
 
   return (
     <div className={styles.root}>
@@ -185,9 +216,15 @@ export function ProductInfo({
         <p className={styles.toVendor} onClick={onVendorClick}>
           {vendor.shopName}
         </p>
-        <p className={styles.toCommunity} onClick={onCommunityClick}>
-          {community.name}
-        </p>
+        <div className={styles.comInfo}>
+          <p className={styles.toCommunity} onClick={onCommunityClick}>
+            {community.name}
+          </p>
+          <img
+            src={`${SERVER_URL}/${community.images.logoUrl}`}
+            alt="Community Logo"
+          />
+        </div>
       </div>
       <div className={styles.blank}></div>
       <div className={styles.images}>
@@ -316,11 +353,11 @@ export function ProductInfo({
         </div>
         <div className={styles.quantity}>
           <span className={styles.minus} onClick={onMinusClick}>
-            <FaMinus size={20} />
+            <FaMinus />
           </span>
           <p>{cartProduct.quantity}cnt</p>
           <span className={styles.plus} onClick={onPlusClick}>
-            <FaPlus size={20} fill="white" />
+            <FaPlus />
           </span>
         </div>
         <Button className={styles.addToCartBtn} onClick={onAddCartClick}>
@@ -339,8 +376,11 @@ export function ProductInfo({
               Subscription Frequency: <span>{subscription?.frequency}</span>
             </p>
             <p className={styles.hint}>
-              <span>Your card will be charged </span>${productPrice} every{' '}
-              {subscription?.duration} weeks <span>or until cancelation</span>
+              <span>Your card will be charged </span>$
+              {productOffPrice *
+                cartProduct.quantity *
+                (subscription?.duration || 1)}{' '}
+              every weeks <span>or until cancelation</span>
             </p>
           </div>
         )}

@@ -141,7 +141,7 @@ export function Business() {
               updateValue={onBusinessChange}
             />
           </div>
-        </div>
+        </div>  
         <div className={styles.buttonBar}>
           <button onClick={onUpdateClick}>Update</button>
         </div>

@@ -29,10 +29,11 @@ export function FulfillDetail() {
         {navItems.map((navItem: INavItem) => (
           <li
             key={navItem.path}
-            className={clsx(
-              styles.navItem,
-              pathname === `${pathPrefix}/${navItem.path}` ? styles.active : '',
-            )}
+            className={clsx(styles.navItem, {
+              [styles.active]: pathname.startsWith(
+                `${pathPrefix}/${navItem.path}`,
+              ),
+            })}
             onClick={() => {
               navigate(`${pathPrefix}/${navItem.path}`);
             }}

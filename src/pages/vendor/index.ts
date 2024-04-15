@@ -6,3 +6,4 @@ export * from './Customers';
 export * from './Community';
 export * from './Goals';
 export * from './Support';
+export * from './Orders';

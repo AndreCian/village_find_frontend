@@ -2,11 +2,8 @@ import { useContext, useEffect, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 
 import { Sidebar, Header } from '@/components/layout/other';
-
 import { HttpService } from '@/services';
-
 import { AuthContext } from '@/providers';
-
 import { setupToken } from '@/utils';
 
 import styles from './Layout.module.scss';
@@ -16,11 +13,11 @@ export function Layout() {
   const navigate = useNavigate();
   const isVendor = location.pathname.startsWith('/vendor');
 
-  const { isLogin, setIsLogin } = useContext(AuthContext);
+  const { isLogin, setIsLogin, setAccount } = useContext(AuthContext);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (isLogin) {
+    if (isLogin || !isVendor) {
       setIsLoading(false);
       return;
     }
@@ -31,9 +28,13 @@ export function Layout() {
       setupToken(token, userRole);
       HttpService.post(`/user/${userRole}/login`, {})
         .then(response => {
-          const { status } = response;
+          const { status, profile } = response;
           if (status === 200) {
             setIsLogin(true);
+            setAccount({
+              role: 'vendor',
+              profile,
+            });
           } else {
             setupToken(null, userRole);
             navigate(userRole === 'vendor' ? '/login/vendor' : '');

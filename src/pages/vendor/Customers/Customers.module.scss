@@ -3,8 +3,10 @@
 
   .customCount {
     @apply flex w-fit items-center gap-x-8;
-
-    span {
+    > p {
+      @apply font-bold;
+    }
+    > span {
       @apply flex min-w-[150px] items-center justify-center rounded-full bg-info py-1 text-2xl font-bold text-success;
     }
   }

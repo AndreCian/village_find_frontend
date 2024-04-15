@@ -1,4 +1,4 @@
-import { useState, useEffect, MouseEvent, useContext } from 'react';
+import { useContext, useEffect, useState, MouseEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import {
@@ -14,11 +14,13 @@ import { Button, Input } from '@/components/forms';
 import { MagnifierIcon, CartIcon, UserIcon } from '@/components/icons';
 import { Logo } from '@/components/layout/customer';
 
-import { AuthContext, SearchbarContext } from '@/providers';
+import { AuthContext, SearchbarContext, ZipcodeContext } from '@/providers';
 
 import { useWindowWidth } from '@/utils/hook/useWindowWidth';
 
 import styles from './Header.module.scss';
+import { ChangeInputEvent } from '@/interfaces';
+import { HttpService } from '@/services';
 
 export interface IHeaderProps {
   switchToScreen: (isScreen: boolean) => void;
@@ -31,18 +33,18 @@ export function Header({
 }: IHeaderProps) {
   const navigate = useNavigate();
 
-  const shopLoc: string = 'Waterbury';
-  const shopZipcode: string = '06705';
-  const cartItemCount: number = 3;
-  // const userName: string = 'Brandon';
+  // const shopLoc: string = 'Waterbury';
+  // const shopZipcode: string = '06705';
 
   const { isLogin, account } = useContext(AuthContext);
   const { isSearchbar } = useContext(SearchbarContext);
+  const { zipcode, cityName, changeZipcode } = useContext(ZipcodeContext);
 
   const [shopLocAnchor, setShopLocAnchor] = useState(-1);
-  const [searchBarAnchor, setSearchBarAnchor] = useState(false);
+  const [cartItemCount, setCartItemCount] = useState(0);
   const [collapseAnchor, setCollapseAnchor] = useState(false);
   const [categoryAnchor, setCategoryAnchor] = useState(true);
+  const [zipcodeInput, setZipcodeInput] = useState('');
   const [_, breakpoint] = useWindowWidth();
 
   const categories = [
@@ -96,11 +98,26 @@ export function Header({
     navigate('/profile');
   };
 
+  const onZipcodeInputKeydown = (e: KeyboardEvent) => {
+    if (e.keyCode === 13) {
+      changeZipcode(zipcodeInput);
+    }
+  };
+
   useEffect(() => {
     if (['sm', 'md', 'lg', 'xl', '2xl', '3xl'].includes(breakpoint as string)) {
       setCollapseAnchor(false);
     }
   }, [breakpoint]);
+
+  useEffect(() => {
+    HttpService.get('/cart/count').then(response => {
+      const { status, count } = response;
+      if (status === 200) {
+        setCartItemCount(count);
+      }
+    });
+  }, []);
 
   return (
     <div
@@ -114,10 +131,12 @@ export function Header({
         <Logo className={styles.logo} />
         <div className={styles.shopLoc} onClick={onShopSelect}>
           <p>You're shopping</p>
-          <p className={styles.locSelect}>
-            <span>{shopLoc}</span>
-            {shopLocAnchor !== -1 ? <FaChevronUp /> : <FaChevronDown />}
-          </p>
+          {cityName && (
+            <p className={styles.locSelect}>
+              <span>{cityName}</span>
+              {shopLocAnchor !== -1 ? <FaChevronUp /> : <FaChevronDown />}
+            </p>
+          )}
         </div>
         <div
           className={clsx(
@@ -148,9 +167,9 @@ export function Header({
               onClick={() => navigate('/checkout')}
             >
               <CartIcon className={styles.icon} />
-              {/* <div className={styles.badge}>
+              <div className={styles.badge}>
                 <span>{cartItemCount}</span>
-              </div> */}
+              </div>
             </div>
           </>
         ) : (
@@ -245,10 +264,12 @@ export function Header({
             <span className={styles.closeIcon} onClick={onShopClose}>
               <AiOutlineClose />
             </span>
-            <div className={styles.shopInfo}>
-              <span>{shopLoc}</span>
-              {shopZipcode}
-            </div>
+            {cityName && (
+              <div className={styles.shopInfo}>
+                <span>{cityName}</span>
+                {zipcode}
+              </div>
+            )}
             <p>
               Enter your zipcode to see items from vendors in your area. There's
               more to explore!
@@ -263,6 +284,11 @@ export function Header({
               size="large"
               borderColor="primary"
               className={styles.searchInput}
+              value={zipcodeInput}
+              updateValue={(e: ChangeInputEvent) =>
+                setZipcodeInput(e.target.value)
+              }
+              onKeyDown={onZipcodeInputKeydown}
             />
           </div>
         )}

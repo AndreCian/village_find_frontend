@@ -19,3 +19,19 @@
     @apply flex h-10 w-10 items-center justify-center rounded-full border border-primary bg-warning;
   }
 }
+
+.statusCell {
+  @apply text-[13px] font-medium leading-[18px];
+
+  div {
+    @apply max-w-[120px];
+  }
+
+  & div:nth-child(2) {
+    @apply mt-1 gap-y-1 rounded-md px-0 py-2;
+
+    span {
+      @apply px-2 py-0.5 text-left text-[13px] leading-[18px] hover:rounded-sm hover:font-medium;
+    }
+  }
+}

@@ -31,7 +31,7 @@ export function InputPiece({
 
   return (
     <span
-      className={clsx(styles.root, className, focused ? styles.focused : '')}
+      className={clsx(styles.root, { [styles.focused]: focused }, className)}
       onClick={onFocus}
       ref={pieceRef}
     >

@@ -17,7 +17,7 @@ export function ProfileHome() {
       <Security />
       <SocialMedia />
       <Store />
-      <ShopOpen isOpen={false} setOpen={() => {}} />
+      <ShopOpen />
     </div>
   );
 }
