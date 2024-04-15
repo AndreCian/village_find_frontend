@@ -1,23 +1,14 @@
+import { useContext } from 'react';
+
 import { Input } from '@/components/forms';
 import { MagnifierIcon } from '@/components/icons';
+import { CategoryContext } from '@/providers';
 
 import styles from './Categories.module.scss';
 
-const initialCats = [
-  'Kitchenware',
-  'Jewelry',
-  'Wedding',
-  'Wood Working',
-  'Metal Working',
-  'Jewelry',
-  'Wedding',
-  'Wood Working',
-  'Metal Working',
-  'Wedding',
-  'Wood Working',
-];
-
 export function Categories() {
+  const { categories } = useContext(CategoryContext);
+
   return (
     <div className={styles.root}>
       <div className={styles.categorybar}>
@@ -33,9 +24,9 @@ export function Categories() {
         />
       </div>
       <ul className={styles.categories}>
-        {initialCats.map((category: string, index: number) => (
+        {categories.map((category: any, index: number) => (
           <li key={`category-${index}`}>
-            <span>{category}</span>
+            <span>{category.name}</span>
           </li>
         ))}
       </ul>

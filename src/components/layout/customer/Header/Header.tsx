@@ -44,20 +44,11 @@ export function Header({
   const [cartItemCount, setCartItemCount] = useState(0);
   const [collapseAnchor, setCollapseAnchor] = useState(false);
   const [categoryAnchor, setCategoryAnchor] = useState(true);
+  const [categories, setCategories] = useState<{ _id: string; name: string }[]>(
+    [],
+  );
   const [zipcodeInput, setZipcodeInput] = useState('');
   const [_, breakpoint] = useWindowWidth();
-
-  const categories = [
-    'Kitchenware',
-    'Jewelry',
-    'Wedding',
-    'Wood Working',
-    'Metal Working',
-    'Jewelry',
-    'Wedding',
-    'Wood Working',
-    'Metal Working',
-  ];
 
   const onShopSelect = (e: MouseEvent) => {
     if (shopLocAnchor === -1) {
@@ -116,6 +107,9 @@ export function Header({
       if (status === 200) {
         setCartItemCount(count);
       }
+    });
+    HttpService.get('/settings/general/category').then(response => {
+      setCategories(response);
     });
   }, []);
 
@@ -231,8 +225,8 @@ export function Header({
                 </p>
                 {categoryAnchor && (
                   <ul>
-                    {categories.map((category: string, index: number) => (
-                      <li key={`${category}-${index}`}>{category}</li>
+                    {categories.map((category: any, index: number) => (
+                      <li key={`${category}-${index}`}>{category.name}</li>
                     ))}
                   </ul>
                 )}
