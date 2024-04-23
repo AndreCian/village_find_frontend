@@ -1,4 +1,5 @@
-import { FaChevronDown } from 'react-icons/fa6';
+import { useState } from 'react';
+import { FaChevronDown, FaChevronUp } from 'react-icons/fa6';
 import { useDrag, useDrop } from 'react-dnd';
 
 import { ITableColumn } from '@/interfaces';
@@ -43,6 +44,8 @@ export function TableRow({
   isLastRow,
   moveItem,
 }: ITableRow) {
+  const [isExpanded, setIsExpanded] = useState(false);
+
   const [, drag] = useDrag<Item>({
     type: ItemTypes.ITEM,
     item: { id: row._id, index: rowIndex },
@@ -75,13 +78,13 @@ export function TableRow({
         ))}
         {expandable && (
           <div className={styles.expandIcon}>
-            <span>
-              <FaChevronDown />
+            <span onClick={() => setIsExpanded(!isExpanded)}>
+              {isExpanded ? <FaChevronUp /> : <FaChevronDown />}
             </span>
           </div>
         )}
       </div>
-      {expandable && expandPanel && (
+      {expandable && expandPanel && isExpanded && (
         <div className={styles.exSection}>{expandPanel}</div>
       )}
       {!isLastRow && (

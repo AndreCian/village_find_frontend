@@ -5,3 +5,4 @@ export * from './TableToolbar';
 export * from './Pagination';
 export * from './Rater';
 export * from './Calendar';
+export * from './LoadingSpinner';

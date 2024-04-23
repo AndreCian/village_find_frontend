@@ -14,9 +14,25 @@ import styles from './OrderHome.module.scss';
 import { HttpService } from '@/services';
 import { enqueueSnackbar } from 'notistack';
 
-const sortOpts = ['Alphabetical Order', 'Most Recent', 'Oldest'];
+const sortOpts = [
+  'Home Delivery Only',
+  'Shipping Only',
+  'Pickup Only',
+  'Safe Pickup Only',
+  'Subscriptions Only',
+  'Alphabetical',
+];
 
-const statusOpts = ['Under Process', 'Canceled', 'Pause'];
+const statusOpts = [
+  'Pending',
+  'Under Process',
+  'Dispatched',
+  'Shipped',
+  'Delivered',
+  'Canceled',
+  'Pause',
+  'Complete',
+];
 
 const initialRange = {
   from: '',
@@ -25,17 +41,19 @@ const initialRange = {
 
 export interface IVendorOrder {
   _id: string;
-  customerID: {
-    firstName: string;
-    lastName: string;
+  customer: {
+    name: string;
+    email: string;
+    phone: string;
+    message: string;
   };
-  vendorID: {
-    shopName: string;
-  };
-  orderInfo: {
-    deliveryType: string;
+  deliveryInfo: {
+    orderDate: string;
+    classification: string;
   };
   product: {
+    image: string;
+    name: string;
     price: number;
     quantity: number;
     discount: number;
@@ -92,17 +110,7 @@ export function OrderHome() {
       name: 'customer',
       width: 200,
       cell: (row: IVendorOrder) => (
-        <span className={styles.cell}>
-          {row.customerID.firstName} {row.customerID.lastName}
-        </span>
-      ),
-    },
-    {
-      title: 'Vendor',
-      name: 'vendor',
-      width: 150,
-      cell: (row: IVendorOrder) => (
-        <span className={styles.cell}>{row.vendorID.shopName}</span>
+        <span className={styles.cell}>{row.customer.name}</span>
       ),
     },
     {
@@ -110,19 +118,19 @@ export function OrderHome() {
       name: 'fulfillment',
       width: 200,
       cell: (row: IVendorOrder) => (
-        <span className={styles.cell}>{row.orderInfo.deliveryType}</span>
+        <span className={styles.cell}>{row.deliveryInfo.classification}</span>
       ),
     },
     {
       title: 'Order Date',
       name: 'date',
-      width: 150,
+      width: 200,
       cell: (row: IVendorOrder) => (
         <Input
           type="date"
-          value={formatDate(row.createdAt)}
           rounded="full"
           bgcolor="secondary"
+          value={row.deliveryInfo.orderDate}
         />
       ),
     },

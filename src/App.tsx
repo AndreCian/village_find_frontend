@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { SnackbarProvider, MaterialDesignContent } from 'notistack';
 import styled from 'styled-components';
@@ -9,7 +10,8 @@ import {
   SearchbarProvider,
   ZipcodeProvider,
 } from '@/providers';
-import { useEffect } from 'react';
+import { useAppSelector } from './redux/store';
+import { LoadingSpinner } from './components';
 
 const StyledMaterialDesignContent = styled(MaterialDesignContent)(() => ({
   '&.notistack-MuiContent-success': {
@@ -24,6 +26,8 @@ function App() {
   const location = useLocation();
   const pathname = location.pathname;
   const hash = location.hash;
+
+  const isLoading = useAppSelector(state => state.loader.isLoading);
 
   useEffect(() => {
     if (!hash) window.scrollTo(0, 0);
@@ -45,6 +49,7 @@ function App() {
           success: StyledMaterialDesignContent,
         }}
       />
+      {isLoading && <LoadingSpinner />}
     </>
   );
 }

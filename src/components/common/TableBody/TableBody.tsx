@@ -4,9 +4,9 @@ import { HTML5Backend } from 'react-dnd-html5-backend';
 import clsx from 'clsx';
 
 import { ITableColumn } from '@/interfaces';
+import { TableRow } from '../TableRow';
 
 import styles from './TableBody.module.scss';
-import { TableRow } from '../TableRow';
 
 export interface ITableBodyProps {
   columns: ITableColumn[];

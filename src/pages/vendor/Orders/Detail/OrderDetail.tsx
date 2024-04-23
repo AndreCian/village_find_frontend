@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import clsx from 'clsx';
 
@@ -13,278 +13,88 @@ import { formatDate } from '@/utils';
 import OrderImg from '/assets/admin/backs/order.png';
 import styles from './OrderDetail.module.scss';
 import { HttpService } from '@/services';
+import { SERVER_URL } from '@/config/global';
+import { enqueueSnackbar } from 'notistack';
 
-type OrderType = 'Shipping' | 'Subscription, Home Delivery';
-type PaymentType = 'Paid Up Front';
-type PaymentStatus = 'Pause';
-
-interface IOrder {
-  date: Date;
-  classification: OrderType;
-  address: string;
-  orderMsg: string;
-  substitutes: boolean;
-  personalization?: string;
-  gift?: IGiftInfo;
-  info?: IOrderInfo;
-  orderItems: IOrderItem[];
-}
-
-interface IOrderItem {
-  image: React.ReactNode;
-  product: string;
-  rate?: string;
-  fee?: number;
-  price: number;
-  quantity: number;
-  discount: number;
-}
-
-interface IGiftInfo {
-  recipient: string;
-  email: string;
-  phone: string;
-  customMsg: string;
-}
-
-interface IOrderInfo {
-  subscription: {
-    current: number;
-    total: number;
+interface IOrderDetail {
+  orderID: number;
+  customer: {
+    name: string;
+    email: string;
+    phone: string;
+    address: string;
   };
-  payType: PaymentType;
-  status: PaymentStatus;
+  deliveryType: string;
+  deliveryInfo: {
+    orderDate: Date;
+    classification: string;
+    address: string;
+    instruction: string;
+    isSubstitute: boolean;
+  };
+  gift?: {
+    recipient: string;
+    email: string;
+    phone: string;
+    message: string;
+  };
+  product: {
+    image: string;
+    name: string;
+    shipping?: {
+      service: string;
+      rate: number;
+    };
+    delivery?: {
+      fee: number;
+    };
+    subscription?: {
+      cycle: {
+        total: number;
+        current: number;
+      };
+      status: string;
+      payment: string;
+    };
+    price: number;
+    quantity: number;
+    discount: number;
+  };
+  personalization: string;
 }
-
-interface ICustomer {
-  name: string;
-  email: string;
-  phone: string;
-  address: string;
-}
-
-export interface IOrderDetail {
-  id: number;
-  customer: ICustomer;
-  shipping: IOrder;
-  homeDelivery: IOrder;
-}
-
-export interface IOrderDetailBeta {}
-
-const initialShippingItems: IOrderItem[] = [
-  {
-    image: <img src={OrderImg} className={styles.orderImage} />,
-    product: 'Black Polish Radish',
-    rate: 'USPS Priority Mail $12.67',
-    price: 23.56,
-    quantity: 1,
-    discount: 0,
-  },
-  {
-    image: <img src={OrderImg} className={styles.orderImage} />,
-    product: 'Bowls of Worth',
-    rate: 'USPS Priority Mail $12.67',
-    price: 23.56,
-    quantity: 1,
-    discount: 0,
-  },
-];
-
-const initialHomeDeliveryItems: IOrderItem[] = [
-  {
-    image: <img src={OrderImg} className={styles.orderImage} />,
-    product: 'Black Polish Radish',
-    fee: 9.99,
-    price: 23.56,
-    quantity: 1,
-    discount: 0,
-  },
-];
-
-const initialHomeDeliveryInfo: IOrderInfo = {
-  subscription: {
-    current: 1,
-    total: 15,
-  },
-  payType: 'Paid Up Front',
-  status: 'Pause',
-};
 
 const initialOrderDet: IOrderDetail = {
-  id: 834,
-  shipping: {
-    date: new Date('04/22/2023'),
-    classification: 'Shipping',
-    address: '313 Capitol Avenue Waterbury, Ct 06705',
-    orderMsg: 'Leave package on patio.',
-    substitutes: false,
-    gift: {
-      recipient: 'Nancy Macnimair',
-      email: 'nancy@gmail.com',
-      phone: '401-400-1249',
-      customMsg:
-        'Hey Nancy, I want to say I love you and I hope this gift finds you well.',
-    },
-    personalization:
-      'Write on the front of the item: For my love and life - Nancy',
-    orderItems: initialShippingItems,
-  },
+  orderID: 0,
   customer: {
-    name: 'Customer: Nathan Bargatzbe',
-    email: 'brandon@fresherchoice.com',
-    phone: '203-228-8814',
-    address: '122 Park Street Bristol, Ct 06010',
+    name: '',
+    email: '',
+    phone: '',
+    address: '',
   },
-  homeDelivery: {
-    date: new Date('04/22/2023'),
-    classification: 'Subscription, Home Delivery',
-    address: '122 Park Street Bristol, Ct 06010',
-    orderMsg: 'Leave my package on the back of the patio.',
-    substitutes: false,
-    orderItems: initialHomeDeliveryItems,
-    info: initialHomeDeliveryInfo,
+  deliveryType: '',
+  deliveryInfo: {
+    orderDate: new Date(),
+    classification: '',
+    address: '',
+    instruction: '',
+    isSubstitute: false,
   },
+  product: {
+    image: '',
+    name: '',
+    shipping: {
+      service: '',
+      rate: 0,
+    },
+    delivery: {
+      fee: 0,
+    },
+    price: 0,
+    quantity: 0,
+    discount: 0,
+  },
+  personalization: '',
 };
-
-const shippingTableColumns: ITableColumn[] = [
-  {
-    title: 'Image',
-    name: 'image',
-    width: 100,
-  },
-  {
-    title: 'Product Name',
-    name: 'product',
-    width: 250,
-    cell: (row: IOrderItem) => (
-      <span className={styles.bold}>{row.product}</span>
-    ),
-  },
-  {
-    title: 'Shipping Rate Selected',
-    name: 'rate',
-    width: 250,
-  },
-  {
-    title: 'Product Price',
-    name: 'price',
-    width: 150,
-    cell: (row: IOrderItem) => (
-      <Input
-        rounded="full"
-        bgcolor="secondary"
-        adornment={{ position: 'left', content: '$' }}
-        value={row.price.toFixed(2)}
-      />
-    ),
-  },
-  {
-    title: 'Order Quantity',
-    name: 'quantity',
-    width: 200,
-    cell: (row: IOrderItem) => (
-      <Input
-        rounded="full"
-        bgcolor="secondary"
-        value={row.quantity.toFixed(3)}
-      />
-    ),
-  },
-  {
-    title: 'Price',
-    name: 'price',
-    width: 100,
-    cell: (row: IOrderItem) => <span>${row.price * row.quantity}</span>,
-  },
-  {
-    title: 'Discount',
-    name: 'discount',
-    width: 100,
-    cell: (row: IOrderItem) => <span>{row.discount} %</span>,
-  },
-  {
-    title: 'Net Price',
-    name: 'nprice',
-    width: 150,
-    cell: (row: IOrderItem) => (
-      <span className={styles.bold}>
-        $
-        {((row.price * row.quantity * (100 - row.discount)) / 100.0).toFixed(2)}
-      </span>
-    ),
-  },
-];
-
-const homeDeliveryTableColumns: ITableColumn[] = [
-  {
-    title: 'Image',
-    name: 'image',
-    width: 100,
-  },
-  {
-    title: 'Product Name',
-    name: 'product',
-    width: 250,
-    cell: (row: IOrderItem) => (
-      <span className={styles.bold}>{row.product}</span>
-    ),
-  },
-  {
-    title: 'Home Delivery Fee',
-    name: 'fee',
-    width: 250,
-    cell: (row: IOrderItem) => <span>${row.fee?.toFixed(2)}</span>,
-  },
-  {
-    title: 'Product Price',
-    name: 'price',
-    width: 150,
-    cell: (row: IOrderItem) => (
-      <Input
-        rounded="full"
-        bgcolor="secondary"
-        adornment={{ position: 'left', content: '$' }}
-        value={row.price.toFixed(2)}
-      />
-    ),
-  },
-  {
-    title: 'Order Quantity',
-    name: 'quantity',
-    width: 200,
-    cell: (row: IOrderItem) => (
-      <Input
-        rounded="full"
-        bgcolor="secondary"
-        value={row.quantity.toFixed(3)}
-      />
-    ),
-  },
-  {
-    title: 'Price',
-    name: 'price',
-    width: 100,
-    cell: (row: IOrderItem) => <span>${row.price * row.quantity}</span>,
-  },
-  {
-    title: 'Discount',
-    name: 'discount',
-    width: 100,
-    cell: (row: IOrderItem) => <span>{row.discount} %</span>,
-  },
-  {
-    title: 'Net Price',
-    name: 'nprice',
-    width: 150,
-    cell: (row: IOrderItem) => (
-      <span className={styles.bold}>
-        $
-        {((row.price * row.quantity * (100 - row.discount)) / 100.0).toFixed(2)}
-      </span>
-    ),
-  },
-];
 
 const BACK_PATH = '/vendor/order';
 
@@ -297,12 +107,95 @@ export function OrderDetail() {
     navigate(BACK_PATH);
   };
 
+  const onAddressClick = (address: string) => {
+    navigator.clipboard
+      .writeText(address)
+      .then(() => {
+        enqueueSnackbar('Address copied', { variant: 'success' });
+      })
+      .catch(err => {
+        enqueueSnackbar(
+          'Copy failed. Please check browser clipboard setting.',
+          { variant: 'warning' },
+        );
+      });
+  };
+
+  const orderProductColumns = useMemo(() => {
+    return [
+      {
+        name: 'image',
+        title: 'Image',
+        cell: (row: any) => <img src={`${SERVER_URL}/${row.image}`} />,
+      },
+      {
+        name: 'name',
+        title: 'Product Name',
+        width: 200,
+      },
+      ...[
+        orderDetail.deliveryInfo.classification === 'Shipping'
+          ? {
+              name: 'shipping',
+              title: 'Shipping Rate Selected',
+              cell: (row: any) => (
+                <p>
+                  {row.shipping.service} ${row.shipping.rate}
+                </p>
+              ),
+              width: 200,
+            }
+          : {
+              name: 'delivery',
+              title: `${orderDetail.deliveryInfo.classification} Fee`,
+              cell: (row: any) => <p>${row.delivery.fee}</p>,
+            },
+      ],
+      {
+        name: 'price',
+        title: 'Product Price',
+      },
+      {
+        name: 'qantity',
+        title: 'Order Quantity',
+      },
+      {
+        name: 'total price',
+        title: 'Price',
+        cell: (row: any) => (
+          <p>
+            $
+            {((row.price * row.quantity * (100 - row.discount)) / 100).toFixed(
+              2,
+            )}
+          </p>
+        ),
+      },
+      {
+        name: 'discount',
+        title: 'Discount',
+        cell: (row: any) => <p>%{row.discount}</p>,
+      },
+      {
+        name: 'net price',
+        title: 'Net Price',
+        cell: (row: any) => (
+          <p>
+            $
+            {(
+              (row.price * row.quantity * (100 - row.discount)) / 100 +
+              (row.shipping?.rate || row.delivery.fee)
+            ).toFixed(2)}
+          </p>
+        ),
+      },
+    ];
+  }, [orderDetail]);
+
   useEffect(() => {
     if (!orderID) return;
     HttpService.get(`/order/vendor/${orderID}`).then(response => {
-      const { status, order } = response;
-      if (status === 200) {
-      }
+      setOrderDetail(response as IOrderDetail);
     });
   }, [orderID]);
 
@@ -313,7 +206,7 @@ export function OrderDetail() {
       </button>
       <Card title="Order Details" className={styles.detail}>
         <p>
-          <span>Order Id:</span> {orderDetail.id}
+          <span>Order Id:</span> {orderDetail.orderID}
         </p>
         <p>
           <span>Customer:</span> {orderDetail.customer.name}
@@ -321,185 +214,121 @@ export function OrderDetail() {
       </Card>
       <Card className={styles.infoSection}>
         <div className={styles.subInfo}>
-          <h2>Ship Order Information</h2>
+          <h2>
+            {`${orderDetail.deliveryInfo.classification} Order Information`}
+          </h2>
           <div className={styles.horizon}>
             <p className={styles.label}>Order date</p>
-            <p>{formatDate(orderDetail.shipping.date)}</p>
+            <p>{formatDate(orderDetail.deliveryInfo.orderDate)}</p>
           </div>
           <div className={styles.horizon}>
             <p className={styles.label}>Order Classification</p>
-            <p>{orderDetail.shipping.classification}</p>
+            <p>{orderDetail.deliveryInfo.classification}</p>
           </div>
           <div className={styles.horizon}>
-            <p className={styles.label}>Shipping Address</p>
+            <p className={styles.label}>
+              {`${orderDetail.deliveryInfo.classification} Address`}
+            </p>
             <Input
-              value={orderDetail.shipping.address}
               rounded="full"
               bgcolor="secondary"
               disabled={true}
-              adornment={{ position: 'right', content: <ClipboardIcon /> }}
+              adornment={{
+                position: 'right',
+                content: <ClipboardIcon />,
+                onClick: () => onAddressClick(orderDetail.deliveryInfo.address),
+              }}
+              value={orderDetail.deliveryInfo.address}
+              className={styles.addressInput}
             />
           </div>
           <div className={styles.horizon}>
             <p className={styles.label}>Delivery Instructions</p>
-            <p>{orderDetail.shipping.orderMsg}</p>
+            <p>{orderDetail.deliveryInfo.instruction}</p>
           </div>
           <div className={styles.horizon}>
             <p className={styles.label}>Substitutes</p>
-            <p>{orderDetail.shipping.substitutes ? 'Yes' : 'No'}</p>
+            <p>{orderDetail.deliveryInfo.isSubstitute ? 'Yes' : 'No'}</p>
           </div>
         </div>
-        <div className={styles.subInfo}>
-          <h2>Gift Information</h2>
-          <div className={styles.horizon}>
-            <p className={styles.label}>Recipient's Name</p>
-            <p>{orderDetail.shipping.gift?.recipient}</p>
+        {orderDetail.gift && (
+          <div className={styles.subInfo}>
+            <h2>Gift Information</h2>
+            <div className={styles.horizon}>
+              <p className={styles.label}>Recipient's Name</p>
+              <p>{orderDetail.gift.recipient}</p>
+            </div>
+            <div className={styles.horizon}>
+              <p className={styles.label}>Email</p>
+              <p>{orderDetail.gift.email}</p>
+            </div>
+            <div className={styles.horizon}>
+              <p className={styles.label}>Phone Number</p>
+              <p>{orderDetail.gift.phone}</p>
+            </div>
+            <div className={styles.horizon}>
+              <p className={styles.label}>Custom Message</p>
+              <p>{orderDetail.gift.message}</p>
+            </div>
           </div>
+        )}
+      </Card>
+      {orderDetail.deliveryInfo.classification !== 'Shipping' && (
+        <Card title="Customer Information" className={styles.customInfo}>
           <div className={styles.horizon}>
             <p className={styles.label}>Email</p>
-            <p>{orderDetail.shipping.gift?.email}</p>
+            <p>{orderDetail.customer.email}</p>
           </div>
           <div className={styles.horizon}>
             <p className={styles.label}>Phone Number</p>
-            <p>{orderDetail.shipping.gift?.phone}</p>
+            <p>{orderDetail.customer.phone}</p>
           </div>
           <div className={styles.horizon}>
-            <p className={styles.label}>Custom Message</p>
-            <p>{orderDetail.shipping.gift?.customMsg}</p>
+            <p className={styles.label}>Address</p>
+            <p>{orderDetail.customer.address}</p>
           </div>
-        </div>
-      </Card>
-      <Card title="Card Personalization" className={styles.personSection}>
-        {orderDetail.shipping.personalization}
-      </Card>
+        </Card>
+      )}
+      {orderDetail.personalization && (
+        <Card title="Order Personalization" className={styles.personSection}>
+          {orderDetail.personalization}
+        </Card>
+      )}
       <Card className={styles.shippingTableSection}>
         <TableBody
-          columns={shippingTableColumns}
-          rows={orderDetail.shipping.orderItems}
+          columns={orderProductColumns}
+          rows={[orderDetail.product]}
           className={styles.shippingTable}
           expandable={true}
           expandPanel={
             <div className={styles.shippingExpandPanel}>
-              <div className={styles.subPanel}>
-                <h3>Gift Information</h3>
-                <div className={styles.horizon}>
-                  <p className={styles.label}>Recipient's Name</p>
-                  <p>{orderDetail.shipping.gift?.recipient}</p>
+              {orderDetail.gift && (
+                <div className={styles.subPanel}>
+                  <h3>Gift Information</h3>
+                  <div className={styles.horizon}>
+                    <p className={styles.label}>Recipient's Name</p>
+                    <p>{orderDetail.gift.recipient}</p>
+                  </div>
+                  <div className={styles.horizon}>
+                    <p className={styles.label}>Email</p>
+                    <p>{orderDetail.gift.email}</p>
+                  </div>
+                  <div className={styles.horizon}>
+                    <p className={styles.label}>Phone Number</p>
+                    <p>{orderDetail.gift.phone}</p>
+                  </div>
+                  <div className={styles.horizon}>
+                    <p className={styles.label}>Custom Message</p>
+                    <p>{orderDetail.gift.message}</p>
+                  </div>
                 </div>
-                <div className={styles.horizon}>
-                  <p className={styles.label}>Email</p>
-                  <p>{orderDetail.shipping.gift?.email}</p>
+              )}
+              {orderDetail.personalization && (
+                <div className={styles.subPanel}>
+                  <h3>Order Personalization</h3>
+                  <p>{orderDetail.personalization}</p>
                 </div>
-                <div className={styles.horizon}>
-                  <p className={styles.label}>Phone Number</p>
-                  <p>{orderDetail.shipping.gift?.phone}</p>
-                </div>
-                <div className={styles.horizon}>
-                  <p className={styles.label}>Custom Message</p>
-                  <p>{orderDetail.shipping.gift?.customMsg}</p>
-                </div>
-              </div>
-              <div className={styles.subPanel}>
-                <h3>Order Personalization</h3>
-                <p>{orderDetail.shipping.personalization}</p>
-              </div>
-              <div className={styles.subPanel}>
-                <h3>Actions</h3>
-                <div className={styles.actions}>
-                  <button className={clsx(styles.button, styles.refund)}>
-                    Refund
-                  </button>
-                  <button className={clsx(styles.button, styles.replace)}>
-                    Replace Item
-                  </button>
-                  <Input
-                    value="Print"
-                    rounded="full"
-                    border="none"
-                    bgcolor="secondary"
-                    disabled={true}
-                    adornment={{ position: 'right', content: <PrintIcon /> }}
-                    className={styles.print}
-                  />
-                </div>
-              </div>
-            </div>
-          }
-        />
-      </Card>
-      <Card
-        title="Home Delivery Order Information"
-        className={styles.homeDelSection}
-      >
-        <div className={styles.form}>
-          <div className={styles.horizon}>
-            <p className={styles.label}>Order Date</p>
-            <p>{formatDate(orderDetail.homeDelivery.date)}</p>
-          </div>
-          <div className={styles.horizon}>
-            <p className={styles.label}>Order Clasification</p>
-            <p>{orderDetail.homeDelivery.classification}</p>
-          </div>
-          <div className={styles.horizon}>
-            <p className={styles.label}>Home Delivery Address</p>
-            <Input
-              value={orderDetail.homeDelivery.address}
-              rounded="full"
-              bgcolor="secondary"
-              disabled={true}
-              adornment={{ position: 'right', content: <ClipboardIcon /> }}
-            />
-          </div>
-          <div className={styles.horizon}>
-            <p className={styles.label}>Order Instructions</p>
-            <p>{orderDetail.homeDelivery.orderMsg}</p>
-          </div>
-          <div className={styles.horizon}>
-            <p className={styles.label}>Substitutes</p>
-            <p>{orderDetail.homeDelivery.substitutes ? 'Yes' : 'No'}</p>
-          </div>
-        </div>
-      </Card>
-      <Card title="Customer Information" className={styles.customInfo}>
-        <div className={styles.horizon}>
-          <p className={styles.label}>Email</p>
-          <p>{orderDetail.customer.email}</p>
-        </div>
-        <div className={styles.horizon}>
-          <p className={styles.label}>Phone Number</p>
-          <p>{orderDetail.customer.phone}</p>
-        </div>
-        <div className={styles.horizon}>
-          <p className={styles.label}>Address</p>
-          <p>{orderDetail.customer.address}</p>
-        </div>
-      </Card>
-      <Card className={styles.homeDeliveryTableSection}>
-        <TableBody
-          columns={homeDeliveryTableColumns}
-          rows={orderDetail.homeDelivery.orderItems}
-          className={styles.homeDeliveryTable}
-          expandable={true}
-          expandPanel={
-            <div className={styles.shippingExpandPanel}>
-              <div className={styles.subPanel}>
-                <h3>Order Information</h3>
-                <div className={styles.horizon}>
-                  <p className={styles.label}>Subscription</p>
-                  <p>
-                    {orderDetail.homeDelivery.info?.subscription.current} of{' '}
-                    {orderDetail.homeDelivery.info?.subscription.total}
-                  </p>
-                </div>
-                <div className={styles.horizon}>
-                  <p className={styles.label}>Payment</p>
-                  <p>{orderDetail.homeDelivery.info?.payType}</p>
-                </div>
-                <div className={styles.horizon}>
-                  <p className={styles.label}>Status</p>
-                  <p>{orderDetail.homeDelivery.info?.status}</p>
-                </div>
-              </div>
+              )}
               <div className={styles.subPanel}>
                 <h3>Actions</h3>
                 <div className={styles.actions}>

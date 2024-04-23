@@ -15,6 +15,7 @@ export interface IAdornment {
   position: AdornmentType;
   content: React.ReactNode | string;
   isText?: boolean;
+  onClick?: () => void;
 }
 
 export interface IInputProps {
@@ -33,6 +34,7 @@ export interface IInputProps {
   adornment?: IAdornment;
   className?: string;
   disabled?: boolean;
+  valueVisible?: boolean;
 
   onClick?: () => void;
   onFocus?: () => void;
@@ -61,6 +63,7 @@ export const Input = forwardRef((props: IInputProps, ref: any) => {
     onBlur = () => {},
     onFocus = () => {},
     onKeyDown = () => {},
+    valueVisible = true,
     ...nativeAttrs
   } = props;
   const classes = clsx(
@@ -92,7 +95,7 @@ export const Input = forwardRef((props: IInputProps, ref: any) => {
       <input
         name={name}
         type={type}
-        value={disabled ? '' : value}
+        value={valueVisible || !disabled ? value : ''}
         disabled={disabled}
         placeholder={placeholder}
         className={styles.input}
@@ -114,6 +117,7 @@ export const Input = forwardRef((props: IInputProps, ref: any) => {
               ? styles.textBar
               : styles.circleBar,
           )}
+          onClick={adornment.onClick || (() => {})}
         >
           {adornment.content}
         </span>
