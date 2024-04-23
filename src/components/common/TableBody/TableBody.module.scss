@@ -15,25 +15,6 @@
 
   .body {
     @apply mb-8 flex h-fit w-fit flex-col;
-
-    .row {
-      @apply flex h-16 items-center;
-
-      & > div {
-        @apply w-40 shrink-0 px-5;
-
-        & * {
-        }
-      }
-
-      .expandIcon {
-        @apply w-10;
-
-        span {
-          @apply flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-info;
-        }
-      }
-    }
   }
 }
 

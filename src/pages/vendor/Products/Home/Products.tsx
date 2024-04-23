@@ -7,7 +7,7 @@ import { Input, Select } from '@/components/forms';
 import { TrashIcon } from '@/components/icons';
 
 import { HttpService } from '@/services';
-import { ITableColumn } from '@/interfaces';
+import { ChangeInputEvent, ITableColumn } from '@/interfaces';
 import { SERVER_URL } from '@/config/global';
 import { capitalizeFirstLetter } from '@/utils';
 
@@ -22,10 +22,15 @@ interface IProductItem {
 }
 
 const statusList = ['Active', 'Inactive', 'Delete'];
+const sortOptions = ['Newest', 'Oldest', 'Active', 'Inactive'];
 
 export function Products() {
   const navigate = useNavigate();
   const [products, setProducts] = useState<IProductItem[]>([]);
+  const [nameFilter, setNameFilter] = useState('');
+  const [idFilter, setIdFilter] = useState('');
+  const [skuFilter, setSkuFilter] = useState('');
+  const [sortBy, setSortBy] = useState('newest');
 
   const onStatusChange = (productId: string) => (value: string) => {
     HttpService.put(`/products/${productId}`, { status: value }).then(
@@ -66,22 +71,6 @@ export function Products() {
       width: 150,
     },
     {
-      title: 'Inventory',
-      name: 'inventory',
-      width: 300,
-      cell: (row: any) => (
-        <div className={styles.inventCell}>
-          <Input
-            className={styles.input}
-            rounded="full"
-            type="number"
-            value={row.inventory}
-          />
-          <button className={styles.button}>Update</button>
-        </div>
-      ),
-    },
-    {
       title: 'Status',
       name: 'status',
       width: 250,
@@ -118,10 +107,16 @@ export function Products() {
   ];
 
   useEffect(() => {
-    HttpService.get('/products/vendor').then(response => {
+    const params: any = {
+      name: nameFilter,
+      id: idFilter,
+      sku: skuFilter,
+      sortBy,
+    };
+    HttpService.get('/products/vendor', params).then(response => {
       setProducts(response);
     });
-  }, []);
+  }, [nameFilter, idFilter, skuFilter, sortBy]);
 
   return (
     <Card title="My Products" className={styles.root}>
@@ -134,15 +129,22 @@ export function Products() {
               border="none"
               bgcolor="secondary"
               placeholder="Product Name"
+              value={nameFilter}
+              updateValue={(e: ChangeInputEvent) =>
+                setNameFilter(e.target.value)
+              }
             />
           </div>
           <div className={styles.control}>
             <p>Product Id</p>
             <Input
+              type="number"
               rounded="full"
               border="none"
               bgcolor="secondary"
               placeholder="Product Id"
+              value={idFilter}
+              updateValue={(e: ChangeInputEvent) => setIdFilter(e.target.value)}
             />
           </div>
           <div className={styles.control}>
@@ -152,6 +154,10 @@ export function Products() {
               border="none"
               bgcolor="secondary"
               placeholder="Product SKU"
+              value={skuFilter}
+              updateValue={(e: ChangeInputEvent) =>
+                setSkuFilter(e.target.value)
+              }
             />
           </div>
           <div className={styles.control}>
@@ -162,6 +168,12 @@ export function Products() {
               bgcolor="primary"
               placeholder="Sort By"
               className={styles.select}
+              options={sortOptions.map(item => ({
+                name: item,
+                value: item.toLowerCase(),
+              }))}
+              value={sortBy}
+              updateValue={(value: string) => setSortBy(value)}
             />
           </div>
           <div className={styles.buttonBar}>

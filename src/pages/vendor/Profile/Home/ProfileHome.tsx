@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 
 import {
   Business,
@@ -9,8 +9,10 @@ import {
 } from '@/components/vendor';
 
 import styles from './ProfileHome.module.scss';
+import { useLocation } from 'react-router-dom';
 
 export function ProfileHome() {
+
   return (
     <div className={styles.root}>
       <Business />

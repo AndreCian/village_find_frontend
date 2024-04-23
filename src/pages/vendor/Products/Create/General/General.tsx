@@ -17,6 +17,7 @@ import { MagicIcon } from '@/components/icons';
 import { HttpService } from '@/services';
 
 import styles from './General.module.scss';
+import { ChangeInputEvent } from '@/interfaces';
 
 type PayType = 'Shipping' | 'Near By' | 'Local Subscriptions';
 type TopicType =
@@ -104,6 +105,13 @@ export function General() {
     setGeneralInfo({
       ...generalInfo,
       deliveryTypes: [...deliveryTypes, value as PayType],
+    });
+  };
+
+  const onProductChange = (e: ChangeInputEvent) => {
+    setGeneralInfo({
+      ...generalInfo,
+      [e.target.name]: e.target.value,
     });
   };
 
@@ -215,13 +223,14 @@ export function General() {
             <div className={styles.control}>
               <p>Product name</p>
               <Input
+                name="name"
                 rounded="full"
                 border="none"
                 bgcolor="secondary"
                 placeholder="Product name"
                 value={generalInfo.name}
+                updateValue={onProductChange}
                 className={styles.input}
-                disabled={true}
                 adornment={{
                   position: 'right',
                   content: (
@@ -233,13 +242,14 @@ export function General() {
             <div className={styles.control}>
               <p>Short Product Description</p>
               <Input
+                name="shortDesc"
                 rounded="full"
                 border="none"
                 bgcolor="secondary"
                 placeholder="Short Product Description"
-                disabled={true}
                 className={styles.input}
                 value={generalInfo.shortDesc}
+                updateValue={onProductChange}
                 adornment={{
                   position: 'right',
                   content: (
@@ -253,12 +263,13 @@ export function General() {
             <div className={styles.control}>
               <p>Long Product Description</p>
               <TextField
+                name="longDesc"
                 rounded="full"
                 border="none"
                 bgcolor="secondary"
                 placeholder="Long Product Description"
-                disabled={true}
                 value={generalInfo.longDesc}
+                updateValue={onProductChange}
                 className={styles.textInput}
                 adornment={{
                   position: 'right',
@@ -273,13 +284,14 @@ export function General() {
             <div className={styles.control}>
               <p>Discalimer</p>
               <TextField
+                name="disclaimer"
                 rounded="full"
                 border="none"
                 bgcolor="secondary"
                 placeholder="Disclaimer"
-                disabled={true}
                 className={styles.textInput}
                 value={generalInfo.disclaimer}
+                updateValue={onProductChange}
                 adornment={{
                   position: 'right',
                   content: (

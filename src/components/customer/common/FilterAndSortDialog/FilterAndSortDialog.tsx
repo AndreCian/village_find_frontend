@@ -1,36 +1,45 @@
 import { useState, useEffect, useRef } from 'react';
 import { FaTimes } from 'react-icons/fa';
-
 import clsx from 'clsx';
 
 import { Button, Input, Select } from '@/components/forms';
-
+import { ChangeInputEvent } from '@/interfaces';
 import { useOnClickOutside } from '@/utils';
 
 import styles from './FilterAndSortDialog.module.scss';
 
 interface IFilterAndSortDialogProps {
   open: boolean;
-  onApply?: () => void;
+  onApply?: (options: any) => void;
   onClose?: () => void;
+  minPrice: string;
+  maxPrice: string;
+  sortOrder: string;
 }
 
-const initialSortOptions = ['Sort Alphabetically, A-Z'];
+const initialSortOptions = [
+  { name: 'Sort Alphabetically, A-Z', value: 'ascending' },
+  { name: 'Sort Alphabetically, Z-A', value: 'descending' },
+  { name: 'None', value: 'none' },
+];
 
 export function FilterAndSortDialog({
   open,
   onApply = () => {},
   onClose = () => {},
+  minPrice,
+  maxPrice,
+  sortOrder,
 }: IFilterAndSortDialogProps) {
   const [price, setPrice] = useState({
-    min: 0,
-    max: 0,
+    min: minPrice,
+    max: maxPrice,
   });
-  const [orderBy, setOrderBy] = useState('Sort Alphabetically, A-Z');
+  const [orderBy, setOrderBy] = useState(sortOrder);
   const dialogRef = useRef<HTMLDivElement>(null);
 
-  const onPriceChange = (which: string) => (e: any) => {
-    setPrice({ ...price, [which]: e.target.value });
+  const onPriceChange = (e: ChangeInputEvent) => {
+    setPrice({ ...price, [e.target.name]: e.target.value });
   };
 
   const onSortChange = (sort: string) => {
@@ -38,7 +47,11 @@ export function FilterAndSortDialog({
   };
 
   const onApplyClick = () => {
-    onApply();
+    onApply({
+      minPrice: price.min,
+      maxPrice: price.max,
+      sortOrder: orderBy,
+    });
   };
 
   useEffect(() => {
@@ -61,8 +74,20 @@ export function FilterAndSortDialog({
           <div className={styles.filter}>
             <label>Price</label>
             <div className={styles.filterInput}>
-              <Input placeholder="Min Price" className={styles.input} />
-              <Input placeholder="Max Price" className={styles.input} />
+              <Input
+                name="min"
+                placeholder="Min Price"
+                className={styles.input}
+                value={price.min}
+                updateValue={onPriceChange}
+              />
+              <Input
+                name="max"
+                placeholder="Max Price"
+                className={styles.input}
+                value={price.max}
+                updateValue={onPriceChange}
+              />
             </div>
           </div>
           <div className={styles.sort}>

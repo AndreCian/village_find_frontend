@@ -21,11 +21,16 @@ import { useWindowWidth } from '@/utils/hook/useWindowWidth';
 import styles from './Header.module.scss';
 import { ChangeInputEvent } from '@/interfaces';
 import { HttpService } from '@/services';
+import { LocationConfirmDialog } from '@/components/customer';
+import { getLocationFromZipcode } from '@/utils/third-api/zipcode';
+import { capitalizeFirstLetter } from '@/utils';
 
 export interface IHeaderProps {
   switchToScreen: (isScreen: boolean) => void;
   className?: string;
 }
+
+const screenBlackList = ['/login/vendor'];
 
 export function Header({
   className = '',
@@ -36,17 +41,17 @@ export function Header({
   const pathname = location.pathname;
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // const shopLoc: string = 'Waterbury';
-  // const shopZipcode: string = '06705';
-
   const { isLogin, account } = useContext(AuthContext);
   const { isSearchbar } = useContext(SearchbarContext);
-  const { zipcode, cityName, changeZipcode } = useContext(ZipcodeContext);
+  const { zipcode, cityName, changeZipcode, changeCityName } =
+    useContext(ZipcodeContext);
 
   const [shopLocAnchor, setShopLocAnchor] = useState(-1);
   const [cartItemCount, setCartItemCount] = useState(0);
   const [collapseAnchor, setCollapseAnchor] = useState(false);
   const [categoryAnchor, setCategoryAnchor] = useState(true);
+  const [confirmAnchor, setConfirmAnchor] = useState(true);
+
   const [categories, setCategories] = useState<{ _id: string; name: string }[]>(
     [],
   );
@@ -95,7 +100,16 @@ export function Header({
 
   const onZipcodeInputKeydown = (e: KeyboardEvent) => {
     if (e.keyCode === 13) {
-      changeZipcode(zipcodeInput);
+      (async () => {
+        const result = await getLocationFromZipcode(zipcodeInput);
+        const { _normalized_city, county, state_code } = result;
+        changeZipcode(zipcodeInput);
+        changeCityName(
+          `${_normalized_city || county}, ${capitalizeFirstLetter(state_code)}`,
+        );
+        setShopLocAnchor(-1);
+        setZipcodeInput('');
+      })();
     }
   };
 
@@ -171,7 +185,9 @@ export function Header({
         {isLogin ? (
           <>
             <div className={styles.account}>
-              <p>Hi, {account?.profile && account.profile.firstName}</p>
+              {!screenBlackList.includes(pathname) && (
+                <p>Hi, {account?.profile && account.profile.firstName}</p>
+              )}
               <UserIcon className={styles.icon} />
             </div>
             <div
@@ -199,6 +215,17 @@ export function Header({
             <FaBars fill="white" />
           )}
         </div>
+
+        {confirmAnchor && !zipcode && (
+          <LocationConfirmDialog
+            onClose={() => setConfirmAnchor(false)}
+            onConfirm={() => setConfirmAnchor(false)}
+            onOtherClick={() => {
+              setConfirmAnchor(false);
+              setShopLocAnchor(200);
+            }}
+          />
+        )}
       </div>
       <div className={styles.collapsePanel}>
         {collapseAnchor && (

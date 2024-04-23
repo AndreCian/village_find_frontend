@@ -1,4 +1,4 @@
-import React, { useState, ChangeEvent } from 'react';
+import React, { useState, ChangeEvent, useEffect } from 'react';
 import clsx from 'clsx';
 
 import { Card, TableToolbar, TableBody } from '@/components/common';
@@ -6,11 +6,7 @@ import { Card, TableToolbar, TableBody } from '@/components/common';
 import { IRange, ITableColumn } from '@/interfaces';
 
 import styles from './SupportCenter.module.scss';
-
-const initialRange = {
-  from: new Date(),
-  to: new Date(),
-};
+import { HttpService } from '@/services';
 
 const initialTableData = [
   {
@@ -29,7 +25,7 @@ const initialTableData = [
 
 export function SupportCenter() {
   const [filter, setFilter] = useState('');
-  const [range, setRange] = useState<IRange>(initialRange);
+  const [range, setRange] = useState<IRange>({ from: '', to: '' });
   const [tableData, setTableData] = useState(initialTableData);
 
   const columns: ITableColumn[] = [
@@ -63,6 +59,12 @@ export function SupportCenter() {
     (which: string) => (e: ChangeEvent<HTMLInputElement>) => {
       setRange({ ...range, [which]: new Date(e.target.value) });
     };
+
+  useEffect(() => {
+    HttpService.get('/settings/general/support').then(response => {
+      setTableData(response || []);
+    });
+  }, []);
 
   return (
     <Card title="Support Center" className={styles.root}>

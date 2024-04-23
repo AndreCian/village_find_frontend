@@ -32,15 +32,14 @@ export interface ITableToolbarProps {
   updateSort?: (e: string) => void;
   selectable?: boolean;
   selectTitle?: string;
-  selectOpts?: string[];
+  selectOpts?: { name: string; value: string }[] | string[];
   category?: string;
   updateCategory?: (e: string) => void;
   actions?: React.ReactNode;
   className?: string;
 }
 
-export interface IOrder {
-}
+export interface IOrder {}
 
 export function TableToolbar({
   searchable = true,

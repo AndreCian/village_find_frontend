@@ -2,9 +2,10 @@ import { Container } from '@/components/layout/customer';
 
 import ShopVComImage from '/assets/customer/backs/shopvcom.png';
 import styles from './VCommunities.module.scss';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { HttpService } from '@/services';
 import { Link, useNavigate } from 'react-router-dom';
+import { CategoryContext } from '@/providers';
 
 const initialCommunities = [
   {
@@ -41,10 +42,12 @@ interface ICommunity {
     backgroundUrl: string;
   };
   shortDesc: string;
+  categories: string[];
 }
 
 export function VCommunities() {
   const navigate = useNavigate();
+  const { categories } = useContext(CategoryContext);
   const [communities, setCommunities] = useState<ICommunity[]>([]);
 
   useEffect(() => {
@@ -58,10 +61,9 @@ export function VCommunities() {
       <div className={styles.head}>
         <h1>Vendor Communities</h1>
         <p>
-          Fresher Choice’s new Vendor Communities initiative empowers local
-          people to organize small makers and growers in their communities to
-          help them connect with people like you looking for what they’re
-          selling.
+          Village Finds' new Vendor Communities initiative empowers local people
+          to organize small makers and growers in their communities to help them
+          connect with people like you looking for what they’re selling.
         </p>
       </div>
       <div className={styles.container}>
@@ -78,7 +80,15 @@ export function VCommunities() {
                 <p className={styles.name}>{community.name}</p>
                 <span className={styles.detail}>{community.shortDesc}</span>
                 <p className={styles.catLabel}>Category</p>
-                <span className={styles.category}>{}</span>
+                {categories
+                  .filter(item =>
+                    community.categories.includes(item.name.toLowerCase()),
+                  )
+                  .map((item: any, index: number) => (
+                    <span key={index} className={styles.category}>
+                      {item.name}
+                    </span>
+                  ))}
               </div>
             </div>
           ))}

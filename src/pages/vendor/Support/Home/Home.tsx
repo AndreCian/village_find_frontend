@@ -1,61 +1,38 @@
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { Card } from '@/components/common';
 import { Input } from '@/components/forms';
 import { MagnifierIcon } from '@/components/icons';
+import { ChangeInputEvent } from '@/interfaces';
+import { HttpService } from '@/services';
+import { SERVER_URL } from '@/config/global';
 
 import supportImg from '/assets/vendor/backs/support.png';
-import postImg1 from '/assets/vendor/backs/post2.png';
-import postImg2 from '/assets/vendor/backs/post2.png';
-import postImg3 from '/assets/vendor/backs/post3.png';
 import styles from './Home.module.scss';
 
 interface IPost {
+  _id: string;
   title: string;
   topic: string;
-  image: string;
+  thumbnail_image: string;
 }
-
-const recentPosts: IPost[] = [
-  {
-    title: 'Ways to Grow Your Business',
-    topic: 'Growth',
-    image: postImg1,
-  },
-  {
-    title: 'Ways to Grow Your Business',
-    topic: 'Saving',
-    image: postImg2,
-  },
-  {
-    title: 'Ways to Grow Your Business',
-    topic: 'Revenue',
-    image: postImg3,
-  },
-];
-
-const lastPosts: IPost[] = [
-  {
-    title: 'Ways to Grow Your Business',
-    topic: 'Growth',
-    image: postImg1,
-  },
-  {
-    title: 'Ways to Grow Your Business',
-    topic: 'Saving',
-    image: postImg2,
-  },
-  {
-    title: 'Ways to Grow Your Business',
-    topic: 'Revenue',
-    image: postImg3,
-  },
-];
-
-const detailPath = '/vendor/support/detail';
 
 export function SupportHome() {
   const navigate = useNavigate();
+  const [filter, setFilter] = useState('');
+  const [recentPosts, setRecentPosts] = useState<IPost[]>([]);
+  const [lastPosts, setLastPosts] = useState<IPost[]>([]);
+
+  useEffect(() => {
+    HttpService.get('/settings/general/support', { latest: true, filter }).then(
+      response => {
+        const { recent, last } = response;
+        setRecentPosts(recent);
+        setLastPosts(last);
+      },
+    );
+  }, [filter]);
 
   return (
     <Card className={styles.root}>
@@ -75,6 +52,8 @@ export function SupportHome() {
               position: 'right',
               content: <MagnifierIcon />,
             }}
+            value={filter}
+            updateValue={(e: ChangeInputEvent) => setFilter(e.target.value)}
           />
         </div>
         <div className={styles.posts}>
@@ -85,9 +64,12 @@ export function SupportHome() {
                 <div
                   key={`${post.title}-${index}`}
                   className={styles.postItem}
-                  onClick={() => navigate(detailPath)}
+                  onClick={() => navigate(post._id)}
                 >
-                  <img src={post.image} className={styles.image} />
+                  <img
+                    src={`${SERVER_URL}/${post.thumbnail_image}`}
+                    className={styles.image}
+                  />
                   <div className={styles.content}>
                     <p>{post.title}</p>
                     <p>
@@ -106,9 +88,9 @@ export function SupportHome() {
                 <div
                   key={`${post.title}-${index}`}
                   className={styles.postItem}
-                  onClick={() => navigate(detailPath)}
+                  onClick={() => navigate(post._id)}
                 >
-                  <img src={post.image} className={styles.image} />
+                  <img src={post.thumbnail_image} className={styles.image} />
                   <div className={styles.content}>
                     <p>{post.title}</p>
                     <p>

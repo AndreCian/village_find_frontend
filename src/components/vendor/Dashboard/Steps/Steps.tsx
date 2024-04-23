@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import clsx from 'clsx';
 
 import { Card } from '@/components/common';
@@ -24,19 +24,19 @@ const steps: IStep[] = [
     num: 2,
     title: 'Complete Profile',
     body: 'Profile > Complete all steps within the profile dropdown',
-    path: '/vendor/profile/fulfill',
+    path: '/vendor/profile',
   },
   {
     num: 3,
     title: 'Create a product',
     body: 'My Products > New',
-    path: '/vendor/product/general',
+    path: '/vendor/products/create/general',
   },
   {
     num: 4,
     title: 'Open Your Shop!',
     body: 'Profile > Open',
-    path: '/vendor/profile',
+    path: '/vendor/profile#shopopen',
   },
 ];
 

@@ -2,7 +2,7 @@
   @apply space-y-4;
 
   .form {
-    @apply flex gap-x-4;
+    @apply flex items-start gap-x-4;
 
     .control {
       @apply space-y-2;
@@ -10,6 +10,9 @@
 
     .values {
       @apply w-full self-end rounded-full bg-primary;
+      > .valueField {
+        @apply max-h-[40px];
+      }
     }
   }
 

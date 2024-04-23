@@ -1,5 +1,5 @@
 .root {
-  @apply absolute left-0 top-0 z-[100] hidden max-h-[500px] w-[300px] flex-col gap-y-2.5 overflow-y-auto rounded-b-md bg-white py-6 shadow-md md:flex;
+  @apply fixed top-40 z-[1000] hidden max-h-[500px] w-[300px] flex-col gap-y-2.5 overflow-y-auto rounded-b-md bg-white py-6 shadow-md md:flex;
 
   .categorybar {
     @apply px-6;

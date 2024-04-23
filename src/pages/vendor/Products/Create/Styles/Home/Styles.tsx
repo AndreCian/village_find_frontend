@@ -20,6 +20,8 @@ interface IStyle {
   status: string;
 }
 
+const statusOptions = ['Active', 'Inactive'];
+
 export function Styles() {
   const navigate = useNavigate();
   const { productId } = useParams();
@@ -37,6 +39,33 @@ export function Styles() {
           ? { ...style, discount: Number(e.target.value) }
           : style,
       ),
+    );
+  };
+
+  const onStatusChange = (id: string) => (value: string) => {
+    HttpService.put(`/styles/${id}/status`, { status: value }).then(
+      response => {
+        const { status } = response;
+        if (status === 200) {
+          enqueueSnackbar('Status updated.', { variant: 'success' });
+          setProductStyles(
+            productStyles.map(item =>
+              item._id === id ? { ...item, status: value } : item,
+            ),
+          );
+        }
+      },
+    );
+  };
+
+  const onRowPosChange = (ids: string[]) => {
+    HttpService.put('/styles/order/place', ids, { productID: productId }).then(
+      response => {
+        const { status } = response;
+        if (status === 200) {
+          enqueueSnackbar('Styles order changed.', { variant: 'success' });
+        }
+      },
     );
   };
 
@@ -96,7 +125,17 @@ export function Styles() {
       name: 'status',
       width: 150,
       cell: (row: any) => (
-        <Select placeholder="Active" rounded="full" className={styles.status} />
+        <Select
+          placeholder="Active"
+          rounded="full"
+          className={styles.status}
+          options={statusOptions.map(item => ({
+            name: item,
+            value: item.toLowerCase(),
+          }))}
+          value={row.status || 'inactive'}
+          updateValue={onStatusChange(row._id)}
+        />
       ),
     },
     {
@@ -118,9 +157,13 @@ export function Styles() {
 
   useEffect(() => {
     HttpService.get('/styles/vendor', { productId }).then(response => {
-      const { status, styles } = response;
+      const { status, styles, orderIDS } = response;
       if (status === 200) {
-        setProductStyles(styles);
+        setProductStyles(
+          orderIDS.map((orderID: string) =>
+            styles.find((item: any) => item._id === orderID),
+          ),
+        );
       }
     });
   }, []);
@@ -135,7 +178,13 @@ export function Styles() {
           New
         </button>
       </div>
-      <TableBody columns={stylesTableColumns} rows={productStyles} />
+      <TableBody
+        columns={stylesTableColumns}
+        rows={productStyles}
+        setRows={setProductStyles}
+        selectable={true}
+        onRowMove={onRowPosChange}
+      />
     </div>
   );
 }

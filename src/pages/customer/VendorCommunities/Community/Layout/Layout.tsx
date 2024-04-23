@@ -22,14 +22,18 @@ const initialNavItems = [
   { name: 'Join Our Community', value: 'join' },
 ];
 
+const initialCommunity = {
+  _id: '',
+  vendors: [],
+};
+
 export function Layout() {
   const navigate = useNavigate();
   const { slug } = useParams();
   const [searchParams] = useSearchParams();
 
-  const [community, setCommunity] = useState<any>({});
+  const [community, setCommunity] = useState<any>(initialCommunity);
   const [currentTab, setCurrentTab] = useState('vendor');
-  const [products, setProducts] = useState<any[]>([]);
 
   const initialPath = `/communities/${slug}`;
 
@@ -42,27 +46,23 @@ export function Layout() {
   };
 
   const onJoinClick = () => {
+    console.log(community);
     if (!community.code) return;
     navigate(`/sign-up/vendor?community=${community.code}`);
   };
 
   useEffect(() => {
     if (!slug) return;
-    (async () => {
-      const response = await HttpService.get(`/communities?slug=${slug}`);
+    HttpService.get(`/communities?slug=${slug}`).then(response => {
       const { status, community } = response;
       if (status === 200) {
         setCommunity(community ?? {});
-        const products = await HttpService.get('/products/public', {
-          community: community._id,
-        });
-        setProducts(products || []);
       } else {
         enqueueSnackbar('Community not found!', { variant: 'error' });
         navigate('/communities');
         return;
       }
-    })();
+    });
   }, [slug]);
 
   useEffect(() => {
@@ -116,10 +116,10 @@ export function Layout() {
       </Container>
       {currentTab === 'vendor' ? (
         <CommunityVendors
-          announcement={community.announcement ?? {}}
-          vendors={community.vendors ?? []}
-          products={products}
-          events={community.events ?? []}
+          community={community}
+          announcement={community.announcement || {}}
+          events={community.events || []}
+          categories={community.categories || []}
         />
       ) : (
         <CommunityAbout />

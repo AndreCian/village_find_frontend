@@ -11,7 +11,7 @@ export function Topbar() {
       <Container className="h-full">
         <div className="flex h-full items-center justify-center gap-x-2.5">
           <p className="text-xs text-success sm:text-sm md:text-xl lg:text-2xl">
-            Start your online business with Fresher Choice
+            Start your online business with Village Finds
           </p>
           <Button
             color="light"

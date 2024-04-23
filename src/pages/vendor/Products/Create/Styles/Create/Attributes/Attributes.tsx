@@ -11,6 +11,7 @@ import { HttpService } from '@/services';
 
 import DimenImage from '/assets/vendor/backs/dimension.png';
 import styles from './Attributes.module.scss';
+import { SERVER_URL } from '@/config/global';
 
 const statusOpts = ['Active', 'Inactive', 'Delete'];
 const subPath = '/vendor/products';
@@ -23,6 +24,7 @@ export function Attributes() {
 
   const [rows, setRows] = useState<any[]>([]);
   const [images, setImages] = useState<(File | null)[]>([]);
+  const [imageSrcs, setImageSrcs] = useState<string[]>([]);
 
   const getSubRows = (
     attrs: IAttribute[],
@@ -59,7 +61,19 @@ export function Attributes() {
   };
 
   const onImageChange = (id: number) => (e: ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files?.length === 0) return;
+    if (!e.target.files || e.target.files.length === 0) return;
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      const result = e.target?.result;
+      if (result) {
+        setImageSrcs(
+          imageSrcs.map((item: string, index: number) =>
+            index === id ? (result as string) : item,
+          ),
+        );
+      }
+    };
+    reader.readAsDataURL(e.target.files[0]);
     setImages(images =>
       images.map((image: File | null, index: number) =>
         index === id ? e.target.files && e.target.files[0] : image,
@@ -103,11 +117,11 @@ export function Attributes() {
         width: 150,
         cell: (row: any) => (
           <Input
-            name="inventory"
+            name="quantity"
             placeholder="Inventory"
             rounded="full"
             className={styles.inventoryInput}
-            value={row.inventory || ''}
+            value={row.quantity || ''}
             updateValue={onRowChange(row.id)}
           />
         ),
@@ -151,7 +165,10 @@ export function Attributes() {
         width: 200,
         cell: (row: any) => (
           <div className={styles.dimensions}>
-            <img src={DimenImage} alt="Dimension Image" />
+            <img
+              src={imageSrcs[row.id] || `${SERVER_URL}/${row.image}`}
+              alt="inventory"
+            />
             <span>+</span>
           </div>
         ),
@@ -182,7 +199,7 @@ export function Attributes() {
             enqueueSnackbar('Inventories saved.', {
               variant: 'success',
             });
-              navigate(`${subPath}/${productId}/style`);
+            navigate(`${subPath}/${productId}/style`);
           } else if (status === 404) {
             navigate(`${subPath}`);
             enqueueSnackbar('Product is not valid!', { variant: 'warning' });
@@ -206,18 +223,22 @@ export function Attributes() {
               id: index,
               inventory: 0,
               price: 0,
+              status: 'active',
             }),
           );
           setRows(subRows);
           setImages(Array(subRows.length).fill(null));
+          setImageSrcs(Array(subRows.length).fill(''));
         } else {
           setRows(
             inventories.map((inventory: any, index: number) => ({
               ...inventory,
               id: index,
+              status: inventory.status || 'active',
             })),
           );
           setImages(Array(inventories.length).fill(null));
+          setImageSrcs(Array(inventories.length).fill(''));
         }
       }
     });

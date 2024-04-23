@@ -50,7 +50,10 @@ export function Layout() {
   }, []);
 
   useEffect(() => {
-    if (isLogin) return;
+    if (isLogin || screenBlackLists.includes(pathname)) {
+      setIsLoading(false);
+      return;
+    }
     const token = localStorage.getItem('customer_token');
     if (token) {
       setupToken(token, 'customer');
@@ -66,12 +69,13 @@ export function Layout() {
           } else {
             setupToken(null, 'customer');
           }
-          setIsLoading(false);
         })
         .catch(err => {
           enqueueSnackbar('Something went wrong with server.', {
             variant: 'error',
           });
+        })
+        .finally(() => {
           setIsLoading(false);
         });
     } else {
@@ -102,7 +106,7 @@ export function Layout() {
           <Navbar />
         </div>
         {isCategoryBar && (
-          <Container className="sticky top-40">
+          <Container className="top-40">
             <Categories />
           </Container>
         )}

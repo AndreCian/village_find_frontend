@@ -1,29 +1,17 @@
-import { useState } from 'react';
-
 import { Input } from '@/components/forms';
 
 import styles from './CategoryBar.module.scss';
-
-const initialVendors = [
-  'All Vendors',
-  'Bills Birds',
-  'The Foundry',
-  'Walk with Purpose Hats',
-  "Lilly's Jewels",
-  'Pat Backs',
-  "Bronson's Purpose",
-  "Greg's Eggs",
-  'Juan and Kan',
-];
-
 interface ICategoryBarProps {
   isVendorPanel?: boolean;
   panel: boolean;
   category: string;
   categories: { name: string; value: string }[];
   changeCategory: (_: string) => void;
-  vendor: number;
-  changeVendor: (_: number) => void;
+  vendor: string;
+  changeVendor: (_: string) => void;
+  minPrice: string;
+  maxPrice: string;
+  vendors: { name: string; value: string }[];
 }
 
 export function CategoryBar({
@@ -32,8 +20,11 @@ export function CategoryBar({
   category = '',
   categories = [],
   changeCategory = () => {},
-  vendor = -1,
+  vendor = '',
   changeVendor = () => {},
+  minPrice = '',
+  maxPrice = '',
+  vendors,
 }: ICategoryBarProps) {
   return (
     <div className={styles.root}>
@@ -59,11 +50,11 @@ export function CategoryBar({
         <div className={styles.container}>
           <div className={styles.control}>
             <p>Min Price</p>
-            <Input bgcolor="primary" />
+            <Input bgcolor="primary" value={minPrice} />
           </div>
           <div className={styles.control}>
             <p>Max Price</p>
-            <Input bgcolor="primary" />
+            <Input bgcolor="primary" value={maxPrice} />
           </div>
         </div>
       </div>
@@ -71,14 +62,16 @@ export function CategoryBar({
         <div className={styles.categoryList}>
           <p>By Vendor</p>
           <ul className={styles.categories}>
-            {initialVendors.map((_vendor: string, index: number) => (
+            {vendors.map((_vendor: any, index: number) => (
               <li
                 key={`vendor-category-${index}`}
-                onClick={() => changeVendor(index)}
-                className={!panel && vendor === index ? styles.active : ''}
+                onClick={() => changeVendor(_vendor.value)}
+                className={
+                  !panel && vendor === _vendor.value ? styles.active : ''
+                }
               >
                 <span />
-                <p>{_vendor}</p>
+                <p>{_vendor.name}</p>
               </li>
             ))}
           </ul>

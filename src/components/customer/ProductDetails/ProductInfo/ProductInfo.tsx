@@ -115,7 +115,7 @@ export function ProductInfo({
       });
       return;
     }
-    if (selectedStyle.attributes.length != Object.keys(attributes).length) {
+    if (selectedStyle.attributes.length !== Object.keys(attributes).length) {
       enqueueSnackbar('Please select product attributes.', {
         variant: 'warning',
       });
@@ -197,6 +197,15 @@ export function ProductInfo({
     }
   };
 
+  const onImageClick = (attribute: any) => () => {
+    setAttributes(
+      Object.keys(attribute).map((key: string) => ({
+        _id: key,
+        value: attribute[key],
+      })),
+    );
+  };
+
   const onMessageChange = (e: ChangeInputEvent) => {
     if (e.target.value.length > 500) return;
     setCustomMessage(e.target.value);
@@ -239,6 +248,7 @@ export function ProductInfo({
                   [styles.active]:
                     selectedInvent && selectedInvent._id === inventory._id,
                 })}
+                onClick={onImageClick(inventory.attrs)}
               />
             ))}
         </div>
@@ -380,7 +390,10 @@ export function ProductInfo({
               {productOffPrice *
                 cartProduct.quantity *
                 (subscription?.duration || 1)}{' '}
-              every weeks <span>or until cancelation</span>
+              {subscription?.duration
+                ? `every ${subscription.duration} weeks`
+                : 'every week'}{' '}
+              <span>or until cancelation</span>
             </p>
           </div>
         )}

@@ -66,6 +66,12 @@ export default {
       ringOffsetColor: {
         primary: '#652F90',
       },
+      stroke: {
+        success: '#652F90'
+      },
+      fill: {
+        success: '#652F90'
+      },
       ringWidth: {
         3: '3px',
         5: '5px',

@@ -4,13 +4,7 @@ import { FaMagnifyingGlass } from 'react-icons/fa6';
 import { TbListDetails } from 'react-icons/tb';
 
 import { Input } from '@/components/forms';
-import {
-  FilterAndSortDialog,
-  FindProductDialog,
-  MobileSettingDialog,
-} from '@/components/customer/common';
 import { ShopList, ProductList } from '..';
-
 import { useWindowWidth } from '@/utils';
 
 import styles from './CommunityContent.module.scss';
@@ -28,23 +22,26 @@ interface ICommunityContentProps {
   panel: boolean;
   title: string;
   subtitle: string;
+  zipcode?: string;
   products: IProduct[];
   vendors: IVendor[];
+  openFindProductDialog: () => void;
+  openFilterSortDialog: () => void;
+  openMobileSettingDialog: () => void;
 }
 
 export function CommunityContent({
   panel = true,
   title = '',
   subtitle = '',
+  zipcode = '',
   products,
   vendors,
+  openFindProductDialog,
+  openFilterSortDialog,
+  openMobileSettingDialog,
 }: ICommunityContentProps) {
   const minBreakLists = ['none', 'xs'];
-
-  const [zipcode, setZipcode] = useState('');
-  const [findProductOpen, showFindProductDialog] = useState(false);
-  const [filterSortOpen, showFilterSortDialog] = useState(false);
-  const [mobileSettingOpen, showMobileSettingDialog] = useState(false);
 
   const [_, breakpoint] = useWindowWidth();
   const isMobile = useMemo(() => {
@@ -69,12 +66,9 @@ export function CommunityContent({
             }}
             className={styles.zipcode}
             value={zipcode}
-            onClick={() => showFindProductDialog(true)}
+            onClick={openFindProductDialog}
           />
-          <div
-            className={styles.filter}
-            onClick={() => showFilterSortDialog(true)}
-          >
+          <div className={styles.filter} onClick={openFilterSortDialog}>
             <p>Filter and sort</p>
             <span>
               <TbListDetails />
@@ -95,10 +89,7 @@ export function CommunityContent({
             }}
             className={styles.search}
           />
-          <div
-            className={styles.filterIcon}
-            onClick={() => showMobileSettingDialog(true)}
-          >
+          <div className={styles.filterIcon} onClick={openMobileSettingDialog}>
             <div className={styles.container}>
               {Array(9)
                 .fill(0)
@@ -118,18 +109,6 @@ export function CommunityContent({
       ) : (
         <ShopList shops={vendors} />
       )}
-      <FindProductDialog
-        open={findProductOpen}
-        onClose={() => showFindProductDialog(false)}
-      />
-      <FilterAndSortDialog
-        open={filterSortOpen}
-        onClose={() => showFilterSortDialog(false)}
-      />
-      <MobileSettingDialog
-        open={isMobile && mobileSettingOpen}
-        onClose={() => showMobileSettingDialog(false)}
-      />
     </div>
   );
 }

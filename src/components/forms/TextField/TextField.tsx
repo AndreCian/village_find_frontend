@@ -10,6 +10,7 @@ export interface ITextFieldProps {
   value?: string;
   updateValue?: (e: ChangeEvent<HTMLTextAreaElement>) => void;
   rows?: number;
+  maxRows?: number;
   placeholder?: string;
   className?: string;
   rounded?: RoundedType;

@@ -8,10 +8,12 @@ import { ITableColumn } from '@/interfaces';
 import styles from './Specifications.module.scss';
 import { useEffect, useState } from 'react';
 import { HttpService } from '@/services';
+import { enqueueSnackbar } from 'notistack';
 
 const subPath = '/vendor/products';
 
 interface ISpec {
+  _id: string;
   name: string;
 }
 
@@ -31,6 +33,19 @@ export function Specifications() {
 
   const [specifications, setSpecifications] = useState<ISpec[]>([]);
 
+  const onDeleteClick = (id: string) => () => {
+    HttpService.put(
+      `/products/${productId}/specification`,
+      specifications.filter(item => item._id !== id),
+    ).then(response => {
+      const { status } = response;
+      if (status === 200) {
+        enqueueSnackbar('Specification deleted.', { variant: 'success' });
+        setSpecifications(specifications.filter(item => item._id !== id));
+      }
+    });
+  };
+
   const stylesTableColumns: ITableColumn[] = [
     {
       title: 'Specification Name',
@@ -49,8 +64,10 @@ export function Specifications() {
       width: 250,
       cell: (row: any) => (
         <div className={styles.action}>
-          <button className={styles.button}>Edit</button>
-          <span>
+          <button className={styles.button} onClick={() => navigate(row._id)}>
+            Edit
+          </button>
+          <span onClick={onDeleteClick(row._id)}>
             <TrashIcon />
           </span>
         </div>

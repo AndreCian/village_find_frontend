@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useContext } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import clsx from 'clsx';
 
@@ -12,12 +12,15 @@ import { formatDate } from '@/utils';
 
 import BackImage from '/assets/customer/vcom/individual.png';
 import styles from './Vendor.module.scss';
+import { CategoryContext } from '@/providers';
+import { FilterAndSortDialog, FindProductDialog } from '@/components/customer';
 
 interface IVendor {
   logoUrl: string;
   slides: string[];
   shopName: string;
   shortDesc: string;
+  tags: string[];
 }
 
 interface ICommunity {
@@ -35,6 +38,7 @@ const initialVendor: IVendor = {
   slides: [],
   shopName: '',
   shortDesc: '',
+  tags: [],
 };
 
 const initialCommunity: ICommunity = {
@@ -47,22 +51,32 @@ export function Vendor() {
   const navigate = useNavigate();
   const { id: vendorID } = useParams();
 
+  const { categories } = useContext(CategoryContext);
   const [vendor, setVendor] = useState<IVendor>(initialVendor);
   const [community, setCommunity] = useState<ICommunity>(initialCommunity);
   const [isMoreOpen, setIsMoreOpen] = useState(false);
 
   const [category, setCategory] = useState('');
-  const [categoryList, setCategoryList] = useState<
-    { name: string; value: string }[]
-  >([]);
+  // const [categoryList, setCategoryList] = useState<
+  //   { name: string; value: string }[]
+  // >([]);
   const currentCategory = useMemo(() => {
-    const current = categoryList.find(item => item.value === category);
-    return !current ? '' : current.name;
-  }, []);
+    const item = [
+      { name: 'All Categories', value: '' },
+      ...categories.map(item => ({ ...item, value: item.name.toLowerCase() })),
+    ].find(item => item.value === category);
+    return item ? item.name : '';
+  }, [category, categories]);
   const [products, setProducts] = useState<any[]>([]);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [pageCount, setPageCount] = useState(1);
+  const [sortOrder, setSortOrder] = useState('ascending');
+  const [minPrice, setMinPrice] = useState('');
+  const [maxPrice, setMaxPrice] = useState('');
+
+  const [isFindProductDialogOpen, showFindProductDialog] = useState(false);
+  const [isSortFilterDialogOpen, showSortFilterDialog] = useState(false);
 
   const onCategoryChange = (value: string) => {
     setCategory(value);
@@ -72,16 +86,25 @@ export function Vendor() {
     navigate('about');
   };
 
+  const onFilterAndSortApply = (options: any) => {
+    const { sortOrder, minPrice, maxPrice } = options;
+    setSortOrder(sortOrder);
+    setMinPrice(minPrice);
+    setMaxPrice(maxPrice);
+    showSortFilterDialog(false);
+  };
+
   useEffect(() => {
     HttpService.get('/user/vendor', { vendorId: vendorID }).then(response => {
-      const { status, vendor } = response;
-      if (status === 200 && vendor) {
+      const vendor = response[0];
+      if (vendor) {
         const { shopName, store, images, community } = vendor;
         setVendor({
-          shopName,
-          shortDesc: store.shortDesc,
-          logoUrl: images.logoUrl,
-          slides: images.slides,
+          shopName: shopName || '',
+          shortDesc: store.shortDesc || [],
+          logoUrl: images.logoUrl || '',
+          slides: images.slides || '',
+          tags: store.tags || [],
         });
         setCommunity({
           logoUrl: (community.images && community.images.logoUrl) || '',
@@ -91,10 +114,18 @@ export function Vendor() {
         });
       }
     });
-    HttpService.get('/products/public', { vendor: vendorID }).then(response => {
+  }, [vendorID]);
+
+  useEffect(() => {
+    const params: any = { vendor: vendorID };
+    if (category) params.category = category;
+    if (minPrice) params.minPrice = minPrice;
+    if (maxPrice) params.maxPrice = maxPrice;
+    if (sortOrder !== 'none') params.sort = sortOrder;
+    HttpService.get('/products/public', params).then(response => {
       setProducts(response || []);
     });
-  }, [vendorID]);
+  }, [vendorID, category, minPrice, maxPrice, sortOrder]);
 
   return (
     <Container>
@@ -155,9 +186,18 @@ export function Vendor() {
             panel={true}
             category={category}
             changeCategory={onCategoryChange}
-            vendor={-1}
+            categories={[
+              { name: 'All Categories', value: '' },
+              ...vendor.tags.map(item => ({
+                name: item,
+                value: item.toLowerCase(),
+              })),
+            ]}
+            vendor={''}
             changeVendor={() => {}}
-            categories={categoryList}
+            vendors={[]}
+            minPrice={minPrice}
+            maxPrice={maxPrice}
           />
           <CommunityContent
             panel={true}
@@ -165,6 +205,9 @@ export function Vendor() {
             subtitle={currentCategory}
             products={products}
             vendors={[]}
+            openFindProductDialog={() => showFindProductDialog(true)}
+            openFilterSortDialog={() => showSortFilterDialog(true)}
+            openMobileSettingDialog={() => {}}
           />
         </div>
         <div className={styles.pagination}>
@@ -175,6 +218,18 @@ export function Vendor() {
           />
         </div>
       </div>
+      <FindProductDialog
+        open={isFindProductDialogOpen}
+        onClose={() => showFindProductDialog(false)}
+      />
+      <FilterAndSortDialog
+        open={isSortFilterDialogOpen}
+        sortOrder={sortOrder}
+        minPrice={minPrice}
+        maxPrice={maxPrice}
+        onApply={onFilterAndSortApply}
+        onClose={() => showSortFilterDialog(false)}
+      />
     </Container>
   );
 }

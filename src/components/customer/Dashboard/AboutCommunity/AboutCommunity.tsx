@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { Container } from '@/components/layout/customer';
 import { Button } from '@/components/forms';
 import { SERVER_URL } from '@/config/global';
 import { HttpService } from '@/services';
+import { CategoryContext } from '@/providers';
 
 import CommunityImage1 from '/assets/customer/vendors/community1.svg';
 import CommunityImage2 from '/assets/customer/vendors/community2.svg';
@@ -28,6 +29,7 @@ interface IVendorType {
 
 interface ILinkImage {
   title: string;
+  path: string;
 }
 
 interface IShopVCommunity {
@@ -41,7 +43,7 @@ interface IShopVCommunity {
 const initialCommunities: ICommunity[] = [
   {
     avatar: CommunityImage1,
-    name: 'The Fresher Choice Community',
+    name: 'The Village Finds Community',
     description:
       "This is the over all community of likeminded individuals using the power of eCommerce to make a difference in their lives through entrepreneurship. Whether you shop solopreneurs or from Vendor Communities, you're shopping from this community.",
   },
@@ -72,21 +74,16 @@ const initialVendorTypes: IVendorType[] = [
 const initialLinkImages: ILinkImage[] = [
   {
     title: 'Makers',
+    path: '/market',
   },
   {
     title: 'Communities',
+    path: '/communities',
   },
   {
     title: 'Subscription',
+    path: '/market?type=subscription',
   },
-];
-
-const initialShopVendorCategories: string[] = [
-  'All Categories',
-  'Wood Working',
-  'Hand Cut',
-  'Mixed',
-  'Glass',
 ];
 
 export interface ICommunityProps {
@@ -117,6 +114,7 @@ export interface IAboutCommunityProps {
 export function AboutCommunity({ community, ready }: IAboutCommunityProps) {
   const navigate = useNavigate();
 
+  const { categories } = useContext(CategoryContext);
   const [communities] = useState<ICommunity[]>(initialCommunities);
   const [shopVCategory, setShopVCategory] = useState('');
   const [shopVCommunities, setShopVCommunities] = useState<IShopVCommunity[]>(
@@ -140,7 +138,7 @@ export function AboutCommunity({ community, ready }: IAboutCommunityProps) {
         <div className={styles.wrapper}>
           <h1>What is a vendor community?</h1>
           <p>
-            Fresher Choice's new C-commerce initiative empowers local people to
+            Village Finds' new C-commerce initiative empowers local people to
             organize small makers and growers in their communities to help them
             connect with customers looking for what they’re selling.
           </p>
@@ -205,7 +203,12 @@ export function AboutCommunity({ community, ready }: IAboutCommunityProps) {
           {initialLinkImages.map((linkImage: ILinkImage, index: number) => (
             <div key={`link-image-${index}`} className={styles.linkImage}>
               <img src={`${SERVER_URL}/${ready.images[index]}`} />
-              <span className={styles.linkTitle}>{linkImage.title}</span>
+              <span
+                className={styles.linkTitle}
+                onClick={() => navigate(linkImage.path)}
+              >
+                {linkImage.title}
+              </span>
             </div>
           ))}
         </div>
@@ -216,17 +219,25 @@ export function AboutCommunity({ community, ready }: IAboutCommunityProps) {
           <div className={styles.categories}>
             <span>Explore by Interest</span>
             <ul>
-              {initialShopVendorCategories.map(
-                (category: string, index: number) => (
-                  <li
-                    key={`shop-vendor-category-${index}`}
-                    className={shopVCategory === category ? styles.active : ''}
-                    onClick={() => setShopVCategory(category)}
-                  >
-                    {category}
-                  </li>
-                ),
-              )}
+              {[
+                { name: 'All Categories', value: '' },
+                ...categories.map(item => ({
+                  ...item,
+                  value: item.name.toLowerCase(),
+                })),
+              ].map((category: any, index: number) => (
+                <li
+                  key={`shop-vendor-category-${index}`}
+                  className={
+                    shopVCategory === category.value ? styles.active : ''
+                  }
+                  onClick={() =>
+                    navigate(`/communities?category=${category.value}`)
+                  }
+                >
+                  {category.name}
+                </li>
+              ))}
             </ul>
           </div>
           <div className={styles.communities}>
@@ -273,7 +284,11 @@ export function AboutCommunity({ community, ready }: IAboutCommunityProps) {
                 Shop from groups of vendors growing together on a single
                 marketplace
               </p>
-              <Button variant="outlined" className={styles.button}>
+              <Button
+                variant="outlined"
+                className={styles.button}
+                onClick={() => navigate('/communities')}
+              >
                 Shop Now
               </Button>
             </div>

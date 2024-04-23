@@ -70,8 +70,7 @@ export interface IOrderDetail {
   homeDelivery: IOrder;
 }
 
-export interface IOrderDetailBeta {
-}
+export interface IOrderDetailBeta {}
 
 const initialShippingItems: IOrderItem[] = [
   {
@@ -299,12 +298,13 @@ export function OrderDetail() {
   };
 
   useEffect(() => {
+    if (!orderID) return;
     HttpService.get(`/order/vendor/${orderID}`).then(response => {
       const { status, order } = response;
       if (status === 200) {
       }
     });
-  }, []);
+  }, [orderID]);
 
   return (
     <div className={styles.root}>

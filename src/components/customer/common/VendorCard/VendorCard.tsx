@@ -8,7 +8,7 @@ interface IVendorCardProps {
   logoImage: string;
   title: string;
   description: string;
-  interest: string;
+  interests: string[];
 }
 
 export function VendorCard({
@@ -17,7 +17,7 @@ export function VendorCard({
   logoImage,
   title,
   description,
-  interest,
+  interests,
 }: IVendorCardProps) {
   const navigate = useNavigate();
 
@@ -25,7 +25,12 @@ export function VendorCard({
     <div className={styles.root}>
       <div className={styles.backImage}>
         <img src={backImage} />
-        <button className={styles.shopBtn}>Shop Now</button>
+        <button
+          className={styles.shopBtn}
+          onClick={() => navigate(`/vendors/${vendorId}`)}
+        >
+          Shop Now
+        </button>
       </div>
       <div className={styles.community}>
         <div className={styles.image}>
@@ -37,7 +42,9 @@ export function VendorCard({
           <div className={styles.extra}>
             <div className={styles.category}>
               <p>Interested In</p>
-              <span>{interest}</span>
+              {interests.map((interest: string, index: number) => (
+                <span key={index}>{interest}</span>
+              ))}
             </div>
           </div>
         </div>

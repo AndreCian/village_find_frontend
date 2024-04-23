@@ -1,3 +1,7 @@
+import { enqueueSnackbar } from 'notistack';
+
+import { GEOLOCATION_API_KEY } from '@/config/global';
+
 export async function getCityFromZipCode(zipcode: string, countryCode = 'us') {
   const url = `https://api.zippopotam.us/${countryCode}/${zipcode}`;
 
@@ -12,5 +16,43 @@ export async function getCityFromZipCode(zipcode: string, countryCode = 'us') {
     return city;
   } catch (error: any) {
     console.error(error.message);
+  }
+}
+
+export async function getLocationFromCoords({
+  latitude,
+  longitude,
+}: {
+  latitude: number;
+  longitude: number;
+}) {
+  try {
+    const result = await fetch(
+      `https://api.opencagedata.com/geocode/v1/json?q=${latitude}+${longitude}&key=${GEOLOCATION_API_KEY}`,
+    )
+      .then(response => response.json())
+      .then(response => response.results[0].components);
+    return result;
+  } catch {
+    enqueueSnackbar(
+      'Cannot get current location. Please allow location settings on the browser and retry.',
+      { variant: 'warning' },
+    );
+  }
+}
+
+export async function getLocationFromZipcode(zipcode: string) {
+  try {
+    const result = await fetch(
+      `https://api.opencagedata.com/geocode/v1/json?q=${zipcode}&key=${GEOLOCATION_API_KEY}`,
+    )
+      .then(response => response.json())
+      .then(response => response.results[0].components);
+    return result;
+  } catch {
+    enqueueSnackbar(
+      'Cannot get current location. Please allow location settings on the browser and retry.',
+      { variant: 'warning' },
+    );
   }
 }

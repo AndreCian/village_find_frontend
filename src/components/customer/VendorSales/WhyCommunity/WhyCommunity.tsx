@@ -20,9 +20,9 @@ interface ICommunity {
 const initialCommunities: ICommunity[] = [
   {
     avatar: CommunityImage1,
-    name: 'The Fresher Choice Community',
+    name: 'The Village Finds Community',
     description:
-      'When you start or grow your business with Fresher Choice, you join a growing community of likeminded individuals using the power of eCommerce to make a difference in their lives through entrepreneurship. This community provides the support you need to get started or take your idea to the next level because they are verified small businesses like yours.',
+      'When you start or grow your business with Village Finds, you join a growing community of likeminded individuals using the power of eCommerce to make a difference in their lives through entrepreneurship. This community provides the support you need to get started or take your idea to the next level because they are verified small businesses like yours.',
   },
   {
     avatar: CommunityImage2,
@@ -57,7 +57,7 @@ const initialStatemenets = [
   {
     title: 'Who are the Vendor Organizers?',
     description:
-      'Vendor organizers are vetted by the Fresher Choice team and have a wealth of experience building maker or grower communities. When platforms grow, their vendors can get left behind. We believe our Vendor Community project will keep the local vibe and your needs at the forefront by empowering these organizers to focus on a select few vendors like YOU.',
+      'Vendor organizers are vetted by the Village Finds team and have a wealth of experience building maker or grower communities. When platforms grow, their vendors can get left behind. We believe our Vendor Community project will keep the local vibe and your needs at the forefront by empowering these organizers to focus on a select few vendors like YOU.',
     image: OrganizerIcon,
   },
 ];
@@ -72,7 +72,7 @@ export function WhyCommunity() {
         <div className={styles.wrapper}>
           <h1>What is a vendor community?</h1>
           <p>
-            Fresher Choice's new C-commerce initiative empowers local people to
+            Village Finds' new C-commerce initiative empowers local people to
             organize small makers and growers in their communities to help them
             connect with customers looking for what they’re selling.
           </p>

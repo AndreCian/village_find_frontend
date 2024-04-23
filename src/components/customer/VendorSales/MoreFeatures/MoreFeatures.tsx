@@ -57,7 +57,7 @@ const initialFeatures2 = [
   {
     title: 'Advanced Search Capabilities',
     description:
-      'Fresher Choice is uniquely set up to highlight both your fully branded store and the products you offer. Customers find your business more easily on our platform by using your direct store link, searching your business’s name or the items you carry.',
+      'Village Finds is uniquely set up to highlight both your fully branded store and the products you offer. Customers find your business more easily on our platform by using your direct store link, searching your business’s name or the items you carry.',
   },
   {
     title: 'Product Analytics',

@@ -5,10 +5,12 @@ import { Button } from '@/components/forms';
 
 import clsx from 'clsx';
 import styles from './Pricing.module.scss';
+import { useNavigate } from 'react-router-dom';
 
 const initialPackages = [
   {
     title: 'Seedling',
+    type: 'seedling',
     content: (
       <div className={styles.content}>
         <p>List up to 25 items for free</p>
@@ -21,6 +23,7 @@ const initialPackages = [
   },
   {
     title: 'Sprouting',
+    type: 'sprouting',
     content: (
       <div className={styles.content}>
         <p>
@@ -36,6 +39,7 @@ const initialPackages = [
   },
   {
     title: 'Budding',
+    type: 'budding',
     content: (
       <div className={styles.content}>
         <p>
@@ -53,7 +57,11 @@ const initialPackages = [
   },
 ];
 
+const SIGNUP_PATH = '/sign-up/vendor';
+
 export function Pricing() {
+  const navigate = useNavigate();
+
   return (
     <Container id="pricing" className={styles.root}>
       <h1>Choose a package</h1>
@@ -70,7 +78,14 @@ export function Pricing() {
             <div className={styles.package}>
               {item.content}
               <Button className={styles.button}>
-                <p className={styles.text}>Let's Go!</p>
+                <p
+                  className={styles.text}
+                  onClick={() =>
+                    navigate(`${SIGNUP_PATH}?subscription=${item.type}`)
+                  }
+                >
+                  Let's Go!
+                </p>
                 <FaLongArrowAltRight fill="#F2EEE9" fontSize={24} />
               </Button>
             </div>

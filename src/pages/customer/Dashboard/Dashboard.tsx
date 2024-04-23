@@ -61,13 +61,9 @@ export function Dashboard() {
         setData(response);
       }
     });
-    HttpService.get('/settings/marketplace/featured-products').then(
-      response => {
-        if (response) {
-          setProducts(response);
-        }
-      },
-    );
+    HttpService.get('/products/public', { featured: true }).then(response => {
+      setProducts(response || []);
+    });
   }, []);
 
   return (

@@ -5,7 +5,7 @@
     @apply relative;
 
     img {
-      @apply w-full;
+      @apply aspect-[3/1] w-full;
     }
 
     button {
@@ -14,17 +14,12 @@
   }
 
   .community {
-    @apply flex items-center gap-x-2.5;
+    @apply flex items-center gap-x-8;
 
     .image {
-      @apply aspect-square shrink-0 overflow-hidden rounded-md shadow-lg;
-
-      img {
+      @apply h-20 w-20 shrink-0 overflow-hidden rounded-full shadow-lg;
+      > img {
         @apply h-full w-full;
-      }
-
-      .shopBtn {
-        @apply absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transform;
       }
     }
 

@@ -1,4 +1,4 @@
-import { useContext, useEffect, useMemo, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
 import { Container } from '@/components/layout/customer';
@@ -7,8 +7,24 @@ import { MagnifierIcon } from '@/components/icons';
 import { ProductCard } from '@/components/customer/common';
 import { CategoryContext } from '@/providers';
 import { HttpService } from '@/services';
+import { ChangeInputEvent } from '@/interfaces';
 
 import styles from './Products.module.scss';
+
+const sortOpts = [
+  {
+    name: 'Sort Alphabetically, A-Z',
+    value: 'ascending',
+  },
+  {
+    name: 'Sort Alphabetically, Z-A',
+    value: 'descending',
+  },
+  {
+    name: 'None',
+    value: 'none',
+  },
+];
 
 export function Products() {
   const [searchParams] = useSearchParams();
@@ -16,15 +32,25 @@ export function Products() {
   const { categories } = useContext(CategoryContext);
   const [products, setProducts] = useState([]);
   const [category, setCategory] = useState('');
+  const [sortValue, setSortValue] = useState('');
+  const [minPrice, setMinPrice] = useState('');
+  const [maxPrice, setMaxPrice] = useState('');
 
   useEffect(() => {
     const type = searchParams.get('type') || '';
     const search = searchParams.get('search') || '';
-    const params: any = { type: type === 'subscription' ? type : '', search };
+    const params: any = {
+      type: type === 'subscription' ? type : '',
+      search,
+    };
+    if (category) params.category = category;
+    if (sortValue !== 'none') params.sort = sortValue;
+    if (minPrice) params.minPrice = Number(minPrice);
+    if (maxPrice) params.maxPrice = Number(maxPrice);
     HttpService.get('/products/public', params).then(response => {
       setProducts(response);
     });
-  }, [searchParams]);
+  }, [searchParams, category, sortValue, minPrice, maxPrice]);
 
   return (
     <Container className={styles.root}>
@@ -39,11 +65,28 @@ export function Products() {
             value={category}
             updateValue={(value: string) => setCategory(value)}
           />
-          <Select placeholder="Sort Alphabetically, A-Z" />
+          <Select
+            placeholder="Sort Alphabetically, A-Z"
+            options={sortOpts}
+            value={sortValue}
+            updateValue={(value: string) => setSortValue(value)}
+          />
           <div className={styles.price}>
-            <Input placeholder="$ Price Lowest" />
+            <Input
+              name="minPrice"
+              type="number"
+              placeholder="$ Price Lowest"
+              value={minPrice}
+              updateValue={(e: ChangeInputEvent) => setMinPrice(e.target.value)}
+            />
             <p>to</p>
-            <Input placeholder="$ Price Highest" />
+            <Input
+              name="maxPrice"
+              type="number"
+              placeholder="$ Price Highest"
+              value={maxPrice}
+              updateValue={(e: ChangeInputEvent) => setMaxPrice(e.target.value)}
+            />
           </div>
         </div>
         <div className={styles.zipcode}>

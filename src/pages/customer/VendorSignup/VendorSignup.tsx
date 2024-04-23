@@ -100,7 +100,7 @@ const formatMonthlyFee = (price: number) => {
 
 export function VendorSignup() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const [step, setStep] = useState(0);
   const [collapseId, setCollapseId] = useState(0);
@@ -141,7 +141,9 @@ export function VendorSignup() {
     if (fullCode.length !== 5) {
       setCodeIssue('Invalid code');
     } else {
-      navigate(`/sign-up/vendor?community_code=${fullCode}`);
+      // navigate(`/sign-up/vendor?community_code=${fullCode}`);
+      searchParams.set('community_code', fullCode);
+      setSearchParams(searchParams);
     }
   };
 
@@ -241,10 +243,18 @@ export function VendorSignup() {
     } else {
       setCollapseId(0);
     }
+
+    const subscriptionName = searchParams.get('subscription');
+    if (subscriptionName) {
+      setSubscription(
+        initialSubscriptions.find(item => item.name === subscriptionName) ||
+          initialSubscriptions[0],
+      );
+    }
   }, [searchParams]);
 
   return (
-    <div className={clsx(styles.root, { [styles.primary]: collapseId > 0 })}>
+    <div className={clsx(styles.root, { [styles.primary]: step > 0 })}>
       {step === 0 ? (
         <div className={styles.dashboard}>
           <div className={styles.head}>

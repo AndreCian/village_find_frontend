@@ -16,7 +16,7 @@ const initialCompanies = [
     image: '/assets/customer/logos/zippy.png',
   },
   {
-    text: 'Atlas Studios is a leading marketing agency that helps Fresher Choice conduct digital marketing for our platform and vendors',
+    text: 'Atlas Studios is a leading marketing agency that helps Village Finds conduct digital marketing for our platform and vendors',
     image: '/assets/customer/logos/atlas.png',
   },
 ];

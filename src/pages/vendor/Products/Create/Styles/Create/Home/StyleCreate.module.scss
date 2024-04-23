@@ -15,17 +15,24 @@
     @apply space-y-4;
   }
 
-  .sizeBar,
-  .colorBar {
+  .valueBar {
     @apply flex flex-wrap gap-x-4 gap-y-2;
 
-    & > span,
-    .addButton {
-      @apply min-w-[150px] rounded-full border-none bg-primary px-4 py-2;
+    > .valueChip {
+      @apply flex min-w-[150px] items-center justify-between rounded-full border-none bg-primary px-4 py-2;
+      > span {
+        > svg {
+          @apply cursor-pointer;
+        }
+      }
     }
 
-    .addButton {
-      @apply flex items-center justify-between font-semibold shadow-xl;
+    > .addButton {
+      @apply flex min-w-[100px] items-center justify-between rounded-full bg-primary px-4 py-2 font-semibold shadow-xl;
+    }
+
+    > .valueInput > input {
+      @apply max-w-[150px] py-2;
     }
   }
 

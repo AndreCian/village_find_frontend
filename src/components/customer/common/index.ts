@@ -8,3 +8,4 @@ export * from './PickDateDialog';
 export * from './PickupLocationDialog';
 export * from './EventMeetupDialog';
 export * from './RegisterFormDialog';
+export * from './LocationConfirmDialog';

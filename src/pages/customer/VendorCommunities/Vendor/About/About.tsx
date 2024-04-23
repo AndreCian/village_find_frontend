@@ -1,9 +1,12 @@
+import { useEffect, useState } from 'react';
+import { Link, useParams } from 'react-router-dom';
 import { FaFacebookF, FaInstagram, FaYoutube } from 'react-icons/fa6';
 
 import { Container } from '@/components/layout/customer';
 import { Button, Input } from '@/components';
 
 import styles from './About.module.scss';
+import { HttpService } from '@/services';
 
 const initialBackImage = '/assets/customer/vcom/about1.png';
 const initialTitleText = 'Sample Title Text';
@@ -17,6 +20,19 @@ const initialStoryTexts = [
 ];
 
 export function About() {
+  const { id: vendorID } = useParams();
+  const [vendor, setVendor] = useState<any>({});
+
+  useEffect(() => {
+    if (!vendorID) return;
+    HttpService.get(`/user/vendor`, { vendorId: vendorID }).then(response => {
+      const result = response[0];
+      if (result) {
+        setVendor(result);
+      }
+    });
+  }, [vendorID]);
+
   return (
     <div className={styles.root}>
       <div className={styles.backImage}>
@@ -41,13 +57,19 @@ export function About() {
           <div className={styles.wrapper}>
             <div className={styles.link}>
               <span>
-                <FaFacebookF size={24} fill="white" />
+                <Link to={vendor.socialUrls?.facebook}>
+                  <FaFacebookF size={24} fill="white" />
+                </Link>
               </span>
               <span>
-                <FaInstagram size={28} fill="white" />
+                <Link to={vendor.socialUrls?.instagram}>
+                  <FaInstagram size={28} fill="white" />
+                </Link>
               </span>
               <span>
-                <FaYoutube size={24} fill="white" />
+                <Link to={vendor.socialUrls?.youtube}>
+                  <FaYoutube size={24} fill="white" />
+                </Link>
               </span>
             </div>
             <Input

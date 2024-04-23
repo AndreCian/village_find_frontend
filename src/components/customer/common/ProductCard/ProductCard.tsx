@@ -34,8 +34,8 @@ export function ProductCard({
   className = '',
   product,
 }: IProductCardProps) {
-  const { _id, image, name, shopName, price, totprice, tags } = product;
   const navigate = useNavigate();
+  const { _id, image, name, shopName, price, totprice, tags } = product;
 
   return (
     <div
@@ -44,7 +44,9 @@ export function ProductCard({
         isActive || isLoadMore ? styles.active : '',
         className,
       )}
-      onClick={() => navigate(`/product-detail/${_id}`)}
+      onClick={() =>
+        navigate(isLoadMore ? '/market' : `/product-detail/${_id}`)
+      }
     >
       <div className={styles.image}>
         <img src={`${SERVER_URL}/${image}`} alt="Product image" />

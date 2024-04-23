@@ -1,12 +1,15 @@
 .root {
-  @apply relative flex h-fit flex-col justify-center pb-6 pt-4 xl:pb-16 xl:pt-24;
+  @apply relative flex max-h-[800px] flex-col items-center md:py-8 xl:py-24;
 
-  .dashImage {
-    @apply absolute top-0 -z-10 h-full w-full;
-  }
+  .imageWrapper {
+    @apply absolute top-0 flex h-full w-full items-center justify-center overflow-hidden;
+    > img {
+      @apply absolute -z-10 w-full;
+    }
 
-  .grayLayer {
-    @apply absolute top-0 -z-10 h-full w-full bg-black opacity-20;
+    .grayLayer {
+      @apply absolute top-0 -z-10 h-full w-full bg-black opacity-20;
+    }
   }
 
   .searchBar {

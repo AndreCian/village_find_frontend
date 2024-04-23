@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import clsx from 'clsx';
 
@@ -18,11 +18,12 @@ const specs = [
   'Length',
   'Package Quantity',
 ].map((spec: string) => ({ name: spec, value: spec.toLowerCase() }));
+
 const subPath = '/vendor/products';
 
 export function SpecCreate() {
   const navigate = useNavigate();
-  const { productId } = useParams();
+  const { productId, specId } = useParams();
 
   const [specName, setSpecName] = useState('');
   const [specValue, setSpecValue] = useState('');
@@ -36,10 +37,14 @@ export function SpecCreate() {
   };
 
   const onUpdateClick = () => {
-    HttpService.post(`/products/${productId}/specification`, {
-      name: specName,
-      value: specValue,
-    }).then(response => {
+    HttpService.post(
+      `/products/${productId}/specification`,
+      {
+        name: specName,
+        value: specValue,
+      },
+      { specId },
+    ).then(response => {
       const { status } = response;
       if (status === 200) {
         navigate(`${subPath}/${productId}/specifications`);
@@ -50,6 +55,21 @@ export function SpecCreate() {
       }
     });
   };
+
+  useEffect(() => {
+    if (!productId) return;
+    HttpService.get(`/products/${productId}/specification`).then(response => {
+      const { status, specifications } = response;
+      console.log('specifications', specifications);
+      if (status === 200) {
+        const specification = specifications.find(
+          (item: any) => item._id === specId,
+        );
+        setSpecName(specification.name);
+        setSpecValue(specification.value);
+      }
+    });
+  }, [productId, specId]);
 
   return (
     <div className={styles.container}>
@@ -69,12 +89,14 @@ export function SpecCreate() {
         <div className={styles.values}>
           <TextField
             rows={1}
+            maxRows={1}
             rounded="full"
             border="none"
             bgcolor="primary"
             placeholder="Enter Specification Values"
             value={specValue}
             updateValue={onSpecValueChange}
+            className={styles.valueField}
           />
         </div>
       </div>
@@ -89,7 +111,7 @@ export function SpecCreate() {
           className={clsx(styles.button, styles.updateBtn)}
           onClick={onUpdateClick}
         >
-          Add
+          {specId === 'create' ? 'Add' : 'Update'}
         </button>
       </div>
     </div>

@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { SERVER_URL } from '@/config/global';
 
 import styles from './VComCard.module.scss';
+import { useContext } from 'react';
+import { CategoryContext } from '@/providers';
 
 interface IVComCardProps {
   vcomId: string;
@@ -10,7 +12,7 @@ interface IVComCardProps {
   logoImage: string;
   title: string;
   description: string;
-  category: string;
+  categories: string[];
   vendors: { _id: string }[];
 }
 
@@ -20,10 +22,11 @@ export function VComCard({
   logoImage,
   title,
   description,
-  category,
+  categories: comCategories,
   vendors,
 }: IVComCardProps) {
   const navigate = useNavigate();
+  const { categories } = useContext(CategoryContext);
 
   return (
     <div className={styles.root}>
@@ -52,7 +55,13 @@ export function VComCard({
           <div className={styles.extra}>
             <div className={styles.category}>
               <p>Category</p>
-              <span>{category}</span>
+              {categories
+                .filter(item =>
+                  (comCategories || []).includes(item.name.toLowerCase()),
+                )
+                .map((item: any, index: number) => (
+                  <span key={index}>{item.name}</span>
+                ))}
             </div>
             <div className={styles.vendor}>
               <p>Vendors</p>

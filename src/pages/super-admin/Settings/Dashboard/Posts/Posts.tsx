@@ -1,37 +1,37 @@
 import { ChangeEvent, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { enqueueSnackbar } from 'notistack';
 
 import { Card, TableToolbar, TableBody } from '@/components/common';
 import { Select } from '@/components/forms';
 import { TrashIcon } from '@/components/icons';
-
-import { PostService } from '@/services';
-
-import { usePostStore } from '@/stores';
-
+import { HttpService } from '@/services';
 import { ITableColumn } from '@/interfaces';
 
 import styles from './Posts.module.scss';
 
-const initialStatus = ['Active', 'Inactive'];
-
+const options = [
+  {
+    name: 'Active',
+    value: 'active',
+  },
+  {
+    name: 'Inactive',
+    value: 'inactive',
+  },
+];
 const postPathPrefix = '/admin/settings/dashboard/posts';
 
 export function Posts() {
   const navigate = useNavigate();
   const [filter, setFilter] = useState<string>('');
   const [category, setCategory] = useState<string>('');
-
-  const {
-    posts: storePosts,
-    setPosts: setStorePosts,
-    deletePost: deleteStorePost,
-  } = usePostStore();
+  const [posts, setPosts] = useState<any[]>([]);
 
   const columns: ITableColumn[] = [
     {
       title: 'Post Name',
-      name: 'name',
+      name: 'title',
       width: 250,
     },
     {
@@ -46,8 +46,9 @@ export function Posts() {
       cell: (row: any) => (
         <Select
           rounded="full"
-          value={row.status}
-          options={[]}
+          value={row.status || 'inactive'}
+          updateValue={onStatusChange(row._id)}
+          options={options}
           className={styles.statusSelector}
         />
       ),
@@ -80,15 +81,33 @@ export function Posts() {
     setCategory(_category);
   };
 
+  const onStatusChange = (id: string) => (value: string) => {
+    HttpService.put('/settings/general/support', { id }).then(response => {
+      const { message } = response;
+      if (message === 'updated') {
+        enqueueSnackbar('Post status updated.', { variant: 'success' });
+        setPosts(
+          posts.map(item =>
+            item._id === id ? { ...item, status: value } : item,
+          ),
+        );
+      }
+    });
+  };
+
   const onDeleteClick = (id: string) => () => {
-    PostService.deleteOne(id).then(() => {
-      deleteStorePost(id);
+    HttpService.delete('/settings/general/support', { id }).then(response => {
+      const { message } = response;
+      if (message === 'deleted') {
+        enqueueSnackbar('Post deleted.', { variant: 'success' });
+        setPosts(posts.filter(item => item._id !== id))
+      }
     });
   };
 
   useEffect(() => {
-    PostService.findAll(filter, category).then(posts => {
-      setStorePosts(posts);
+    HttpService.get('/settings/general/support').then(response => {
+      setPosts(response || []);
     });
   }, [filter, category]);
 
@@ -101,7 +120,7 @@ export function Posts() {
         category={category}
         updateCategory={updateStatus}
         selectTitle="Status"
-        selectOpts={initialStatus}
+        selectOpts={options}
         className={styles.tableToolbar}
         actions={
           <div>
@@ -115,11 +134,7 @@ export function Posts() {
           </div>
         }
       />
-      <TableBody
-        columns={columns}
-        rows={storePosts}
-        className={styles.tableBody}
-      />
+      <TableBody columns={columns} rows={posts} className={styles.tableBody} />
     </Card>
   );
 }

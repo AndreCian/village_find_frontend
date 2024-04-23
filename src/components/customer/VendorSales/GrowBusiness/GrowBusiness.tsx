@@ -14,8 +14,8 @@ import styles from './GrowBusiness.module.scss';
 
 const initialSecNames = [
   {
-    path: '#why-fresher-choice',
-    title: 'Why Fresher Choice',
+    path: '#why-village-finds',
+    title: 'Why Village Finds',
   },
   {
     path: '#why-community',
@@ -113,9 +113,8 @@ export function GrowBusiness() {
           <div className={styles.control}>
             <p className={styles.head}>Save valuable time</p>
             <p className={styles.body}>
-              Fresher Choice's powerfully simple tools allow you to focus on
-              your creative products and less time managing a complicated
-              website.
+              Village Finds' powerfully simple tools allow you to focus on your
+              creative products and less time managing a complicated website.
             </p>
             <ul className={styles.list}>
               <li>One dashboard to manage your online business</li>
@@ -134,7 +133,7 @@ export function GrowBusiness() {
         </div>
         <div className={styles.choices}>
           <h1>Big ideas often need simple solutions</h1>
-          <p>Fresher Choice clears the air with:</p>
+          <p>Village Finds clears the air with:</p>
           <div className={styles.list}>
             {initialSolutios.map((solution: any, index: number) => (
               <div key={`choice-${index}`} className={styles.choice}>

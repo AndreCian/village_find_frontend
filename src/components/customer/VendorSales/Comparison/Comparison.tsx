@@ -21,7 +21,7 @@ const initialComparisons = [
     delivery: false,
   },
   {
-    title: 'Fresher Choice',
+    title: 'Village Finds',
     transFee: '8.5% - 10%',
     referFee: 'Free',
     listFee: 'Free up to 25 items',

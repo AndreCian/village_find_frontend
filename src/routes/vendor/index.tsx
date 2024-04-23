@@ -221,7 +221,7 @@ export const vendorRoutes = [
               },
               {
                 title: 'Create',
-                path: 'create',
+                path: ':specId',
                 element: <SpecCreate />,
               },
             ],
@@ -245,6 +245,7 @@ export const vendorRoutes = [
     path: 'order',
     icon: <UserIcon />,
     element: <Outlet />,
+    leaf: true,
     children: [
       {
         index: true,
@@ -321,7 +322,7 @@ export const vendorRoutes = [
       },
       {
         title: 'Detail',
-        path: 'detail',
+        path: ':id',
         element: <SupportDetail />,
       },
     ],

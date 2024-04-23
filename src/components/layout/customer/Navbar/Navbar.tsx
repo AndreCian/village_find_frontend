@@ -13,12 +13,14 @@ import styles from './Navbar.module.scss';
 interface INavItem {
   title: string;
   path: string;
+  isemphasize?: boolean;
 }
 
 export function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
   const pathname = location.pathname;
+  const search = location.search;
 
   const { isCategoryBar, toggleCategoryBar } = useContext(CategoryContext);
 
@@ -38,6 +40,7 @@ export function Navbar() {
     {
       title: 'Sell',
       path: '/sell',
+      isemphasize: true,
     },
   ];
 
@@ -50,15 +53,17 @@ export function Navbar() {
       <Container className={styles.container}>
         <ul className={styles.navbar}>
           <li onClick={onCatClick}>
-            Categories {isCategoryBar ? <FaChevronUp /> : <FaChevronDown />}
+            <div>
+              Categories {isCategoryBar ? <FaChevronUp /> : <FaChevronDown />}
+            </div>
           </li>
           {navItems.map((navItem: INavItem) => (
             <li
               key={navItem.title}
-              className={clsx(
-                styles.navItem,
-                pathname.startsWith(navItem.path),
-              )}
+              className={clsx({
+                [styles.active]: navItem.path === `${pathname}${search}`,
+                [styles.emphasize]: navItem.isemphasize,
+              })}
               onClick={() => navigate(navItem.path)}
             >
               {navItem.title}

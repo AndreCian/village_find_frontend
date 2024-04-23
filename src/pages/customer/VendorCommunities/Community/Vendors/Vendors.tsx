@@ -8,65 +8,84 @@ import {
   CategoryBar,
   CommunityContent,
 } from '@/components/customer/VendorCommunities';
-import { EventMeetupDialog } from '@/components/customer/common';
-
+import {
+  FilterAndSortDialog,
+  FindProductDialog,
+  MobileSettingDialog,
+  EventMeetupDialog,
+} from '@/components/customer/common';
 import { HttpService } from '@/services';
-
-import { AuthContext } from '@/providers';
+import { AuthContext, CategoryContext } from '@/providers';
+import { useWindowWidth } from '@/utils';
 
 import styles from './Vendors.module.scss';
-
-const initialVendors = [
-  'All Vendors',
-  'Bills Birds',
-  'The Foundry',
-  'Walk with Purpose Hats',
-  "Lilly's Jewels",
-  'Pat Backs',
-  "Bronson's Purpose",
-  "Greg's Eggs",
-  'Juan and Kan',
-];
 
 interface IVendorsProps {
   announcement: {
     text: string;
     updated_at: string;
   };
-  vendors: any[];
   events: {
     fulfillment?: {
       date: string;
     };
   }[];
-  products: any[];
+  community: {
+    _id: string;
+    vendors: any[];
+  };
+  categories: string[];
 }
+
+const minBreakLists = ['none', 'xs'];
 
 export function Vendors({
   announcement,
-  vendors,
   events,
-  products,
+  community,
+  categories: comCategories,
 }: IVendorsProps) {
   const { account } = useContext(AuthContext);
+  const { categories } = useContext(CategoryContext);
+
+  const [_, breakpoint] = useWindowWidth();
+  const isMobile = useMemo(() => {
+    return minBreakLists.includes(breakpoint as string);
+  }, [breakpoint]);
 
   const [panelType, setPanelType] = useState(true);
   const [category, setCategory] = useState('');
-  const [categoryList, setCategoryList] = useState<
-    { name: string; value: string }[]
-  >([]);
+  const [minPrice, setMinPrice] = useState('');
+  const [maxPrice, setMaxPrice] = useState('');
+  const [sortOrder, setSortOrder] = useState('ascending');
   const currentCategory = useMemo(() => {
-    const current = categoryList.find(item => item.value === category);
-    return !current ? '' : current.name;
-  }, []);
+    const item = [
+      { name: 'All Categories', value: '' },
+      ...categories.map(item => ({ ...item, value: item.name.toLowerCase() })),
+    ].find(item => item.value === category);
+    return item?.name || '';
+  }, [category]);
 
-  const [vendor, setVendor] = useState(-1);
+  const [vendor, setVendor] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [pageCount, setPageCount] = useState(1);
   const [isMoreOpen, setIsMoreOpen] = useState(false);
   const [isMeetupOpen, setIsMeetupOpen] = useState(false);
+  const currentVendor = useMemo(() => {
+    const item = [
+      { name: 'All Vendors', value: '' },
+      ...community.vendors.map(item => ({ name: item.name, value: item._id })),
+    ].find(item => item.value === vendor);
+    return item ? item.name : '';
+  }, [vendor]);
 
   const [attendees, setAttendees] = useState<string[]>([]);
+  const [products, setProducts] = useState<any[]>([]);
+  const [vendors, setVendors] = useState<any[]>([]);
+
+  const [findProductOpen, showFindProductDialog] = useState(false);
+  const [filterSortOpen, showFilterSortDialog] = useState(false);
+  const [mobileSettingOpen, showMobileSettingDialog] = useState(false);
 
   const formatDate = (date: string) => {
     return !date
@@ -83,8 +102,8 @@ export function Vendors({
     setPanelType(true);
   };
 
-  const onVendorChange = (index: number) => {
-    setVendor(index);
+  const onVendorChange = (value: string) => {
+    setVendor(value);
     setPanelType(false);
   };
 
@@ -92,18 +111,13 @@ export function Vendors({
     setIsMoreOpen(!isMoreOpen);
   };
 
-  useEffect(() => {
-    HttpService.get('/settings/general/category').then((response: any) => {
-      const categories = [
-        { name: 'All Categories', value: 'all' },
-        ...(response ?? []),
-      ].map((item: any) => ({
-        ...item,
-        value: item.value ?? item.name.toLowerCase(),
-      }));
-      setCategoryList(categories);
-    });
-  }, []);
+  const onOptionChange = (option: any) => {
+    const { minPrice, maxPrice, sortOrder } = option;
+    setMinPrice(minPrice);
+    setMaxPrice(maxPrice);
+    setSortOrder(sortOrder);
+    showFilterSortDialog(false);
+  };
 
   useEffect(() => {
     if (!(account && account.profile && account.profile._id)) return;
@@ -117,6 +131,27 @@ export function Vendors({
     });
   }, []);
 
+  useEffect(() => {
+    if (!community._id) return;
+    const params: any = { community: community._id };
+    if (category) params.category = category;
+    if (minPrice) params.minPrice = minPrice;
+    if (maxPrice) params.maxPrice = maxPrice;
+    if (sortOrder) params.sort = sortOrder;
+    HttpService.get('/products/public', params).then(response => {
+      setProducts(response || []);
+    });
+  }, [community, category, minPrice, maxPrice, sortOrder]);
+
+  useEffect(() => {
+    if (!community._id) return;
+    const params: any = { communityId: community._id };
+    if (vendor) params.vendorId = vendor;
+    HttpService.get('/user/vendor', params).then(response => {
+      setVendors(response || []);
+    });
+  }, [community, vendor]);
+
   return (
     <>
       <Container className={styles.root}>
@@ -125,7 +160,7 @@ export function Vendors({
         </div>
         <div className={styles.vendors}>
           <p>
-            Vendors <span>{vendors.length}</span>
+            Vendors <span>{community.vendors.length}</span>
           </p>
         </div>
         <div className={styles.schedule}>
@@ -160,14 +195,31 @@ export function Vendors({
             changeCategory={onCategoryChange}
             vendor={vendor}
             changeVendor={onVendorChange}
-            categories={categoryList}
+            categories={[
+              { name: 'All Categories', value: '' },
+              ...categories
+                .filter(item => comCategories.includes(item.name.toLowerCase()))
+                .map(item => ({ ...item, value: item.name.toLowerCase() })),
+            ]}
+            minPrice={minPrice}
+            maxPrice={maxPrice}
+            vendors={[
+              { name: 'All Vendors', value: '' },
+              ...community.vendors.map(item => ({
+                name: item.shopName,
+                value: item._id,
+              })),
+            ]}
           />
           <CommunityContent
             panel={panelType}
             title={panelType ? 'Products' : 'Vendors'}
-            subtitle={panelType ? currentCategory : initialVendors[vendor]}
+            subtitle={panelType ? currentCategory : currentVendor}
             products={products}
             vendors={vendors}
+            openFindProductDialog={() => showFindProductDialog(true)}
+            openFilterSortDialog={() => showFilterSortDialog(true)}
+            openMobileSettingDialog={() => showMobileSettingDialog(true)}
           />
         </div>
         <div className={styles.pagination}>
@@ -183,6 +235,22 @@ export function Vendors({
         onClose={() => setIsMeetupOpen(false)}
         events={events}
         attendees={attendees}
+      />
+      <FindProductDialog
+        open={findProductOpen}
+        onClose={() => showFindProductDialog(false)}
+      />
+      <FilterAndSortDialog
+        open={filterSortOpen}
+        minPrice={minPrice}
+        maxPrice={maxPrice}
+        sortOrder={sortOrder}
+        onClose={() => showFilterSortDialog(false)}
+        onApply={onOptionChange}
+      />
+      <MobileSettingDialog
+        open={isMobile && mobileSettingOpen}
+        onClose={() => showMobileSettingDialog(false)}
       />
     </>
   );

@@ -94,56 +94,26 @@ export function Payment({ onNextStep = () => {}, summary }: IPaymentProps) {
         return;
       }
 
-      // const { clientSecret } = await HttpService.post(
-      //   '/stripe/create-payment-intent',
-      //   {
-      //     amount: summary.orderTotal,
-      //     currency: 'usd',
-      //   },
-      // );
-
-      // const result = await stripe.confirmCardPayment(clientSecret, {
-      //   payment_method: {
-      //     card: cardNumberElement,
-      //     billing_details: {
-      //       email: payment.email,
-      //       name: payment.cardName,
-      //     },
-      //   },
-      // });
-
       const payload = await stripe.createPaymentMethod({
         type: 'card',
         card: cardNumberElement,
         billing_details: {
           name: payment.cardName,
           email: payment.email,
+          phone: payment.phoneNumber,
         },
       });
 
       if (payload.error) {
         enqueueSnackbar('Payment confirmation failed.', { variant: 'error' });
       } else {
-        // if (result.paymentIntent.status === 'succeeded') {
-        //   enqueueSnackbar('Success! Payment received.', { variant: 'success' });
-        // } else if (result.paymentIntent.status === 'processing') {
-        //   enqueueSnackbar(
-        //     "Payment processing. We'll update you when payment is received.",
-        //     { variant: 'info' },
-        //   );
-        // } else if (result.paymentIntent.status === 'requires_payment_method') {
-        //   enqueueSnackbar(
-        //     'Payment failed. Please try another payment method.',
-        //     { variant: 'warning' },
-        //   );
-        // } else {
-        //   enqueueSnackbar('Something went wrong.', { variant: 'error' });
-        // }
         HttpService.post('/stripe/create-payment-method', {
-          amount: summary.orderTotal,
-          currency: 'usd',
-          paymentMethodID: payload.paymentMethod.id,
-          billingDetails: payload.paymentMethod.billing_details,
+          methodID: payload.paymentMethod.id,
+          payment: {
+            name: payment.cardName,
+            email: payment.email,
+            phone: payment.phoneNumber
+          }
         }).then(response => {
           const { status } = response;
           if (status === 200) {

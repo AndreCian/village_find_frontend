@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { FaMagnifyingGlass } from 'react-icons/fa6';
 
 import { Input, Select } from '@/components/forms';
 import { Container } from '@/components/layout/customer';
 import { VComCard } from '@/components/customer/common';
-
+import { CategoryContext } from '@/providers';
 import { HttpService } from '@/services';
 
 import styles from './Home.module.scss';
@@ -22,13 +23,14 @@ interface ICommunity {
   title: string;
   description: string;
   vendors: number;
-  category: string;
+  categories: string[];
 }
 
 export function Home() {
-  const [category, setCategory] = useState<string | null>(null);
-  const [categoryList, setCategoryList] = useState<ICategory[]>([]);
+  const [searchParams] = useSearchParams();
+  const { categories } = useContext(CategoryContext);
   const [filter, setFilter] = useState('');
+  const [category, setCategory] = useState<string>('');
   const [communities, setCommunities] = useState<ICommunity[]>([]);
 
   const onCategoryChange = (value: string) => {
@@ -36,17 +38,9 @@ export function Home() {
   };
 
   useEffect(() => {
-    HttpService.get('/settings/general/category').then(response => {
-      const categories = [
-        { name: 'All Categories', value: 'all' },
-        ...(response ?? []),
-      ].map(category => ({
-        ...category,
-        value: category.value ?? category.name.toLowerCase(),
-      }));
-      setCategoryList(categories);
-    });
-  }, []);
+    const category = searchParams.get('category') || '';
+    setCategory(category);
+  }, [searchParams]);
 
   useEffect(() => {
     HttpService.get(`/communities`, {
@@ -60,7 +54,7 @@ export function Home() {
         title: community.name,
         description: community.shortDesc,
         vendors: community.vendors,
-        category: community.category,
+        categories: community.categories,
       }));
       setCommunities(result);
     });
@@ -75,7 +69,7 @@ export function Home() {
         <div className={styles.head}>
           <h1>What is a vendor community?</h1>
           <p>
-            Fresher Choice’s new C-commerce initiative empowers local people to
+            Village Finds' new C-commerce initiative empowers local people to
             organize small makers and growers in their communities to help them
             connect with customers looking for what they’re selling.
           </p>
@@ -84,9 +78,15 @@ export function Home() {
           <div className={styles.leftbar}>
             <p>Community Interest</p>
             <ul className={styles.categories}>
-              {categoryList.map((_category: any, _index: number) => (
+              {[
+                { name: 'All Categories', value: '' },
+                ...categories.map(item => ({
+                  ...item,
+                  value: item.name.toLowerCase(),
+                })),
+              ].map((_category: any, _index: number) => (
                 <li
-                  key={_category._id ?? _index}
+                  key={_index}
                   onClick={() => setCategory(_category.value)}
                   className={category === _category.value ? styles.active : ''}
                 >
@@ -101,7 +101,13 @@ export function Home() {
               <Select
                 rounded="full"
                 placeholder="Community Interest"
-                options={categoryList}
+                options={[
+                  { name: 'All Categories', value: '' },
+                  ...categories.map(item => ({
+                    ...item,
+                    value: item.name.toLowerCase(),
+                  })),
+                ]}
                 border="none"
                 bgcolor="primary"
                 className={styles.interests}

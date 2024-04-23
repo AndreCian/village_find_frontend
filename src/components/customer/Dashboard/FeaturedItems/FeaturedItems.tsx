@@ -7,8 +7,9 @@ import { useWindowWidth } from '@/utils';
 import styles from './FeaturedItems.module.scss';
 
 export interface IFeaturedItem {
-  title: string;
+  _id: string;
   name: string;
+  shopName: string;
   price: number;
   tags: string[];
   image: string;

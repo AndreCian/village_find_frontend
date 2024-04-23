@@ -1,5 +1,5 @@
 .root {
-  @apply flex flex-col space-y-20 py-10 xl:py-20;
+  @apply flex flex-col items-center gap-y-20 py-10 xl:py-20;
 
   .head {
     @apply max-w-[650px];
@@ -14,7 +14,7 @@
   }
 
   .container {
-    @apply space-y-6;
+    @apply flex w-full flex-col gap-y-6;
 
     .title {
       @apply text-[16px] font-bold leading-[24px] xl:text-[28px] xl:leading-[42px];
@@ -27,7 +27,7 @@
         @apply flex w-[90%] shrink-0 cursor-pointer items-center gap-x-2 rounded-lg p-2 hover:shadow-md md:w-[50%] xl:w-[30%];
 
         img {
-          @apply aspect-square h-full;
+          @apply aspect-square h-full shrink-0;
         }
 
         .vcomText {

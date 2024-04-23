@@ -9,6 +9,7 @@ import { ChangeInputEvent } from '@/interfaces';
 import styles from './StyleCreate.module.scss';
 import { HttpService } from '@/services';
 import { enqueueSnackbar } from 'notistack';
+import { FaTimes } from 'react-icons/fa';
 
 export interface IAttribute {
   _id?: string;
@@ -58,7 +59,7 @@ export function StyleCreate() {
               ...attribute,
               values: [
                 ...attribute.values,
-                `${attribute.name}${attribute.values.length + 1}`,
+                `Value${attribute.values.length + 1}`,
               ],
             }
           : attribute,
@@ -71,6 +72,17 @@ export function StyleCreate() {
     setCurrentAttrIndex(attrIndex);
     setCurrentValueIndex(vIndex);
     setIsDirty(true);
+  };
+
+  const onDeleteValueClick = (e: any, attrIndex: number, vIndex: number) => {
+    e.stopPropagation();
+    const newValues = [...attributes[attrIndex].values];
+    newValues.splice(vIndex);
+    setAttributes(
+      attributes.map((attribute: IAttribute, index: number) =>
+        index === attrIndex ? { ...attribute, values: newValues } : attribute,
+      ),
+    );
   };
 
   const onAttrValueChange =
@@ -171,7 +183,7 @@ export function StyleCreate() {
                 rounded="full"
                 border="none"
                 bgcolor="secondary"
-                placeholder="Size"
+                placeholder="Name"
                 className={styles.attrNameInput}
                 value={attribute.name}
                 updateValue={onAttrNameChange(attrIndex)}
@@ -179,29 +191,42 @@ export function StyleCreate() {
             </div>
             <div className={styles.control}>
               <p>Attribute Values</p>
-              <div className={styles.sizeBar}>
+              <div className={styles.valueBar}>
                 {attribute.values.map((value: string, vIndex: number) =>
                   currentAttrIndex === attrIndex &&
                   currentValueIndex === vIndex ? (
                     <Input
+                      key={vIndex}
+                      className={styles.valueInput}
                       value={value}
                       updateValue={onAttrValueChange(attrIndex, vIndex)}
                       onBlur={onAttrValueBlur}
+                      onKeyDown={(e: KeyboardEvent) =>
+                        e.keyCode === 13 && onAttrValueBlur()
+                      }
                     />
                   ) : (
-                    <span
-                      key={value}
+                    <div
+                      key={vIndex}
+                      className={styles.valueChip}
                       onClick={() => onEditValueClick(attrIndex, vIndex)}
                     >
-                      {value}
-                    </span>
+                      <p>{value}</p>
+                      <span
+                        onClick={(e: any) =>
+                          onDeleteValueClick(e, attrIndex, vIndex)
+                        }
+                      >
+                        <FaTimes />
+                      </span>
+                    </div>
                   ),
                 )}
                 <button
                   className={styles.addButton}
                   onClick={onAddValueClick(attrIndex)}
                 >
-                  Add {attribute.name}
+                  Add
                   <span>+</span>
                 </button>
               </div>

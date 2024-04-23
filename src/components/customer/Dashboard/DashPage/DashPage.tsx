@@ -4,9 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Container } from '@/components/layout/customer';
 import { Input } from '@/components/forms';
 import { MagnifierIcon } from '@/components/icons';
-
 import { SERVER_URL } from '@/config/global';
-
 import { SearchbarContext } from '@/providers';
 
 import styles from './DashPage.module.scss';
@@ -43,8 +41,10 @@ export function DashPage({ title, subtitle, images }: IDashPageProps) {
 
   return (
     <div className={styles.root}>
-      <img src={`${SERVER_URL}/${images[0]}`} className={styles.dashImage} />
-      <div className={styles.grayLayer} />
+      <div className={styles.imageWrapper}>
+        <img src={`${SERVER_URL}/${images[0]}`} className={styles.dashImage} />
+        <div className={styles.grayLayer} />
+      </div>
       <Container className={styles.searchBar}>
         <h1>{title}</h1>
         <p>{subtitle}</p>
