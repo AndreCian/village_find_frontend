@@ -1,21 +1,58 @@
+import { lazy } from 'react';
 import { Outlet, Navigate } from 'react-router-dom';
 
-import { Login, Signup as CustomerSignup } from '@/pages/customer';
-import {
-  Dashboard,
-  Market,
-  VendorSales,
-  ProductDetails,
-  Checkout,
-  About,
-  VendorSignup,
-} from '@/pages/customer';
-import {
-  Home as CommunityHome,
-  CommunityLayout,
-  Vendor,
-  VendorAbout,
-} from '@/pages/customer/VendorCommunities';
+// Importing customer-related components
+const Login = lazy(() =>
+  import('@/pages/customer').then(module => ({ default: module.Login })),
+);
+const CustomerSignup = lazy(() =>
+  import('@/pages/customer').then(module => ({ default: module.Signup })),
+);
+const Dashboard = lazy(() =>
+  import('@/pages/customer').then(module => ({ default: module.Dashboard })),
+);
+const Market = lazy(() =>
+  import('@/pages/customer').then(module => ({ default: module.Market })),
+);
+const VendorSales = lazy(() =>
+  import('@/pages/customer').then(module => ({ default: module.VendorSales })),
+);
+const ProductDetails = lazy(() =>
+  import('@/pages/customer').then(module => ({
+    default: module.ProductDetails,
+  })),
+);
+const Checkout = lazy(() =>
+  import('@/pages/customer').then(module => ({ default: module.Checkout })),
+);
+const About = lazy(() =>
+  import('@/pages/customer').then(module => ({ default: module.About })),
+);
+const VendorSignup = lazy(() =>
+  import('@/pages/customer').then(module => ({ default: module.VendorSignup })),
+);
+
+// Importing components from VendorCommunities under customer
+const CommunityHome = lazy(() =>
+  import('@/pages/customer/VendorCommunities').then(module => ({
+    default: module.Home,
+  })),
+);
+const CommunityLayout = lazy(() =>
+  import('@/pages/customer/VendorCommunities').then(module => ({
+    default: module.CommunityLayout,
+  })),
+);
+const Vendor = lazy(() =>
+  import('@/pages/customer/VendorCommunities').then(module => ({
+    default: module.Vendor,
+  })),
+);
+const VendorAbout = lazy(() =>
+  import('@/pages/customer/VendorCommunities').then(module => ({
+    default: module.VendorAbout,
+  })),
+);
 
 export const customerRoutes = [
   {

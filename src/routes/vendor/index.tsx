@@ -1,3 +1,4 @@
+import { lazy } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 
 import {
@@ -9,42 +10,178 @@ import {
   VendorIcon,
 } from '@/components/icons';
 
-import { Dashboard } from '@/pages/vendor/Dashboard';
-import {
-  ProfileHome,
-  BankDetail,
-  FulfillDetail,
-  Pickup,
-  Delivery,
-  PickupLocation,
-  PickupLocationCreate,
-  ShippingService,
-  ShippingAddress,
-  ParcelSize,
-  ParcelCreate,
-  ShippingAccount,
-} from '@/pages/vendor/Profile';
-import {
-  General,
-  ProductLayout,
-  Products,
-  StyleCreate,
-  Styles,
-  Specifications,
-  Customization,
-  Subscription,
-  SpecCreate,
-  Attributes,
-  StyleCreateLayout,
-} from '@/pages/vendor/Products';
-import { Financials } from '@/pages/vendor/Financials';
-import { Community } from '@/pages/vendor/Community';
-import { Customers } from '@/pages/vendor/Customers';
-import { GoalLayout, GoalHome, Rewards } from '@/pages/vendor/Goals';
-import { SupportDetail, SupportHome } from '@/pages/vendor/Support';
-import { OrderHome, OrderDetail } from '@/pages/vendor/Orders';
+// For the vendor dashboard and profile related components
+const Dashboard = lazy(() =>
+  import('@/pages/vendor/Dashboard').then(module => ({
+    default: module.Dashboard,
+  })),
+);
+const ProfileHome = lazy(() =>
+  import('@/pages/vendor/Profile').then(module => ({
+    default: module.ProfileHome,
+  })),
+);
+const BankDetail = lazy(() =>
+  import('@/pages/vendor/Profile').then(module => ({
+    default: module.BankDetail,
+  })),
+);
+const FulfillDetail = lazy(() =>
+  import('@/pages/vendor/Profile').then(module => ({
+    default: module.FulfillDetail,
+  })),
+);
+const Pickup = lazy(() =>
+  import('@/pages/vendor/Profile').then(module => ({ default: module.Pickup })),
+);
+const Delivery = lazy(() =>
+  import('@/pages/vendor/Profile').then(module => ({
+    default: module.Delivery,
+  })),
+);
+const PickupLocation = lazy(() =>
+  import('@/pages/vendor/Profile').then(module => ({
+    default: module.PickupLocation,
+  })),
+);
+const PickupLocationCreate = lazy(() =>
+  import('@/pages/vendor/Profile').then(module => ({
+    default: module.PickupLocationCreate,
+  })),
+);
+const ShippingService = lazy(() =>
+  import('@/pages/vendor/Profile').then(module => ({
+    default: module.ShippingService,
+  })),
+);
+const ShippingAddress = lazy(() =>
+  import('@/pages/vendor/Profile').then(module => ({
+    default: module.ShippingAddress,
+  })),
+);
+const ParcelSize = lazy(() =>
+  import('@/pages/vendor/Profile').then(module => ({
+    default: module.ParcelSize,
+  })),
+);
+const ParcelCreate = lazy(() =>
+  import('@/pages/vendor/Profile').then(module => ({
+    default: module.ParcelCreate,
+  })),
+);
+const ShippingAccount = lazy(() =>
+  import('@/pages/vendor/Profile').then(module => ({
+    default: module.ShippingAccount,
+  })),
+);
 
-import { Coupons } from '@/pages';
+// For products related components
+const General = lazy(() =>
+  import('@/pages/vendor/Products').then(module => ({
+    default: module.General,
+  })),
+);
+const ProductLayout = lazy(() =>
+  import('@/pages/vendor/Products').then(module => ({
+    default: module.ProductLayout,
+  })),
+);
+const Products = lazy(() =>
+  import('@/pages/vendor/Products').then(module => ({
+    default: module.Products,
+  })),
+);
+const StyleCreate = lazy(() =>
+  import('@/pages/vendor/Products').then(module => ({
+    default: module.StyleCreate,
+  })),
+);
+const Styles = lazy(() =>
+  import('@/pages/vendor/Products').then(module => ({
+    default: module.Styles,
+  })),
+);
+const Specifications = lazy(() =>
+  import('@/pages/vendor/Products').then(module => ({
+    default: module.Specifications,
+  })),
+);
+const Customization = lazy(() =>
+  import('@/pages/vendor/Products').then(module => ({
+    default: module.Customization,
+  })),
+);
+const Subscription = lazy(() =>
+  import('@/pages/vendor/Products').then(module => ({
+    default: module.Subscription,
+  })),
+);
+const SpecCreate = lazy(() =>
+  import('@/pages/vendor/Products').then(module => ({
+    default: module.SpecCreate,
+  })),
+);
+const Attributes = lazy(() =>
+  import('@/pages/vendor/Products').then(module => ({
+    default: module.Attributes,
+  })),
+);
+const StyleCreateLayout = lazy(() =>
+  import('@/pages/vendor/Products').then(module => ({
+    default: module.StyleCreateLayout,
+  })),
+);
+
+// Additional components
+const Financials = lazy(() =>
+  import('@/pages/vendor/Financials').then(module => ({
+    default: module.Financials,
+  })),
+);
+const Community = lazy(() =>
+  import('@/pages/vendor/Community').then(module => ({
+    default: module.Community,
+  })),
+);
+const Customers = lazy(() =>
+  import('@/pages/vendor/Customers').then(module => ({
+    default: module.Customers,
+  })),
+);
+const GoalLayout = lazy(() =>
+  import('@/pages/vendor/Goals').then(module => ({
+    default: module.GoalLayout,
+  })),
+);
+const GoalHome = lazy(() =>
+  import('@/pages/vendor/Goals').then(module => ({ default: module.GoalHome })),
+);
+const Rewards = lazy(() =>
+  import('@/pages/vendor/Goals').then(module => ({ default: module.Rewards })),
+);
+const SupportDetail = lazy(() =>
+  import('@/pages/vendor/Support').then(module => ({
+    default: module.SupportDetail,
+  })),
+);
+const SupportHome = lazy(() =>
+  import('@/pages/vendor/Support').then(module => ({
+    default: module.SupportHome,
+  })),
+);
+const OrderHome = lazy(() =>
+  import('@/pages/vendor/Orders').then(module => ({
+    default: module.OrderHome,
+  })),
+);
+const OrderDetail = lazy(() =>
+  import('@/pages/vendor/Orders').then(module => ({
+    default: module.OrderDetail,
+  })),
+);
+const Coupons = lazy(() =>
+  import('@/pages').then(module => ({ default: module.Coupons })),
+);
 
 export const vendorRoutes = [
   {

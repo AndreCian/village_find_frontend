@@ -1,3 +1,4 @@
+import { lazy } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 
 import {
@@ -9,40 +10,165 @@ import {
   LogoutIcon,
 } from '@/components';
 
-import { Dashboard } from '@/pages/super-admin';
-import {
-  SettingsLayout,
-  Imagry,
-  Products,
-  Slider,
-  HowPage,
-  Shop,
-  Vendor,
-  ReadyToShop,
-  Footer,
-  ProductTags,
-  NewProductTag,
-  Metrics,
-  NewMetric,
-  Categories,
-  NewCategory,
-  Posts,
-  NewPost,
-} from '@/pages/super-admin/Settings';
-import {
-  CustomerHome,
-  Coupons,
-  CustomerEdit,
-  CouponEdit,
-} from '@/pages/super-admin/Customers';
-import { OrderHome, OrderDetail } from '@/pages/super-admin/Orders';
-import {
-  VendorsHome,
-  VendorDetail,
-  Subscription,
-} from '@/pages/super-admin/Vendors';
-import { VillageCommunity, VillageEdit } from '@/pages/super-admin/Communities';
-import { Transactions } from '@/pages/super-admin/Financials';
+// Super Admin Main and Settings Pages
+const Dashboard = lazy(() =>
+  import('@/pages/super-admin').then(module => ({ default: module.Dashboard })),
+);
+const SettingsLayout = lazy(() =>
+  import('@/pages/super-admin/Settings').then(module => ({
+    default: module.SettingsLayout,
+  })),
+);
+const Imagry = lazy(() =>
+  import('@/pages/super-admin/Settings').then(module => ({
+    default: module.Imagry,
+  })),
+);
+const Products = lazy(() =>
+  import('@/pages/super-admin/Settings').then(module => ({
+    default: module.Products,
+  })),
+);
+const Slider = lazy(() =>
+  import('@/pages/super-admin/Settings').then(module => ({
+    default: module.Slider,
+  })),
+);
+const HowPage = lazy(() =>
+  import('@/pages/super-admin/Settings').then(module => ({
+    default: module.HowPage,
+  })),
+);
+const Shop = lazy(() =>
+  import('@/pages/super-admin/Settings').then(module => ({
+    default: module.Shop,
+  })),
+);
+const Vendor = lazy(() =>
+  import('@/pages/super-admin/Settings').then(module => ({
+    default: module.Vendor,
+  })),
+);
+const ReadyToShop = lazy(() =>
+  import('@/pages/super-admin/Settings').then(module => ({
+    default: module.ReadyToShop,
+  })),
+);
+const Footer = lazy(() =>
+  import('@/pages/super-admin/Settings').then(module => ({
+    default: module.Footer,
+  })),
+);
+const ProductTags = lazy(() =>
+  import('@/pages/super-admin/Settings').then(module => ({
+    default: module.ProductTags,
+  })),
+);
+const NewProductTag = lazy(() =>
+  import('@/pages/super-admin/Settings').then(module => ({
+    default: module.NewProductTag,
+  })),
+);
+const Metrics = lazy(() =>
+  import('@/pages/super-admin/Settings').then(module => ({
+    default: module.Metrics,
+  })),
+);
+const NewMetric = lazy(() =>
+  import('@/pages/super-admin/Settings').then(module => ({
+    default: module.NewMetric,
+  })),
+);
+const Categories = lazy(() =>
+  import('@/pages/super-admin/Settings').then(module => ({
+    default: module.Categories,
+  })),
+);
+const NewCategory = lazy(() =>
+  import('@/pages/super-admin/Settings').then(module => ({
+    default: module.NewCategory,
+  })),
+);
+const Posts = lazy(() =>
+  import('@/pages/super-admin/Settings').then(module => ({
+    default: module.Posts,
+  })),
+);
+const NewPost = lazy(() =>
+  import('@/pages/super-admin/Settings').then(module => ({
+    default: module.NewPost,
+  })),
+);
+
+// Super Admin Customer Pages
+const CustomerHome = lazy(() =>
+  import('@/pages/super-admin/Customers').then(module => ({
+    default: module.CustomerHome,
+  })),
+);
+const Coupons = lazy(() =>
+  import('@/pages/super-admin/Customers').then(module => ({
+    default: module.Coupons,
+  })),
+);
+const CustomerEdit = lazy(() =>
+  import('@/pages/super-admin/Customers').then(module => ({
+    default: module.CustomerEdit,
+  })),
+);
+const CouponEdit = lazy(() =>
+  import('@/pages/super-admin/Customers').then(module => ({
+    default: module.CouponEdit,
+  })),
+);
+
+// Super Admin Orders Pages
+const OrderHome = lazy(() =>
+  import('@/pages/super-admin/Orders').then(module => ({
+    default: module.OrderHome,
+  })),
+);
+const OrderDetail = lazy(() =>
+  import('@/pages/super-admin/Orders').then(module => ({
+    default: module.OrderDetail,
+  })),
+);
+
+// Super Admin Vendors Pages
+const VendorsHome = lazy(() =>
+  import('@/pages/super-admin/Vendors').then(module => ({
+    default: module.VendorsHome,
+  })),
+);
+const VendorDetail = lazy(() =>
+  import('@/pages/super-admin/Vendors').then(module => ({
+    default: module.VendorDetail,
+  })),
+);
+const Subscription = lazy(() =>
+  import('@/pages/super-admin/Vendors').then(module => ({
+    default: module.Subscription,
+  })),
+);
+
+// Super Admin Communities Pages
+const VillageCommunity = lazy(() =>
+  import('@/pages/super-admin/Communities').then(module => ({
+    default: module.VillageCommunity,
+  })),
+);
+const VillageEdit = lazy(() =>
+  import('@/pages/super-admin/Communities').then(module => ({
+    default: module.VillageEdit,
+  })),
+);
+
+// Super Admin Financials Page
+const Transactions = lazy(() =>
+  import('@/pages/super-admin/Financials').then(module => ({
+    default: module.Transactions,
+  })),
+);
 
 export const superAdminRoutes = [
   {

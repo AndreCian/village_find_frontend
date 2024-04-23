@@ -1,16 +1,47 @@
-import {
-  Home,
-  Dashboard,
-  Profile,
-  Earning,
-  Announcement,
-  Events,
-  DetailView,
-} from '@/pages/community';
-import { Login, Signup } from '@/pages/community/Auth';
-
-import { AuthLayout, HomeLayout } from '@/components/layout/community';
+import { lazy } from 'react';
 import { Outlet } from 'react-router-dom';
+
+const Home = lazy(() =>
+  import('@/pages/community').then(module => ({ default: module.Home })),
+);
+const Dashboard = lazy(() =>
+  import('@/pages/community').then(module => ({ default: module.Dashboard })),
+);
+const Profile = lazy(() =>
+  import('@/pages/community').then(module => ({ default: module.Profile })),
+);
+const Earning = lazy(() =>
+  import('@/pages/community').then(module => ({ default: module.Earning })),
+);
+const Announcement = lazy(() =>
+  import('@/pages/community').then(module => ({
+    default: module.Announcement,
+  })),
+);
+const Events = lazy(() =>
+  import('@/pages/community').then(module => ({ default: module.Events })),
+);
+const DetailView = lazy(() =>
+  import('@/pages/community').then(module => ({ default: module.DetailView })),
+);
+
+const Login = lazy(() =>
+  import('@/pages/community/Auth').then(module => ({ default: module.Login })),
+);
+const Signup = lazy(() =>
+  import('@/pages/community/Auth').then(module => ({ default: module.Signup })),
+);
+
+const AuthLayout = lazy(() =>
+  import('@/components/layout/community').then(module => ({
+    default: module.AuthLayout,
+  })),
+);
+const HomeLayout = lazy(() =>
+  import('@/components/layout/community').then(module => ({
+    default: module.HomeLayout,
+  })),
+);
 
 export const communityRoutes = [
   {
