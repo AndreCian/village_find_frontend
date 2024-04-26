@@ -11,13 +11,11 @@ import {
   TextField,
 } from '@/components/forms';
 import { AIDialog } from '@/components/super-admin/common';
-
 import { MagicIcon } from '@/components/icons';
-
 import { HttpService } from '@/services';
+import { ChangeInputEvent } from '@/interfaces';
 
 import styles from './General.module.scss';
-import { ChangeInputEvent } from '@/interfaces';
 
 type PayType = 'Shipping' | 'Near By' | 'Local Subscriptions';
 type TopicType =
@@ -47,6 +45,8 @@ const initialInfo: IProductGeneralInfo = {
   soldByUnit: '',
   tax: 0,
 };
+
+const ROOT_PATH = '/vendor/products/create/general';
 
 export function General() {
   const { productId } = useParams();
@@ -135,9 +135,10 @@ export function General() {
 
     if (productId === 'create') {
       HttpService.post('/products', formData).then(response => {
-        const { status } = response;
+        const { status, product } = response;
         if (status === 200) {
           enqueueSnackbar('One product added.', { variant: 'success' });
+          navigate(ROOT_PATH.replace('create', product._id));
         } else {
           enqueueSnackbar('Something went wrong!', { variant: 'error' });
         }

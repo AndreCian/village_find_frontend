@@ -216,7 +216,7 @@ export function Header({
           )}
         </div>
 
-        {confirmAnchor && !zipcode && (
+        {/* {confirmAnchor && !zipcode && (
           <LocationConfirmDialog
             onClose={() => setConfirmAnchor(false)}
             onConfirm={() => setConfirmAnchor(false)}
@@ -225,7 +225,7 @@ export function Header({
               setShopLocAnchor(200);
             }}
           />
-        )}
+        )} */}
       </div>
       <div className={styles.collapsePanel}>
         {collapseAnchor && (

@@ -53,6 +53,15 @@ export function Products() {
     );
   };
 
+  const onProductDeleteClick = (id: string) => () => {
+    HttpService.delete(`/products/${id}`).then(response => {
+      const { status } = response;
+      if (status === 200) {
+        enqueueSnackbar('Product deleted.', { variant: 'success' });
+      }
+    });
+  };
+
   const productsTableColumns: ITableColumn[] = [
     {
       title: 'Image',
@@ -98,7 +107,7 @@ export function Products() {
           <button className={styles.button} onClick={() => navigate(row._id)}>
             Edit
           </button>
-          <span>
+          <span onClick={onProductDeleteClick(row._id)}>
             <TrashIcon />
           </span>
         </div>
