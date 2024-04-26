@@ -5,11 +5,8 @@ import clsx from 'clsx';
 
 import { Button, Input } from '@/components/forms';
 import { Container } from '@/components/layout/customer';
-
 import { HttpService } from '@/services';
-
 import { RoleType, AuthContext } from '@/providers';
-
 import { setupToken } from '@/utils';
 
 import LoginImage from '/assets/customer/backs/login.png';

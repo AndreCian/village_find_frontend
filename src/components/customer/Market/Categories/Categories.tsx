@@ -10,11 +10,11 @@ import { useOnClickOutside } from '@/utils';
 
 export function Categories() {
   const { categories, filter, setFilter } = useContext(CategoryContext);
-  const { isCategoryBar, toggleCategoryBar } = useContext(CategoryContext);
+  const { setCategoryBar } = useContext(CategoryContext);
 
   const catRef = useRef<HTMLDivElement>(null);
 
-  useOnClickOutside(catRef, toggleCategoryBar, 'mousedown');
+  useOnClickOutside(catRef, () => setCategoryBar(false), 'mousedown');
 
   return (
     <div className={styles.root} ref={catRef}>

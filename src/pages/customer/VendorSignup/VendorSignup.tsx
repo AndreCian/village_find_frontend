@@ -130,7 +130,8 @@ export function VendorSignup() {
     setStep(0);
     setCollapseId(0);
     setMaxCollapseId(0);
-    navigate('/sign-up/vendor');
+    // navigate('/sign-up/vendor');
+    navigate('/login/vendor');
   };
 
   const navigateCollapse = (id: number) => {

@@ -22,7 +22,7 @@ export function Navbar() {
   const pathname = location.pathname;
   const search = location.search;
 
-  const { isCategoryBar, toggleCategoryBar } = useContext(CategoryContext);
+  const { isCategoryBar, setCategoryBar } = useContext(CategoryContext);
 
   const navItems: INavItem[] = [
     {
@@ -45,7 +45,7 @@ export function Navbar() {
   ];
 
   const onCatClick = () => {
-    toggleCategoryBar();
+    setCategoryBar(true);
   };
 
   return (

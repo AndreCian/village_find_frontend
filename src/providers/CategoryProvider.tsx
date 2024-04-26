@@ -9,6 +9,7 @@ interface ICategory {
 interface ICategoryContext {
   isCategoryBar: boolean;
   toggleCategoryBar: () => void;
+  setCategoryBar: (show: boolean) => void;
   categories: ICategory[];
   filter: string;
   setFilter: (filter: string) => void;
@@ -17,6 +18,7 @@ interface ICategoryContext {
 export const CategoryContext = React.createContext<ICategoryContext>({
   isCategoryBar: false,
   toggleCategoryBar: () => {},
+  setCategoryBar: () => {},
   categories: [],
   filter: '',
   setFilter: () => {},
@@ -45,6 +47,7 @@ export function CategoryProvider({ children }: ICategoryContextProps) {
       value={{
         isCategoryBar: isEnabled,
         toggleCategoryBar: () => setIsEnabled(!isEnabled),
+        setCategoryBar: (show: boolean) => setIsEnabled(show),
         categories,
         filter,
         setFilter,
