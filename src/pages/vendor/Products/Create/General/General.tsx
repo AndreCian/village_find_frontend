@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { ChangeEvent, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { enqueueSnackbar } from 'notistack';
 import clsx from 'clsx';
@@ -83,8 +83,10 @@ export function General() {
     setProductDialogOpen(true);
   };
 
-  const onNutritionChange = (e: any) => {
-    setNutrition(e.target.files[0]);
+  const onNutritionChange = (e: ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    setNutrition(e.target.files[0] as File);
+    // console.log(e.target.files);
   };
 
   const onDeliveryTypeChange = (value: string) => {
@@ -307,7 +309,7 @@ export function General() {
                 rounded="full"
                 border="none"
                 bgcolor="secondary"
-                value={nutrition ?? ''}
+                value={nutrition}
                 updateValue={onNutritionChange}
               />
             </div>
@@ -324,10 +326,14 @@ export function General() {
             <div className={styles.control}>
               <p>Tax</p>
               <Input
+                type="number"
+                name="tax"
                 rounded="full"
                 border="none"
                 bgcolor="secondary"
                 placeholder="Tax"
+                value={generalInfo.tax}
+                updateValue={onProductChange}
               />
             </div>
           </div>

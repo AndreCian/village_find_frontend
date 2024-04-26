@@ -26,6 +26,7 @@ export interface ICartItem {
   _id: string;
   orderId: number;
   vendorId: {
+    stripeAccountID: string;
     shopName: string;
     images: {
       logoUrl: string;
@@ -168,9 +169,10 @@ export function Checkout() {
       ) {
         return (
           tot +
-          item.price *
+          (item.price *
             item.quantity *
-            item.inventoryId.productId.subscription.duration
+            item.inventoryId.productId.subscription.duration) /
+            100
         );
       }
       return tot + item.price * item.quantity;
@@ -212,7 +214,11 @@ export function Checkout() {
           <ShippingMode onNextStep={onNextStep} />
         ) : step === 2 ? (
           <Elements stripe={stripePromise}>
-            <Payment onNextStep={onNextStep} summary={summary} />
+            <Payment
+              onNextStep={onNextStep}
+              summary={summary}
+              cartItems={cartItems}
+            />
           </Elements>
         ) : (
           <Complete />

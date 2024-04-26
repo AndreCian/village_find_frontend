@@ -102,3 +102,13 @@
 
 .isText {
 }
+
+.fileInput {
+  @apply flex cursor-pointer items-center gap-x-2 rounded-full bg-primary p-2;
+  > input {
+    @apply hidden;
+  }
+  > button {
+    @apply rounded-full bg-secondary px-2 py-1;
+  }
+}

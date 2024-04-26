@@ -154,9 +154,9 @@
     }
 
     .logo {
-      @apply space-y-2;
+      @apply flex flex-col gap-y-2;
 
-      p {
+      > p {
         @apply text-[16px] font-bold leading-[25px];
       }
     }

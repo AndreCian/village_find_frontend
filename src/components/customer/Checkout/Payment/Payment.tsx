@@ -13,7 +13,7 @@ import { Button, Input } from '@/components/forms';
 import { HttpService } from '@/services';
 
 import styles from './Payment.module.scss';
-import { ISummary } from '@/pages/customer';
+import { ICartItem, ISummary } from '@/pages/customer';
 import { StripeCardNumberElement } from '@stripe/stripe-js';
 
 interface IPayment {
@@ -43,6 +43,7 @@ const initialPayment: IPayment = {
 interface IPaymentProps {
   onNextStep: () => void;
   summary: ISummary;
+  cartItems: ICartItem[];
 }
 
 const CARD_ELEMENT_OPTIONS = {
@@ -61,7 +62,11 @@ const CARD_ELEMENT_OPTIONS = {
   },
 };
 
-export function Payment({ onNextStep = () => {}, summary }: IPaymentProps) {
+export function Payment({
+  onNextStep = () => {},
+  summary,
+  cartItems,
+}: IPaymentProps) {
   const stripe = useStripe();
   const elements = useElements();
 
@@ -94,33 +99,21 @@ export function Payment({ onNextStep = () => {}, summary }: IPaymentProps) {
         return;
       }
 
-      const payload = await stripe.createPaymentMethod({
-        type: 'card',
-        card: cardNumberElement,
-        billing_details: {
-          name: payment.cardName,
-          email: payment.email,
-          phone: payment.phoneNumber,
-        },
-      });
-
-      if (payload.error) {
-        enqueueSnackbar('Payment confirmation failed.', { variant: 'error' });
-      } else {
-        HttpService.post('/stripe/create-payment-method', {
-          methodID: payload.paymentMethod.id,
-          payment: {
-            name: payment.cardName,
-            email: payment.email,
-            phone: payment.phoneNumber
-          }
-        }).then(response => {
-          const { status } = response;
-          if (status === 200) {
-            enqueueSnackbar('Payment method created.', { variant: 'success' });
-          }
-        });
+      const { error, token } = await stripe.createToken(cardNumberElement);
+      if (error) {
+        enqueueSnackbar(error.message, { variant: 'warning' });
+        return;
       }
+
+      HttpService.post('/stripe/create-payment-method', {
+        detail: payment,
+        token: token.id,
+      }).then(response => {
+        const { status } = response;
+        if (status === 200) {
+          enqueueSnackbar('Payment success.', { variant: 'success' });
+        }
+      });
     })();
   };
 

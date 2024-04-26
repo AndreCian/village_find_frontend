@@ -139,6 +139,7 @@ export function ProductInfo({
       vendorId: vendor._id,
       price: productOffPrice + (isPersonalized ? customization.fee : 0),
       quantity: cartProduct.quantity,
+      discount: productDiscount,
     };
     if (isPersonalized) {
       reqJson.personalization = {

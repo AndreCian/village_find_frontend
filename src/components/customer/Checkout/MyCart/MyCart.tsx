@@ -207,7 +207,7 @@ export function MyCart({
       shipping,
       delivery,
       donation,
-    }).then(response => {
+  }).then(response => {
       const { status } = response;
       if (status === 200) {
         onNextStep();

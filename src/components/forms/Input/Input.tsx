@@ -1,4 +1,11 @@
-import React, { ChangeEvent, forwardRef } from 'react';
+import React, {
+  ChangeEvent,
+  ForwardedRef,
+  forwardRef,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import clsx from 'clsx';
 
 import styles from './Input.module.scss';
@@ -87,26 +94,57 @@ export const Input = forwardRef((props: IInputProps, ref: any) => {
       [styles.isText]:
         adornment && adornment.isText && adornment.isText === true,
     },
+    type === 'file' ? styles.fileInput : '',
     className,
   );
 
+  const [fileInput, setFileInput] = useState<File | null>(null);
+  const fileName = useMemo(
+    () => (fileInput ? fileInput.name : ''),
+    [fileInput],
+  );
+  const inputRef = useRef<HTMLDivElement>(null);
+
+  const onChooseClick = () => {
+    if (ref) {
+      ref.current.click();
+    } else if (inputRef.current) {
+      inputRef.current.click();
+    }
+  };
+
+  const onFileInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setFileInput(e.target.files[0]);
+      updateValue(e);
+    }
+  };
+
   return (
-    <div className={classes}>
+    <div className={classes} onClick={onChooseClick}>
       <input
         name={name}
         type={type}
-        value={valueVisible || !disabled ? value : ''}
+        value={type === 'file' ? null : valueVisible || !disabled ? value : ''}
         disabled={disabled}
         placeholder={placeholder}
         className={styles.input}
-        onChange={updateValue}
+        onChange={type === 'file' ? onFileInputChange : updateValue}
         onClick={onClick}
         onFocus={onFocus}
         onBlur={onBlur}
         onKeyDown={onKeyDown}
-        ref={ref}
+        ref={ref || inputRef}
         {...nativeAttrs}
       />
+      {type === 'file' && (
+        <>
+          <button>Choose file</button>
+          <p className={styles.fileText}>
+            <strong>{fileName || 'No file selected'}</strong>
+          </p>
+        </>
+      )}
       {adornment ? (
         <span
           className={clsx(

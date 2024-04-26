@@ -25,7 +25,8 @@ export function ImageUpload({
   rounded = false,
   baseImagePath = '',
   updateBaseImage = () => {},
-  labelEnhancer = () => `Image pixel size:${exWidth} width X ${exHeight} height`,
+  labelEnhancer = () =>
+    `Image pixel size:${exWidth} width X ${exHeight} height`,
 }: IImageUploadProps) {
   const [imageSrc, setImageSrc] = useState<string>('');
   const [imagePath, setImagePath] = useState<string>('');

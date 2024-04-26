@@ -74,7 +74,7 @@ export function Attributes() {
       }
     };
     reader.readAsDataURL(e.target.files[0]);
-    setImages(images =>
+    setImages(
       images.map((image: File | null, index: number) =>
         index === id ? e.target.files && e.target.files[0] : image,
       ),
@@ -154,7 +154,7 @@ export function Attributes() {
             border="none"
             bgcolor="secondary"
             className={styles.imageInput}
-            value={images[row.id]}
+            // value={images[row.id]}
             updateValue={onImageChange(row.id)}
           />
         ),
@@ -174,7 +174,7 @@ export function Attributes() {
         ),
       },
     ],
-    [attributes],
+    [attributes, images, imageSrcs],
   );
 
   const onUpdateClick = () => {
