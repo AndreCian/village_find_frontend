@@ -98,23 +98,27 @@ export function Header({
     navigate('/profile');
   };
 
+  const onUpdateLocation = () => {
+    (async () => {
+      const result = await getLocationFromZipcode(zipcodeInput);
+      if (result) {
+        const { _normalized_city, county, state_code } = result;
+        const normalizedCity = `${
+          _normalized_city || county
+        }, ${capitalizeFirstLetter(state_code)}`;
+        changeZipcode(zipcodeInput);
+        changeCityName(normalizedCity);
+        localStorage.setItem('zipcode', zipcodeInput);
+        localStorage.setItem('cityname', normalizedCity);
+        setShopLocAnchor(-1);
+        setZipcodeInput('');
+      }
+    })();
+  };
+
   const onZipcodeInputKeydown = (e: KeyboardEvent) => {
     if (e.keyCode === 13) {
-      (async () => {
-        const result = await getLocationFromZipcode(zipcodeInput);
-        if (result) {
-          const { _normalized_city, county, state_code } = result;
-          const normalizedCity = `${
-            _normalized_city || county
-          }, ${capitalizeFirstLetter(state_code)}`;
-          changeZipcode(zipcodeInput);
-          changeCityName(normalizedCity);
-          localStorage.setItem('zipcode', zipcodeInput);
-          localStorage.setItem('cityname', normalizedCity);
-          setShopLocAnchor(-1);
-          setZipcodeInput('');
-        }
-      })();
+      onUpdateLocation();
     }
   };
 
@@ -331,6 +335,7 @@ export function Header({
               adornment={{
                 position: 'right',
                 content: <FaMagnifyingGlass fill="white" />,
+                onClick: onUpdateLocation,
               }}
               placeholder="Enter Zip Code"
               size="large"
