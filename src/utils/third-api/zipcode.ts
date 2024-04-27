@@ -31,11 +31,23 @@ export async function getLocationFromCoords({
       `https://api.opencagedata.com/geocode/v1/json?q=${latitude}+${longitude}&key=${GEOLOCATION_API_KEY}`,
     )
       .then(response => response.json())
-      .then(response => response.results[0].components);
-    return result;
+      .then(response => {
+        const results = response.results;
+        const usResults = results.filter(
+          (item: any) => item.components.country === 'United States',
+        );
+        if (usResults.length === 0) {
+          enqueueSnackbar('You are not located in United States.', {
+            variant: 'warning',
+          });
+          return null;
+        } else {
+          return usResults[0].components;
+        }
+      });
   } catch {
     enqueueSnackbar(
-      'Cannot get current location. Please allow location settings on the browser and retry.',
+      'Please ensure to allow location settings on the browser.',
       { variant: 'warning' },
     );
   }
@@ -47,11 +59,27 @@ export async function getLocationFromZipcode(zipcode: string) {
       `https://api.opencagedata.com/geocode/v1/json?q=${zipcode}&key=${GEOLOCATION_API_KEY}`,
     )
       .then(response => response.json())
-      .then(response => response.results[0].components);
+      .then(response => {
+        const results = response.results;
+        const usResults = results.filter(
+          (item: any) => item.components.country === 'United States',
+        );
+        if (usResults.length === 0) {
+          enqueueSnackbar(
+            `There are no available cities with zipcode ${zipcode}.`,
+            {
+              variant: 'warning',
+            },
+          );
+          return null;
+        } else {
+          return usResults[0].components;
+        }
+      });
     return result;
   } catch {
     enqueueSnackbar(
-      'Cannot get current location. Please allow location settings on the browser and retry.',
+      'Please ensure to allow location settings on the browser.',
       { variant: 'warning' },
     );
   }

@@ -61,7 +61,7 @@ export function Login() {
           setupToken(token, role);
           setIsLogin(true);
           enqueueSnackbar('Login successfully!', { variant: 'success' });
-          navigate(role === 'vendor' ? '/vendor' : '/dashboard');
+          navigate(role === 'vendor' ? '/vendor' : '/');
         } else if (status === 400) {
           enqueueSnackbar('Invalid credentials!', { variant: 'error' });
         } else if (status === 404) {

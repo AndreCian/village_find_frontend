@@ -50,7 +50,7 @@ export function Header({
   const [cartItemCount, setCartItemCount] = useState(0);
   const [collapseAnchor, setCollapseAnchor] = useState(false);
   const [categoryAnchor, setCategoryAnchor] = useState(true);
-  const [confirmAnchor, setConfirmAnchor] = useState(true);
+  const [confirmAnchor, setConfirmAnchor] = useState(false);
 
   const [categories, setCategories] = useState<{ _id: string; name: string }[]>(
     [],
@@ -102,13 +102,18 @@ export function Header({
     if (e.keyCode === 13) {
       (async () => {
         const result = await getLocationFromZipcode(zipcodeInput);
-        const { _normalized_city, county, state_code } = result;
-        changeZipcode(zipcodeInput);
-        changeCityName(
-          `${_normalized_city || county}, ${capitalizeFirstLetter(state_code)}`,
-        );
-        setShopLocAnchor(-1);
-        setZipcodeInput('');
+        if (result) {
+          const { _normalized_city, county, state_code } = result;
+          const normalizedCity = `${
+            _normalized_city || county
+          }, ${capitalizeFirstLetter(state_code)}`;
+          changeZipcode(zipcodeInput);
+          changeCityName(normalizedCity);
+          localStorage.setItem('zipcode', zipcodeInput);
+          localStorage.setItem('cityname', normalizedCity);
+          setShopLocAnchor(-1);
+          setZipcodeInput('');
+        }
       })();
     }
   };
@@ -131,6 +136,14 @@ export function Header({
   }, [breakpoint]);
 
   useEffect(() => {
+    const zipcode = localStorage.getItem('zipcode');
+    const cityname = localStorage.getItem('cityname');
+    if (zipcode && cityname) {
+      changeZipcode(zipcode);
+      changeCityName(cityname);
+    } else {
+      setConfirmAnchor(true);
+    }
     HttpService.get('/cart/count').then(response => {
       const { status, count } = response;
       if (status === 200) {
@@ -216,7 +229,7 @@ export function Header({
           )}
         </div>
 
-        {/* {confirmAnchor && !zipcode && (
+        {confirmAnchor && !zipcode && (
           <LocationConfirmDialog
             onClose={() => setConfirmAnchor(false)}
             onConfirm={() => setConfirmAnchor(false)}
@@ -225,7 +238,7 @@ export function Header({
               setShopLocAnchor(200);
             }}
           />
-        )} */}
+        )}
       </div>
       <div className={styles.collapsePanel}>
         {collapseAnchor && (

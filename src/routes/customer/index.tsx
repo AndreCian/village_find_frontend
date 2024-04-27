@@ -57,10 +57,6 @@ const VendorAbout = lazy(() =>
 export const customerRoutes = [
   {
     path: '',
-    element: <Navigate to="dashboard" />,
-  },
-  {
-    path: 'dashboard',
     element: <Dashboard />,
   },
   {
