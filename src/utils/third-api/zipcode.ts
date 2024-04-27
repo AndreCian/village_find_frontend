@@ -45,6 +45,7 @@ export async function getLocationFromCoords({
           return usResults[0].components;
         }
       });
+    return result;
   } catch {
     enqueueSnackbar(
       'Please ensure to allow location settings on the browser.',

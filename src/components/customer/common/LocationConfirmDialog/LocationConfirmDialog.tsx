@@ -34,27 +34,29 @@ export function LocationConfirmDialog({
 
   useEffect(() => {
     if (!zipcode) {
-      // navigator.geolocation.getCurrentPosition(
-      //   (position: GeolocationPosition) => {
-      //     const { latitude, longitude } = position.coords;
-      //     (async () => {
-      //       const result = await getLocationFromCoords({ latitude, longitude });
-      //       const {
-      //         _normalized_city,
-      //         county,
-      //         state_code,
-      //         country_code,
-      //         postcode,
-      //       } = result;
-      //       setCurrentCityName(
-      //         `${_normalized_city || county}, ${capitalizeFirstLetter(
-      //           state_code || country_code,
-      //         )}`,
-      //       );
-      //       setCurrentZipcode(postcode);
-      //     })();
-      //   },
-      // );
+      navigator.geolocation.getCurrentPosition(
+        (position: GeolocationPosition) => {
+          const { latitude, longitude } = position.coords;
+          (async () => {
+            const result = await getLocationFromCoords({ latitude, longitude });
+            if (result) {
+              const {
+                _normalized_city,
+                county,
+                state_code,
+                country_code,
+                postcode,
+              } = result;
+              setCurrentCityName(
+                `${_normalized_city || county}, ${capitalizeFirstLetter(
+                  state_code || country_code,
+                )}`,
+              );
+              setCurrentZipcode(postcode);
+            }
+          })();
+        },
+      );
     }
   }, [zipcode]);
 
