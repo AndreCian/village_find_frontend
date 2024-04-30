@@ -8,19 +8,7 @@
       @apply flex gap-x-6;
 
       .role {
-        @apply flex cursor-pointer items-center gap-x-4 rounded-md bg-light p-4 text-white;
-
-        .radio span {
-          @apply bg-transparent ring-0;
-        }
-
-        .radio p {
-          @apply text-white;
-        }
-      }
-
-      .active {
-        @apply border-1 border-primary bg-white;
+        @apply flex cursor-pointer items-center gap-x-4 rounded-md p-4 border-1 border-primary bg-white;
 
         .radio p {
           @apply text-primary;
@@ -28,6 +16,18 @@
 
         .radio span {
           @apply bg-white ring-1 ring-secondary;
+        }
+      }
+
+      .active {
+        @apply bg-light text-white;
+
+        .radio span {
+          @apply bg-transparent ring-0;
+        }
+
+        .radio p {
+          @apply text-white;
         }
       }
     }
