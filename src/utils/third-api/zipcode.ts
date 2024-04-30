@@ -28,21 +28,18 @@ export async function getLocationFromCoords({
 }) {
   try {
     const result = await fetch(
-      `https://api.opencagedata.com/geocode/v1/json?q=${latitude}+${longitude}&key=${GEOLOCATION_API_KEY}`,
+      `https://api.opencagedata.com/geocode/v1/json?q=${latitude}+${longitude}&country_code=us&limit=1&key=${GEOLOCATION_API_KEY}`,
     )
       .then(response => response.json())
       .then(response => {
         const results = response.results;
-        const usResults = results.filter(
-          (item: any) => item.components.country === 'United States',
-        );
-        if (usResults.length === 0) {
+        if (results.length === 0) {
           enqueueSnackbar('You are not located in United States.', {
             variant: 'warning',
           });
           return null;
         } else {
-          return usResults[0].components;
+          return results[0].components;
         }
       });
     return result;
@@ -57,15 +54,12 @@ export async function getLocationFromCoords({
 export async function getLocationFromZipcode(zipcode: string) {
   try {
     const result = await fetch(
-      `https://api.opencagedata.com/geocode/v1/json?q=${zipcode}&key=${GEOLOCATION_API_KEY}`,
+      `https://api.opencagedata.com/geocode/v1/json?q=${zipcode}&country_code=us&limit=1&key=${GEOLOCATION_API_KEY}`,
     )
       .then(response => response.json())
       .then(response => {
         const results = response.results;
-        const usResults = results.filter(
-          (item: any) => item.components.country === 'United States',
-        );
-        if (usResults.length === 0) {
+        if (results.length === 0) {
           enqueueSnackbar(
             `There are no available cities with zipcode ${zipcode}.`,
             {
@@ -74,7 +68,7 @@ export async function getLocationFromZipcode(zipcode: string) {
           );
           return null;
         } else {
-          return usResults[0].components;
+          return results[0].components;
         }
       });
     return result;

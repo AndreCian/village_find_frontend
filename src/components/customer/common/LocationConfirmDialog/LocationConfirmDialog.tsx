@@ -78,9 +78,9 @@ export function LocationConfirmDialog({
         </Button>
         <p className={styles.otherLoc}>
           Not your location?{' '}
-          <a href="#" onClick={onOtherClick}>
+          <span onClick={onOtherClick}>
             Click here
-          </a>
+          </span>
         </p>
       </div>
     </div>

@@ -75,7 +75,7 @@ export function VCommunities() {
               className={styles.shopvcom}
               onClick={() => navigate(`/communities/${community.slug}`)}
             >
-              <img src={community.images.logoUrl} />
+              <img src={community.images?.logoUrl} />
               <div className={styles.vcomText}>
                 <p className={styles.name}>{community.name}</p>
                 <span className={styles.detail}>{community.shortDesc}</span>
