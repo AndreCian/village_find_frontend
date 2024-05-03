@@ -24,7 +24,7 @@ export function ImageUpload({
   className = '',
   rounded = false,
   baseImagePath = '',
-  updateBaseImage = () => {},
+  updateBaseImage = () => { },
   labelEnhancer = () =>
     `Image pixel size:${exWidth} width X ${exHeight} height`,
 }: IImageUploadProps) {
@@ -53,7 +53,10 @@ export function ImageUpload({
 
   const onUploadCancel = () => {
     setImageSrc('');
-    if (imgInputRef.current) imgInputRef.current.value = '';
+    if (imgInputRef.current) {
+      console.log('Upload Cancel');
+      imgInputRef.current.value = '';
+    }
   };
 
   useEffect(() => {

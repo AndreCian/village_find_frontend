@@ -75,6 +75,16 @@ export function Specifications() {
     },
   ];
 
+  const onOrderChange = (ids: string[]) => {
+    const orderedRows = ids.map((id: string) => specifications.find(item => item._id === id)).filter(item => item);
+    HttpService.put(`/products/${productId}/specification`, orderedRows).then(response => {
+      const { status } = response;
+      if (status === 200) {
+        enqueueSnackbar("Order changed.", { variant: 'success' });
+      }
+    })
+  }
+
   useEffect(() => {
     HttpService.get(`/products/${productId}/specification`).then(response => {
       const { status, specifications } = response;
@@ -96,7 +106,7 @@ export function Specifications() {
           New
         </button>
       </div>
-      <TableBody columns={stylesTableColumns} rows={specifications} />
+      <TableBody selectable={true} columns={stylesTableColumns} rows={specifications} setRows={setSpecifications} onRowMove={onOrderChange} />
     </div>
   );
 }

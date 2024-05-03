@@ -25,7 +25,7 @@ export function NewMetric() {
   const { id: metricId }: any = useParams();
   const navigate = useNavigate();
   const [metric, setMetric] = useState<IMetric>(initialMetric);
-  const { updateMetric: updateStoreMetric } = useMetricStore();
+  // const { updateMetric: updateStoreMetric } = useMetricStore();
 
   const updateMetricName = (e: ChangeEvent<HTMLInputElement>) => {
     setMetric({ ...metric, name: e.target.value });
@@ -51,7 +51,7 @@ export function NewMetric() {
       MetricService.updateOne(metricId, metric)
         .then(metric => {
           enqueueSnackbar('Metric updated successfully!', { variant: 'error' });
-          updateStoreMetric(metricId, metric);
+          setMetric(metric)
           navigate(backToPath);
         })
         .catch(err => {
@@ -87,7 +87,7 @@ export function NewMetric() {
             value={metric.status}
             updateValue={updateMetricStatus}
             placeholder="Status"
-            options={initialStatus}
+            options={initialStatus.map(item => ({ name: item, value: item.toLowerCase() }))}
           />
         </div>
       </div>

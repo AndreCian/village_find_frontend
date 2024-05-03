@@ -48,51 +48,12 @@ const initialAccount = {
 };
 
 interface ISubscription {
-  title: string;
   name: string;
   description: string;
-  monthlyFee: number;
-  discount: {
-    origin: number;
-    current: number;
-  };
+  monthInvest: number;
+  expectedFee: number;
+  transactionFee: number;
 }
-
-const initialSubscriptions: ISubscription[] = [
-  {
-    title: 'Seedling',
-    name: 'seedling',
-    description:
-      'Enjoy a no-code online store with Shipping integrations and everything you need to sell online. Add up to 25 items for free.',
-    monthlyFee: 0,
-    discount: {
-      origin: 10,
-      current: 8.5,
-    },
-  },
-  {
-    title: 'Sprouting',
-    name: 'sprouting',
-    description:
-      'Give your growing business take advantage of a no-code online store with Shipping integrations and everything you need to sell online. This subscription includes access to FC University and a lower transaction fee.',
-    monthlyFee: 4.99,
-    discount: {
-      origin: 8.5,
-      current: 6.5,
-    },
-  },
-  {
-    title: 'Budding',
-    name: 'budding',
-    description:
-      'This subscription offers your budding business more than shipping. You can now provide flexible delivery, pickup, and shipping options with the ability to set order cut-off times and add pickup locations.',
-    monthlyFee: 9.99,
-    discount: {
-      origin: 8.5,
-      current: 6.5,
-    },
-  },
-];
 
 const formatMonthlyFee = (price: number) => {
   return price === 0 ? 'Free' : `$${price.toFixed(2)} a month`;
@@ -109,9 +70,8 @@ export function VendorSignup() {
 
   const [account, setAccount] = useState<IAccount>(initialAccount);
   const [community, setCommunity] = useState<ICommunity | null>(null);
-  const [subscription, setSubscription] = useState<ISubscription>(
-    initialSubscriptions[0],
-  );
+  const [subscription, setSubscription] = useState('');
+  const [subscriptions, setSubscriptions] = useState<ISubscription[]>([]);
   const [codes, setCodes] = useState<string[]>(Array(5).fill(''));
   const [codeIssue, setCodeIssue] = useState('');
   const fullCode = useMemo(() => {
@@ -130,8 +90,6 @@ export function VendorSignup() {
     setStep(0);
     setCollapseId(0);
     setMaxCollapseId(0);
-    // navigate('/sign-up/vendor');
-    navigate('/login/vendor');
   };
 
   const navigateCollapse = (id: number) => {
@@ -196,6 +154,7 @@ export function VendorSignup() {
             });
 
             initializeStates();
+            navigate('/vendor/profile/bank-detail');
           } else if (status === 500) {
             enqueueSnackbar('Something went wrong with server', {
               variant: 'error',
@@ -245,14 +204,15 @@ export function VendorSignup() {
       setCollapseId(0);
     }
 
-    const subscriptionName = searchParams.get('subscription');
-    if (subscriptionName) {
-      setSubscription(
-        initialSubscriptions.find(item => item.name === subscriptionName) ||
-          initialSubscriptions[0],
-      );
-    }
+    const subscriptionName = searchParams.get('subscription') as string;
+    setSubscription(subscriptionName);
   }, [searchParams]);
+
+  useEffect(() => {
+    HttpService.get('/subscriptions').then(response => {
+      setSubscriptions(response)
+    })
+  }, []);
 
   return (
     <div className={clsx(styles.root, { [styles.primary]: step > 0 })}>
@@ -501,17 +461,13 @@ export function VendorSignup() {
                 <div className={styles.content}>
                   <RadioGroup
                     color="secondary"
-                    value={subscription.name}
-                    updateValue={(value: string) =>
-                      setSubscription(
-                        initialSubscriptions.find(
-                          (item: any) => item.name === value,
-                        ) || initialSubscriptions[0],
-                      )
-                    }
+                    value={subscription}
+                    updateValue={(value: string) => {
+                      setSubscription(value)
+                    }}
                     className={styles.variants}
                   >
-                    {initialSubscriptions.map(
+                    {subscriptions.map(
                       (subscription: ISubscription, index: number) => (
                         <div key={index} className={styles.variant}>
                           <Radio
@@ -519,20 +475,20 @@ export function VendorSignup() {
                             className={styles.checkbox}
                           />
                           <div className={styles.text}>
-                            <p className={styles.title}>{subscription.title}</p>
+                            <p className={styles.title}>{subscription.name}</p>
                             <p className={styles.description}>
                               {subscription.description}
                             </p>
                             <p className={styles.transaction}>
                               <span className={styles.monthFee}>
-                                {formatMonthlyFee(subscription.monthlyFee)}
+                                {formatMonthlyFee(subscription.monthInvest)}
                               </span>{' '}
-                              +{' '}
+                              +
                               <span className={styles.origin}>
-                                {subscription.discount.origin}%
+                                {subscription.expectedFee}%
                               </span>{' '}
                               <span className={styles.current}>
-                                now {subscription.discount.current}%
+                                now {subscription.transactionFee}%
                               </span>{' '}
                               transaction fee
                             </p>

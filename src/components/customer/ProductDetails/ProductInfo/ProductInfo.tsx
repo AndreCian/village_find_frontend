@@ -162,8 +162,8 @@ export function ProductInfo({
             subscription.frequency.toLowerCase() === 'weekly'
               ? 'week'
               : subscription.frequency === 'monthly'
-              ? 'month'
-              : '',
+                ? 'month'
+                : '',
           interval: subscription.duration,
         };
       }
@@ -306,54 +306,58 @@ export function ProductInfo({
               ))}
           </div>
         </div>
-        <div className={styles.personalization}>
-          <div
-            className={styles.dropdown}
-            onClick={() => setIsPersonalized(!isPersonalized)}
-          >
-            <p>Add personalization</p>
-            {!isPersonalized ? (
-              <FaChevronDown size={15} />
-            ) : (
-              <FaChevronUp size={15} />
-            )}
-          </div>
-          <p className={clsx({ hidden: !isPersonalized })}>
-            Personalization Fee: <span>${customization.fee.toFixed(2)}</span>
-          </p>
-        </div>
-        <div className={clsx(styles.message, { hidden: !isPersonalized })}>
-          <div className={styles.example}>
-            <p>{customization.customText}</p>
-          </div>
-          <div className={styles.msgInput}>
-            <TextField
-              rows={4}
-              placeholder="Type here"
-              value={customMessage}
-              updateValue={onMessageChange}
-              className={
-                customMessage.length === 500 ? styles.dangerMessage : ''
-              }
-            />
-            <div
-              className={clsx(styles.alerts, {
-                [styles.warning]: customMessage.length === 500,
-              })}
-            >
-              <span
-                className={clsx(styles.invalidLength, {
-                  hidden: customMessage.length !== 500,
-                })}
+        {
+          customization && customization.customText && <>
+            <div className={styles.personalization}>
+              <div
+                className={styles.dropdown}
+                onClick={() => setIsPersonalized(!isPersonalized)}
               >
-                The message must be a maximum of 500 characters.
-              </span>
-              <span className={styles.letterLength}>
-                {500 - customMessage.length}
-              </span>
+                <p>Add personalization</p>
+                {!isPersonalized ? (
+                  <FaChevronDown size={15} />
+                ) : (
+                  <FaChevronUp size={15} />
+                )}
+              </div>
+              <p>
+                Personalization Fee: <span>${customization.fee.toFixed(2)}</span>
+              </p>
             </div>
-          </div>
-        </div>
+            {isPersonalized && <div className={styles.message}>
+              <div className={styles.example}>
+                <p>{customization.customText}</p>
+              </div>
+              <div className={styles.msgInput}>
+                <TextField
+                  rows={4}
+                  placeholder="Type here"
+                  value={customMessage}
+                  updateValue={onMessageChange}
+                  className={
+                    customMessage.length === 500 ? styles.dangerMessage : ''
+                  }
+                />
+                <div
+                  className={clsx(styles.alerts, {
+                    [styles.warning]: customMessage.length === 500,
+                  })}
+                >
+                  <span
+                    className={clsx(styles.invalidLength, {
+                      hidden: customMessage.length !== 500,
+                    })}
+                  >
+                    The message must be a maximum of 500 characters.
+                  </span>
+                  <span className={styles.letterLength}>
+                    {500 - customMessage.length}
+                  </span>
+                </div>
+              </div>
+            </div>}
+          </>
+        }
         <div className={styles.logo}>
           <p>Add your logo or image here</p>
           <ImageUpload

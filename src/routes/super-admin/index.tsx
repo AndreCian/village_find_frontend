@@ -150,6 +150,10 @@ const Subscription = lazy(() =>
     default: module.Subscription,
   })),
 );
+const SubscriptionDet = lazy(() =>
+  import('@/pages/super-admin/Vendors').then(module => ({
+    default: module.NewSubscription
+  })))
 
 // Super Admin Communities Pages
 const VillageCommunity = lazy(() =>
@@ -421,7 +425,18 @@ export const superAdminRoutes = [
       {
         title: 'Subscription Packages',
         path: 'subscription',
-        element: <Subscription />,
+        leaf: true,
+        element: <Outlet />,
+        children: [
+          {
+            index: true,
+            element: <Subscription />,
+          },
+          {
+            path: ':id',
+            element: <SubscriptionDet />
+          }
+        ]
       },
     ],
   },

@@ -1,7 +1,7 @@
 .root {
   @apply h-max;
 
-  > p {
+  >p {
     @apply mb-4;
   }
 
@@ -10,6 +10,10 @@
 
     .imgSelector {
       @apply flex items-center gap-x-2;
+
+      >img {
+        @apply cursor-pointer;
+      }
     }
 
     .imgViewer {

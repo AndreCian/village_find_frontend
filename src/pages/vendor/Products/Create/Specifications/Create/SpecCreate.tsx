@@ -80,7 +80,7 @@ export function SpecCreate() {
             rounded="full"
             border="none"
             bgcolor="primary"
-            placeholder="SKU"
+            placeholder="Select here"
             options={specs}
             value={specName}
             updateValue={onSpecNameChange}

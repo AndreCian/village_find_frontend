@@ -1,42 +1,32 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { Card, TableToolbar, TableBody } from '@/components/common';
 import { Select } from '@/components/forms';
-
 import { TrashIcon } from '@/components/icons';
-
 import { ITableColumn } from '@/interfaces';
+import { HttpService } from '@/services';
 
 import styles from './Subscription.module.scss';
-
-type StatusType = 'Active' | 'Blocked' | 'Paused' | 'Inactive';
+import { enqueueSnackbar } from 'notistack';
 
 export interface ISubscription {
   name: string;
-  title: string;
-  status: StatusType;
+  description: string;
+  monthInvest: number;
+  expectedFee: number;
+  transactionFee: number;
+  status: string;
 }
-
-const initialSubsData: ISubscription[] = [
-  {
-    name: 'Freemium Plan',
-    title: '0.00 per month + 0.00% transaction fee.',
-    status: 'Active',
-  },
-  {
-    name: 'Budding',
-    title: '14.99 per month + 7.00% transaction fee.',
-    status: 'Active',
-  },
-];
 
 const statusOps: string[] = ['Active', 'Blocked', 'Paused', 'Inactive'];
 
-const newSubscPath = '/admin/vendors/subscription/create';
+const MAIN_PATH = '/admin/vendors/subscription';
 
 export function Subscription() {
-  const [subsData, setSubsData] = useState<ISubscription[]>(initialSubsData);
+  const navigate = useNavigate();
+
+  const [subsData, setSubsData] = useState<ISubscription[]>([]);
 
   const columns: ITableColumn[] = [
     {
@@ -48,6 +38,7 @@ export function Subscription() {
       title: 'Title',
       name: 'title',
       width: 350,
+      cell: (row: any) => <p>{`$${row.monthInvest.toFixed(2)}`} per month + {`${row.transactionFee.toFixed(2)}`}% transaction fee.</p>
     },
     {
       title: 'Status',
@@ -57,7 +48,7 @@ export function Subscription() {
         <Select
           rounded="full"
           value={row.status}
-          options={statusOps}
+          options={statusOps.map(item => ({ name: item, value: item.toLowerCase() }))}
           className={styles.statusSelector}
         />
       ),
@@ -68,14 +59,29 @@ export function Subscription() {
       width: 250,
       cell: (row: any) => (
         <div className={styles.actionCell}>
-          <button className={styles.actionButton}>Edit</button>
-          <span>
+          <button className={styles.actionButton} onClick={() => navigate(`${MAIN_PATH}/${row._id}`)}>Edit</button>
+          <span onClick={() => onDeleteClick(row)}>
             <TrashIcon />
           </span>
         </div>
       ),
     },
   ];
+
+  const onDeleteClick = (row: any) => {
+    HttpService.delete(`/subscriptions/${row._id}`).then(response => {
+      const { status } = response;
+      if (status === 200) {
+        enqueueSnackbar(`Subscription ${row.name.toLowerCase()} deleted.`, { variant: 'success' })
+      }
+    })
+  }
+
+  useEffect(() => {
+    HttpService.get('/subscriptions').then(response => {
+      setSubsData(response);
+    })
+  }, []);
 
   return (
     <Card title="Subscription Packages" className={styles.root}>
@@ -86,8 +92,8 @@ export function Subscription() {
         actions={
           <div className={styles.toolbarAction}>
             <p className={styles.buttonLabel}>New</p>
-            <button className={styles.actionButton}>
-              <Link to={newSubscPath}>New</Link>
+            <button className={styles.actionButton} onClick={() => navigate(`${MAIN_PATH}/create`)}>
+              New
             </button>
           </div>
         }

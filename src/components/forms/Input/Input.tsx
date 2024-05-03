@@ -2,6 +2,7 @@ import React, {
   ChangeEvent,
   ForwardedRef,
   forwardRef,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -65,11 +66,11 @@ export const Input = forwardRef((props: IInputProps, ref: any) => {
     disabled = false,
     adornment = null,
     defaultValue = '',
-    updateValue = () => {},
-    onClick = () => {},
-    onBlur = () => {},
-    onFocus = () => {},
-    onKeyDown = () => {},
+    updateValue = () => { },
+    onClick = () => { },
+    onBlur = () => { },
+    onFocus = () => { },
+    onKeyDown = () => { },
     valueVisible = true,
     ...nativeAttrs
   } = props;
@@ -83,13 +84,13 @@ export const Input = forwardRef((props: IInputProps, ref: any) => {
     borderColor === 'success'
       ? styles.borderColorSuccess
       : borderColor === 'primary'
-      ? styles.borderColorPrimary
-      : '',
+        ? styles.borderColorPrimary
+        : '',
     adornment && adornment.position === 'right'
       ? styles.adornmentRight
       : adornment && adornment.position === 'left'
-      ? styles.adornmentLeft
-      : '',
+        ? styles.adornmentLeft
+        : '',
     {
       [styles.isText]:
         adornment && adornment.isText && adornment.isText === true,
@@ -103,10 +104,10 @@ export const Input = forwardRef((props: IInputProps, ref: any) => {
     () => (fileInput ? fileInput.name : ''),
     [fileInput],
   );
-  const inputRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const onChooseClick = () => {
-    if (ref) {
+    if (ref.current) {
       ref.current.click();
     } else if (inputRef.current) {
       inputRef.current.click();
@@ -155,7 +156,7 @@ export const Input = forwardRef((props: IInputProps, ref: any) => {
               ? styles.textBar
               : styles.circleBar,
           )}
-          onClick={adornment.onClick || (() => {})}
+          onClick={adornment.onClick || (() => { })}
         >
           {adornment.content}
         </span>

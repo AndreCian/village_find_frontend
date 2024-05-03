@@ -1,4 +1,5 @@
-import { RefObject } from 'react';
+import { ForwardedRef, forwardRef } from 'react';
+import { uniqueId } from 'lodash';
 import clsx from 'clsx';
 
 import styles from './Card.module.scss';
@@ -8,20 +9,13 @@ export interface ICardProps {
   className?: string;
   children: React.ReactNode;
   cardID?: string;
-  ref?: RefObject<HTMLDivElement>;
-}
+};
 
-export function Card({
-  className = '',
-  title = null,
-  children,
-  cardID = '',
-  ref,
-}: ICardProps) {
+export const Card = forwardRef(({ cardID = uniqueId(), title = '', className = '', children }: ICardProps, ref: ForwardedRef<HTMLDivElement>) => {
   return (
     <div id={cardID} className={clsx(styles.root, className)} ref={ref}>
       {title && <h1>{title}</h1>}
       {children}
     </div>
   );
-}
+})

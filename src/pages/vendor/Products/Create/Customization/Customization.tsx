@@ -61,7 +61,8 @@ export function Customization() {
     HttpService.get(`/products/${productId}/customization`).then(response => {
       const { status, customization } = response;
       if (status === 200) {
-        if (customization) setIsActivated(true);
+        const { customText, fee } = customization;
+        if (customText && fee) setIsActivated(true);
         setCustomization(customization || initialCustomization);
       }
     });

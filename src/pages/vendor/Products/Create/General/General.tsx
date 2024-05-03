@@ -1,4 +1,4 @@
-import { ChangeEvent, useEffect, useState } from 'react';
+import { ChangeEvent, useContext, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { enqueueSnackbar } from 'notistack';
 import clsx from 'clsx';
@@ -13,6 +13,7 @@ import {
 import { AIDialog } from '@/components/super-admin/common';
 import { MagicIcon } from '@/components/icons';
 import { HttpService } from '@/services';
+import { CategoryContext } from '@/providers';
 import { ChangeInputEvent } from '@/interfaces';
 
 import styles from './General.module.scss';
@@ -52,11 +53,11 @@ export function General() {
   const { productId } = useParams();
   const navigate = useNavigate();
 
+  const { categories } = useContext(CategoryContext);
   const [productDialogOpen, setProductDialogOpen] = useState(false);
   const [nutrition, setNutrition] = useState<File | null>(null);
   const [generalInfo, setGeneralInfo] =
     useState<IProductGeneralInfo>(initialInfo);
-  const [categories, setCategories] = useState<any[]>([]);
   const [dialogTopic, setDialogTopic] = useState<TopicType>('product name');
 
   const onAnswerSelect = (answer: string) => {
@@ -65,10 +66,10 @@ export function General() {
       [dialogTopic === 'product name'
         ? 'name'
         : dialogTopic === 'long product description'
-        ? 'longDesc'
-        : dialogTopic === 'short product description'
-        ? 'shortDesc'
-        : 'disclaimer']: answer,
+          ? 'longDesc'
+          : dialogTopic === 'short product description'
+            ? 'shortDesc'
+            : 'disclaimer']: answer,
     });
     setProductDialogOpen(false);
   };
@@ -156,17 +157,6 @@ export function General() {
   };
 
   useEffect(() => {
-    HttpService.get('/settings/general/category').then(response => {
-      setCategories(
-        response.map((item: any) => ({
-          ...item,
-          value: item.name.toLowerCase(),
-        })),
-      );
-    });
-  }, []);
-
-  useEffect(() => {
     if (productId === 'create') return;
     HttpService.get(`/products/vendor/${productId}`).then(response => {
       const { status, product } = response;
@@ -215,7 +205,7 @@ export function General() {
               <p>Product Category</p>
               <Select
                 placeholder="Product category"
-                options={categories}
+                options={categories.map(item => ({ ...item, value: item.name.toLowerCase() }))}
                 className={styles.categories}
                 value={generalInfo.category}
                 updateValue={(category: string) =>

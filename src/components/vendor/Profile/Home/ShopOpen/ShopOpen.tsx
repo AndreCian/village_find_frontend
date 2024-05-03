@@ -37,8 +37,11 @@ export function ShopOpen() {
 
   useEffect(() => {
     if (hash === '#shopopen') {
+      console.log('Shop open!!!');
       console.log(shopOpenRef);
-      // shopOpenRef.current.scrollIntoView({ behavior: 'smooth' });
+      if (shopOpenRef.current) {
+        shopOpenRef.current.scrollIntoView({ behavior: 'smooth' });
+      }
     }
   }, [hash]);
 
