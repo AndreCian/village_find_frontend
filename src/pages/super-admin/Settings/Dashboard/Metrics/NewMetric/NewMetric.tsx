@@ -1,31 +1,31 @@
 import { ChangeEvent, useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { enqueueSnackbar } from 'notistack';
 
 import { Card } from '@/components/common';
 import { Input, Select } from '@/components/forms';
 
-import { MetricService } from '@/services';
-
-import { useMetricStore } from '@/stores';
-
-import { IMetric } from '@/interfaces';
+import { HttpService } from '@/services';
 
 import styles from './NewMetric.module.scss';
-import { enqueueSnackbar } from 'notistack';
+
+type IMetric = {
+  _id?: string;
+  name: string;
+  status: string;
+}
 
 const initialMetric: IMetric = {
   name: '',
   status: '',
 };
-const initialStatus: string[] = ['Active', 'Inactive'];
-
-const backToPath = '/admin/settings/dashboard/metrics';
+const METRIC_PATH = '/admin/settings/dashboard/metrics';
+const STATUS_OPTS: string[] = ['Active', 'Inactive'];
 
 export function NewMetric() {
   const { id: metricId }: any = useParams();
   const navigate = useNavigate();
   const [metric, setMetric] = useState<IMetric>(initialMetric);
-  // const { updateMetric: updateStoreMetric } = useMetricStore();
 
   const updateMetricName = (e: ChangeEvent<HTMLInputElement>) => {
     setMetric({ ...metric, name: e.target.value });
@@ -37,26 +37,21 @@ export function NewMetric() {
 
   const onMetricCreate = () => {
     if (metricId === 'create') {
-      MetricService.createOne(metric)
-        .then(metric => {
-          enqueueSnackbar('New metric added successfully!', {
-            variant: 'success',
-          });
-          navigate(backToPath);
-        })
-        .catch(err => {
-          enqueueSnackbar('Error occured!', { variant: 'error' });
-        });
+      HttpService.post('/settings/general/metric', metric).then(response => {
+        const { status } = response;
+        if (status === 200) {
+          enqueueSnackbar('New metric created.', { variant: 'success' });
+          navigate(METRIC_PATH);
+        }
+      })
     } else {
-      MetricService.updateOne(metricId, metric)
-        .then(metric => {
-          enqueueSnackbar('Metric updated successfully!', { variant: 'error' });
-          setMetric(metric)
-          navigate(backToPath);
-        })
-        .catch(err => {
-          enqueueSnackbar('Error occured!', { variant: 'error' });
-        });
+      HttpService.put(`/settings/general/metric/${metric._id}`, metric).then(response => {
+        const { status } = response;
+        if (status === 200) {
+          enqueueSnackbar('Metric updated.', { variant: 'success' });
+          navigate(METRIC_PATH);
+        }
+      })
     }
   };
 
@@ -64,9 +59,9 @@ export function NewMetric() {
     if (!metricId || metricId === 'create') {
       setMetric(initialMetric);
     } else {
-      MetricService.findOne(metricId).then(metric => {
-        setMetric(metric);
-      });
+      HttpService.get(`/settings/general/metric/${metricId}`).then(response => {
+        setMetric(response);
+      })
     }
   }, [metricId]);
 
@@ -87,14 +82,14 @@ export function NewMetric() {
             value={metric.status}
             updateValue={updateMetricStatus}
             placeholder="Status"
-            options={initialStatus.map(item => ({ name: item, value: item.toLowerCase() }))}
+            options={STATUS_OPTS.map(item => ({ name: item, value: item.toLowerCase() }))}
           />
         </div>
       </div>
       <div className={styles.buttonBar}>
         <button
           className={styles.cancelButton}
-          onClick={() => navigate(backToPath)}
+          onClick={() => navigate(METRIC_PATH)}
         >
           Cancel
         </button>

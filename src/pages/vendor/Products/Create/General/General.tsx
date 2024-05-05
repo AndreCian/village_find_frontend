@@ -36,6 +36,12 @@ interface IProductGeneralInfo {
   tax: number;
 }
 
+type IMetric = {
+  _id: string;
+  name: string;
+  value: string;
+}
+
 const initialInfo: IProductGeneralInfo = {
   name: '',
   deliveryTypes: [],
@@ -59,6 +65,7 @@ export function General() {
   const [generalInfo, setGeneralInfo] =
     useState<IProductGeneralInfo>(initialInfo);
   const [dialogTopic, setDialogTopic] = useState<TopicType>('product name');
+  const [metrics, setMetrics] = useState<IMetric[]>([]);
 
   const onAnswerSelect = (answer: string) => {
     setGeneralInfo({
@@ -165,6 +172,12 @@ export function General() {
       }
     });
   }, [productId]);
+
+  useEffect(() => {
+    HttpService.get('/settings/general/metric').then(response => {
+      setMetrics(response);
+    })
+  }, []);
 
   return (
     <div className={styles.root}>
@@ -311,7 +324,9 @@ export function General() {
                 border="none"
                 bgcolor="primary"
                 placeholder="unit"
+                options={metrics.map(item => ({ ...item, value: item.name.toLowerCase() }))}
                 value={generalInfo.soldByUnit}
+                updateValue={(value: string) => setGeneralInfo({ ...generalInfo, soldByUnit: value })}
               />
             </div>
             <div className={styles.control}>

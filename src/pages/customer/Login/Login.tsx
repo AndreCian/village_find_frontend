@@ -52,7 +52,6 @@ export function Login() {
     HttpService.post(`/user/${role}/login`, currentUser)
       .then(response => {
         const { status, token, profile } = response;
-        console.log('-----------------Profile', profile);
         if (status === 200) {
           setAccount({
             role: role as RoleType,

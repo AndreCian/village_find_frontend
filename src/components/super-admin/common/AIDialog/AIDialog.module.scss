@@ -79,17 +79,25 @@
           @apply flex flex-col gap-y-2;
 
           .answer {
-            @apply flex items-center gap-x-4;
+            @apply flex items-start gap-x-4;
 
-            .ansInput {
-              @apply w-full;
+            .radio {
+              @apply translate-y-4 transform;
+            }
 
-              input {
-                @apply rounded-none;
-              }
+            > div.description {
+              @apply flex grow flex-col gap-y-2;
 
-              span {
-                @apply bg-transparent;
+              .ansInput {
+                @apply w-full;
+
+                input {
+                  @apply rounded-none;
+                }
+
+                span {
+                  @apply bg-transparent;
+                }
               }
             }
           }

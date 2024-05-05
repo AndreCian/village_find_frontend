@@ -7,7 +7,7 @@ import { Select } from '@/components/forms';
 
 import { TrashIcon } from '@/components/icons';
 
-import { TagService } from '@/services';
+import { HttpService, TagService } from '@/services';
 
 import { useTagsStore } from '@/stores';
 
@@ -15,20 +15,28 @@ import { ITableColumn } from '@/interfaces';
 
 import styles from './ProductTags.module.scss';
 
-const tagPathPrefix = '/admin/settings/dashboard/tags';
+const TAG_PATH = '/admin/settings/dashboard/tags';
+const STATUS_OPTS = ['Active', 'Inactive'];
+
+type ITag = {
+  _id: string;
+  name: string;
+  status: string;
+}
 
 export function ProductTags() {
   const navigate = useNavigate();
   const [filter, setFilter] = useState<string>('');
   const [category, setCategory] = useState<string>('');
-  const {
-    tags: storeTags,
-    setTags: setStoreTags,
-    deleteTag: deleteStoreTag,
-  } = useTagsStore();
+  const [tags, setTags] = useState<ITag[]>([]);
+  // const {
+  //   tags: storeTags,
+  //   setTags: setStoreTags,
+  //   deleteTag: deleteStoreTag,
+  // } = useTagsStore();
 
   const onEditClick = (id: string) => {
-    navigate(`${tagPathPrefix}/${id}`);
+    navigate(`${TAG_PATH}/${id}`);
   };
 
   const statuses: string[] = ['Active', 'Inactive'];
@@ -46,8 +54,10 @@ export function ProductTags() {
         <Select
           rounded="full"
           placeholder={row.status}
-          // options={statuses}
+          options={STATUS_OPTS.map(item => ({ name: item, value: item.toLowerCase() }))}
           className={styles.statusSelector}
+          value={row.status}
+          updateValue={onStatusChange(row._id)}
         />
       ),
     },
@@ -75,25 +85,37 @@ export function ProductTags() {
     setFilter(e.target.value);
   };
 
+  const onStatusChange = (id: string) => (value: string) => {
+    HttpService.put(`/settings/general/tag/${id}`, { status: value }).then(response => {
+      const { status } = response;
+      if (status === 200) {
+        enqueueSnackbar('Tag status updated.', { variant: 'success' });
+        setTags(tags.map(item => item._id === id ? ({ ...item, status: value }) : item))
+      }
+    })
+  }
+
   const updateStatus = (_category: string) => {
     setCategory(_category);
   };
 
   const onDeleteClick = (id: string) => {
-    TagService.deleteOne(id)
-      .then(() => {
-        enqueueSnackbar('Tag deleted successfully!', { variant: 'success' });
-        deleteStoreTag(id);
-      })
-      .catch(err => {
-        enqueueSnackbar('Error occured!', { variant: 'error' });
-      });
+    HttpService.delete(`/settings/general/tag/${id}`).then(response => {
+      const { status } = response;
+      if (status === 200) {
+        enqueueSnackbar('Product tag deleted.', { variant: 'success' })
+        setTags(tags.filter(item => item._id !== id));
+      }
+    })
   };
 
   useEffect(() => {
-    TagService.findAll(filter, category).then(tags => {
-      setStoreTags(tags);
-    });
+    const params: any = {};
+    if (filter) params.name = filter;
+    if (category) params.status = category;
+    HttpService.get('/settings/general/tag', params).then(response => {
+      setTags(response);
+    })
   }, [filter, category]);
 
   return (
@@ -105,14 +127,14 @@ export function ProductTags() {
         category={category}
         updateCategory={updateStatus}
         selectTitle="Status"
-        selectOpts={statuses}
+        selectOpts={STATUS_OPTS.map(item => ({ name: item, value: item.toLowerCase() }))}
         className={styles.tableToolbar}
         actions={
           <div>
             <p className={styles.buttonLabel}>New</p>
             <button
               className={styles.actionButton}
-              onClick={() => navigate(`${tagPathPrefix}/create`)}
+              onClick={() => navigate(`${TAG_PATH}/create`)}
             >
               New
             </button>
@@ -121,7 +143,7 @@ export function ProductTags() {
       />
       <TableBody
         columns={columns}
-        rows={storeTags}
+        rows={tags}
         className={styles.tableBody}
       />
     </Card>

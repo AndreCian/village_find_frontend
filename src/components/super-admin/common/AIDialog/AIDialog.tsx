@@ -46,8 +46,8 @@ const initialTones = [
 
 export function AIDialog({
   open,
-  onClose = () => {},
-  onSelect = () => {},
+  onClose = () => { },
+  onSelect = () => { },
   topic,
   category,
 }: IAIDialogProps) {
@@ -56,7 +56,7 @@ export function AIDialog({
   const [ansTone, setAnsTone] = useState('Default');
   const [prompt, setPrompt] = useState('');
   const [answers, setAnswers] = useState<string[]>([]);
-  const [isEditings, setIsEditings] = useState<boolean[]>([]);
+  const [editingIndex, setEditingIndex] = useState(-1);
   const dialogRef = useRef<HTMLDivElement>(null);
 
   const initializeStates = () => {
@@ -65,7 +65,7 @@ export function AIDialog({
     setAnsTone('Default');
     setPrompt('');
     setAnswers([]);
-    setIsEditings([]);
+    setEditingIndex(-1);
   };
 
   const onAnswerChange = (index: number) => (e: any) => {
@@ -81,19 +81,15 @@ export function AIDialog({
   };
 
   const onRegenClick = () => {
-    setAnswers(Array(ansCount).fill(''));
-    setIsEditings(Array(ansCount).fill(false));
+    onSubmitClick();
   };
 
   const onAnsEditClick = (index: number) => () => {
-    setIsEditings(
-      isEditings.map((_editing: boolean, _index: number) =>
-        _index === index ? !_editing : _editing,
-      ),
-    );
+    setEditingIndex(Number(index));
   };
 
   const onSubmitClick = () => {
+    setAnswers(Array(ansCount).fill(''));
     HttpService.get(
       `/openai?count=${ansCount}&tone=${ansTone}&type=${topic}&category=${category}&prompt=${prompt}`,
     ).then(response => {
@@ -187,21 +183,27 @@ export function AIDialog({
               >
                 {answers.map((answer: string, index: number) => (
                   <div key={index} className={styles.answer}>
-                    <Radio value={index.toString()} />
-                    <Input
-                      value={answer}
-                      updateValue={onAnswerChange(index)}
-                      className={styles.ansInput}
-                      disabled={!isEditings[index]}
-                      adornment={{
-                        position: 'right',
-                        content: !isEditings[index] ? (
-                          <PencilIcon onClick={onAnsEditClick(index)} />
-                        ) : (
-                          <></>
-                        ),
-                      }}
-                    />
+                    <Radio value={index.toString()} className={styles.radio} />
+                    <div className={styles.description}>
+                      <Input
+                        value={answer}
+                        className={styles.ansInput}
+                        disabled={true}
+                        adornment={{
+                          position: 'right',
+                          content: editingIndex !== index ? (
+                            <PencilIcon onClick={onAnsEditClick(index)} className='cursor-pointer' />
+                          ) : (
+                            <></>
+                          ),
+                        }}
+                      />
+                      {editingIndex === index && <TextField
+                        rows={5}
+                        value={answer}
+                        updateValue={onAnswerChange(index)}
+                      />}
+                    </div>
                   </div>
                 ))}
               </RadioGroup>

@@ -16,7 +16,7 @@ interface INavItem {
   actions?: any;
 }
 
-const pathPrefix = '/vendor/products';
+const PRODUCT_PATH = '/vendor/products';
 
 const navItems: INavItem[] = [
   {
@@ -55,9 +55,11 @@ export function ProductLayout() {
   const pathname = location.pathname;
 
   const [subPath, subActionPath] = useMemo(() => {
-    const trimPath = pathname.slice(pathPrefix.length);
+    const trimPath = pathname.slice(PRODUCT_PATH.length);
     const segPaths = trimPath.split('/');
-    return [segPaths[2] ?? '', segPaths[3] ?? ''];
+    const path = segPaths[2] ?? '';
+    const actionPath = path === 'style' ? (segPaths[4] ?? '') : (segPaths[3] ?? '');
+    return [path, actionPath];
   }, [pathname]);
   const [subPathTitle, subActionPathTitle] = useMemo(() => {
     const pathItem = navItems.find((item: INavItem) => item.path === subPath);
@@ -73,7 +75,7 @@ export function ProductLayout() {
   const [productName, setProductName] = useState('');
 
   const buildPath = (childPath: string) => {
-    return `${pathPrefix}/${productId}/${childPath}`;
+    return `${PRODUCT_PATH}/${productId}/${childPath}`;
   };
 
   const onNavItemClick = (item: INavItem) => {
@@ -96,7 +98,7 @@ export function ProductLayout() {
         setProductName(name || '');
       } else if (status === 404) {
         enqueueSnackbar('Product not found!', { variant: 'warning' });
-        navigate(pathPrefix);
+        navigate(PRODUCT_PATH);
       }
     });
   }, [productId]);
@@ -123,7 +125,7 @@ export function ProductLayout() {
         )}
         <Card className={styles.content}>
           <div className={styles.breadcrumb}>
-            <p>My Products</p>
+            <p onClick={() => navigate(PRODUCT_PATH)}>My Products</p>
             {subPathTitle && (
               <>
                 <FaChevronRight fontSize={14} />
@@ -131,6 +133,7 @@ export function ProductLayout() {
                   className={clsx({
                     [styles.bold]: routeStep === 'MAIN_ROUTE',
                   })}
+                  onClick={() => navigate(buildPath(subPath))}
                 >
                   {subPathTitle}
                 </p>

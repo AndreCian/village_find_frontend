@@ -6,27 +6,31 @@ import { Card, TableToolbar, TableBody } from '@/components/common';
 import { Select } from '@/components/forms';
 import { TrashIcon } from '@/components/icons';
 
-import { MetricService } from '@/services';
+import { HttpService, MetricService } from '@/services';
 
-import { useMetricStore } from '@/stores';
-
-import { ITableColumn, IMetric } from '@/interfaces';
+import { ITableColumn } from '@/interfaces';
 
 import styles from './Metrics.module.scss';
 
-const initialStatus: string[] = ['Active', 'Inactive'];
+const METRIC_PATH = '/admin/settings/dashboard/metrics';
+const statusOpts = ['Active', 'Inactive'];
 
-const metricPathPrefix = '/admin/settings/dashboard/metrics';
+type IMetric = {
+  _id: string;
+  name: string;
+  status: string;
+}
 
 export function Metrics() {
   const navigate = useNavigate();
   const [filter, setFilter] = useState<string>('');
   const [category, setCategory] = useState<string>('');
-  const {
-    metrics: storeMetrics,
-    setMetrics: setStoreMetrics,
-    deleteMetric: deleteStoreMetric,
-  } = useMetricStore();
+  // const {
+  //   metrics: storeMetrics,
+  //   setMetrics: setStoreMetrics,
+  //   deleteMetric: deleteStoreMetric,
+  // } = useMetricStore();
+  const [metrics, setMetrics] = useState<IMetric[]>([]);
 
   const columns: ITableColumn[] = [
     {
@@ -42,8 +46,10 @@ export function Metrics() {
         <Select
           rounded="full"
           placeholder={row.status}
-          // options={initialStatus}
+          options={statusOpts.map(item => ({ name: item, value: item.toLowerCase() }))}
           className={styles.statusSelector}
+          value={row.status}
+          updateValue={onStatusChange(row._id)}
         />
       ),
     },
@@ -75,25 +81,37 @@ export function Metrics() {
     setCategory(_category);
   };
 
+  const onStatusChange = (id: string) => (value: string) => {
+    HttpService.put(`/settings/general/metric/${id}`, { status: value }).then(response => {
+      const { status } = response;
+      if (status === 200) {
+        enqueueSnackbar('Status updated.', { variant: 'success' });
+        setMetrics(metrics.map(metric => metric._id === id ? ({ ...metric, status: value }) : metric));
+      }
+    })
+  }
+
   const onClickEdit = (id: string) => () => {
-    navigate(`${metricPathPrefix}/${id}`);
+    navigate(`${METRIC_PATH}/${id}`);
   };
 
   const onClickDelete = (id: string) => () => {
-    MetricService.deleteOne(id)
-      .then(() => {
-        enqueueSnackbar('Metric deleted successfully!');
-        deleteStoreMetric(id);
-      })
-      .catch(err => {
-        enqueueSnackbar('Error occured!', { variant: 'error' });
-      });
+    HttpService.delete(`/settings/general/metric/${id}`).then(response => {
+      const { status } = response;
+      if (status === 200) {
+        enqueueSnackbar('Metric deleted.', { variant: 'success' });
+        setMetrics(metrics.filter(item => item._id !== id));
+      }
+    })
   };
 
   useEffect(() => {
-    MetricService.findAll(filter, category).then(metrics => {
-      setStoreMetrics(metrics);
-    });
+    const params: any = {};
+    if (filter) params.name = filter.toLowerCase();
+    if (category) params.status = category;
+    HttpService.get('/settings/general/metric', params).then(response => {
+      setMetrics(response);
+    })
   }, [filter, category]);
 
   return (
@@ -105,14 +123,14 @@ export function Metrics() {
         category={category}
         updateCategory={updateStatus}
         selectTitle="Status"
-        selectOpts={initialStatus}
+        selectOpts={statusOpts.map(item => ({ name: item, value: item.toLowerCase() }))}
         className={styles.tableToolbar}
         actions={
           <div>
             <p className={styles.buttonLabel}>New</p>
             <button
               className={styles.actionButton}
-              onClick={() => navigate(`${metricPathPrefix}/create`)}
+              onClick={() => navigate(`${METRIC_PATH}/create`)}
             >
               New
             </button>
@@ -121,7 +139,7 @@ export function Metrics() {
       />
       <TableBody
         columns={columns}
-        rows={storeMetrics}
+        rows={metrics}
         className={styles.tableBody}
       />
     </Card>

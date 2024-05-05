@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { enqueueSnackbar } from 'notistack';
 
-import { Button, Input, Radio } from '@/components/forms';
+import { Button, Input, Radio, RadioGroup } from '@/components/forms';
 import { Container } from '@/components/layout/customer';
 
 import { HttpService } from '@/services';
@@ -30,21 +30,35 @@ const initialAccount = {
 
 export function Signup() {
   const [account, setAccount] = useState<IAccount>(initialAccount);
+  const [accepted, setAccepted] = useState(false);
+  const [errors, setErrors] = useState<any>({});
 
   const onAccountChange = (e: any) => {
     setAccount({ ...account, [e.target.name]: e.target.value });
   };
 
   const onSignupClick = () => {
-    HttpService.post('/user/customer/register', account)
-      .then(response => {
-        if (response) {
-          enqueueSnackbar('Signup successfully!', { variant: 'success' });
-        }
-      })
-      .catch(err => {
-        enqueueSnackbar('Signup failed!', { variant: 'error' });
-      });
+    const errors: any = {};
+    Object.keys(account).forEach((key: string) => {
+      if (!(account as any)[key]) errors[key] = 'This field should not be empty.';
+    });
+    if (account.password.length < 6) errors.password = 'Password should be at least 6 characters.';
+    if (account.password !== account.confirm) errors.confirm = 'Password does not match.';
+    console.log(errors);
+
+    if (!Object.keys(errors).length) {
+      HttpService.post('/user/customer/register', account)
+        .then(response => {
+          if (response) {
+            enqueueSnackbar('Signup successfully!', { variant: 'success' });
+          }
+        })
+        .catch(err => {
+          enqueueSnackbar('Signup failed!', { variant: 'error' });
+        });
+    } else {
+      setErrors(errors);
+    }
   };
 
   return (
@@ -62,6 +76,7 @@ export function Signup() {
             className={styles.input}
             value={account.firstName}
             updateValue={onAccountChange}
+            error={errors.firstName}
           />
           <Input
             name="lastName"
@@ -72,6 +87,7 @@ export function Signup() {
             className={styles.input}
             value={account.lastName}
             updateValue={onAccountChange}
+            error={errors.lastName}
           />
           <Input
             name="phone"
@@ -82,6 +98,7 @@ export function Signup() {
             className={styles.input}
             value={account.phone}
             updateValue={onAccountChange}
+            error={errors.phone}
           />
           <Input
             type="email"
@@ -93,6 +110,7 @@ export function Signup() {
             className={styles.input}
             value={account.email}
             updateValue={onAccountChange}
+            error={errors.email}
           />
           <Input
             name="zipcode"
@@ -103,6 +121,7 @@ export function Signup() {
             className={styles.input}
             value={account.zipcode}
             updateValue={onAccountChange}
+            error={errors.zipcode}
           />
           <Input
             name="password"
@@ -114,6 +133,7 @@ export function Signup() {
             className={styles.input}
             value={account.password}
             updateValue={onAccountChange}
+            error={errors.password}
           />
           <Input
             name="confirm"
@@ -125,16 +145,23 @@ export function Signup() {
             className={styles.input}
             value={account.confirm}
             updateValue={onAccountChange}
+            error={errors.confirm}
           />
           <div className={styles.terms}>
             <h2>Terms And Conditions</h2>
           </div>
-          <Radio
-            label="I accept the terms and conditions"
-            value="false"
-            className={styles.agreeRadio}
-          />
-          <Button className={styles.signupBtn} onClick={onSignupClick}>
+          <RadioGroup
+            value={accepted ? ['accept'] : []}
+            updateValue={() => setAccepted(!accepted)}
+            multiple={true}
+          >
+            <Radio
+              label="I accept the terms and conditions"
+              className={styles.agreeRadio}
+              value='accept'
+            />
+          </RadioGroup>
+          <Button className={styles.signupBtn} onClick={onSignupClick} disabled={!accepted}>
             Register
           </Button>
         </div>

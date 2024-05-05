@@ -42,6 +42,7 @@ export interface IInputProps {
   adornment?: IAdornment;
   className?: string;
   disabled?: boolean;
+  error?: string;
   valueVisible?: boolean;
 
   onClick?: () => void;
@@ -66,6 +67,7 @@ export const Input = forwardRef((props: IInputProps, ref: any) => {
     disabled = false,
     adornment = null,
     defaultValue = '',
+    error = '',
     updateValue = () => { },
     onClick = () => { },
     onBlur = () => { },
@@ -91,6 +93,7 @@ export const Input = forwardRef((props: IInputProps, ref: any) => {
       : adornment && adornment.position === 'left'
         ? styles.adornmentLeft
         : '',
+    { [styles.borderColorDanger]: error },
     {
       [styles.isText]:
         adornment && adornment.isText && adornment.isText === true,
@@ -107,7 +110,7 @@ export const Input = forwardRef((props: IInputProps, ref: any) => {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const onChooseClick = () => {
-    if (ref.current) {
+    if (ref && ref.current) {
       ref.current.click();
     } else if (inputRef.current) {
       inputRef.current.click();
@@ -163,6 +166,9 @@ export const Input = forwardRef((props: IInputProps, ref: any) => {
       ) : (
         <></>
       )}
+      {
+        error && <p className={styles.error}>{error}</p>
+      }
     </div>
   );
 });

@@ -46,6 +46,10 @@
       .breadcrumb {
         @apply flex items-center gap-x-2;
 
+        p {
+          @apply cursor-pointer;
+        }
+
         .bold {
           @apply font-bold;
         }

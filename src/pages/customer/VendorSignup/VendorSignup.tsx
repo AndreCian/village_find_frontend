@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import clsx from 'clsx';
 
@@ -8,6 +8,8 @@ import { HttpService } from '@/services';
 
 import styles from './VendorSignup.module.scss';
 import { enqueueSnackbar } from 'notistack';
+import { AuthContext } from '@/providers';
+import { setupToken } from '@/utils';
 
 const initialRoles = [
   'SEO & Marketing',
@@ -48,6 +50,7 @@ const initialAccount = {
 };
 
 interface ISubscription {
+  _id: string;
   name: string;
   description: string;
   monthInvest: number;
@@ -63,6 +66,7 @@ export function VendorSignup() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
+  const { setIsLogin, setAccount: setAuthAccount } = useContext(AuthContext);
   const [step, setStep] = useState(0);
   const [collapseId, setCollapseId] = useState(0);
   const [maxCollapseId, setMaxCollapseId] = useState(0);
@@ -83,13 +87,13 @@ export function VendorSignup() {
   );
 
   const initializeStates = () => {
-    setAccount(initialAccount);
-    setCodeIssue('');
-    setCodes(Array(5).fill(''));
-    setCommunity(null);
     setStep(0);
     setCollapseId(0);
     setMaxCollapseId(0);
+    setCodeIssue('');
+    setSubscription('');
+    setCodes(Array(5).fill(''));
+    setCommunity(null);
   };
 
   const navigateCollapse = (id: number) => {
@@ -147,13 +151,14 @@ export function VendorSignup() {
 
       HttpService.post('/user/vendor/register', reqJson)
         .then(response => {
-          const { status } = response;
+          const { status, token } = response;
           if (status === 200) {
             enqueueSnackbar('Vendor signup successfully!', {
               variant: 'success',
             });
 
             initializeStates();
+            setupToken(token, 'vendor');
             navigate('/vendor/profile/bank-detail');
           } else if (status === 500) {
             enqueueSnackbar('Something went wrong with server', {
@@ -278,7 +283,7 @@ export function VendorSignup() {
                     alt="Vendor community general logo"
                   />
                   <div className={styles.text}>
-                    <p className={styles.title}>Field of Artisans</p>
+                    <p className={styles.title}>{community && community.name}</p>
                     <p>Vendor Community</p>
                   </div>
                 </div>
@@ -471,7 +476,7 @@ export function VendorSignup() {
                       (subscription: ISubscription, index: number) => (
                         <div key={index} className={styles.variant}>
                           <Radio
-                            value={subscription.name}
+                            value={subscription._id}
                             className={styles.checkbox}
                           />
                           <div className={styles.text}>

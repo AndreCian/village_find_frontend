@@ -18,6 +18,7 @@ export function Layout() {
 
   useEffect(() => {
     if (isLogin || !isVendor) {
+      console.log('Already logged in------------------');
       setIsLoading(false);
       return;
     }
@@ -32,7 +33,7 @@ export function Layout() {
           if (status === 200) {
             setIsLogin(true);
             setAccount({
-              role: 'vendor',
+              role: userRole,
               profile,
             });
           } else {
