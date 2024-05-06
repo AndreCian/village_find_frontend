@@ -1,10 +1,13 @@
-import { useState } from 'react';
+import { useContext, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { enqueueSnackbar } from 'notistack';
 
 import { Button, Input, Radio, RadioGroup } from '@/components/forms';
 import { Container } from '@/components/layout/customer';
 
+import { AuthContext } from '@/providers';
 import { HttpService } from '@/services';
+import { setupToken } from '@/utils';
 
 import styles from './Signup.module.scss';
 
@@ -29,6 +32,9 @@ const initialAccount = {
 };
 
 export function Signup() {
+  const navigate = useNavigate();
+  const { setIsLogin, setAccount: setAuthAccount } = useContext(AuthContext);
+
   const [account, setAccount] = useState<IAccount>(initialAccount);
   const [accepted, setAccepted] = useState(false);
   const [errors, setErrors] = useState<any>({});
@@ -44,20 +50,24 @@ export function Signup() {
     });
     if (account.password.length < 6) errors.password = 'Password should be at least 6 characters.';
     if (account.password !== account.confirm) errors.confirm = 'Password does not match.';
-    console.log(errors);
+
+    setErrors(errors);
 
     if (!Object.keys(errors).length) {
       HttpService.post('/user/customer/register', account)
         .then(response => {
-          if (response) {
+          const { status, token, profile } = response;
+          if (status === 200) {
             enqueueSnackbar('Signup successfully!', { variant: 'success' });
+            setIsLogin(true);
+            setupToken(token, 'customer');
+            setAuthAccount({ role: 'customer', profile });
+            navigate('/');
           }
         })
         .catch(err => {
           enqueueSnackbar('Signup failed!', { variant: 'error' });
         });
-    } else {
-      setErrors(errors);
     }
   };
 

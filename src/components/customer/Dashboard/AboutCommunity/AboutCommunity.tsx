@@ -126,7 +126,7 @@ export function AboutCommunity({ community, ready }: IAboutCommunityProps) {
       const communities = (response || []).map((item: any) => ({
         ...item,
         detail: item.shortDesc,
-        image: item.images.logoUrl,
+        image: item.images?.logoUrl,
       }));
       setShopVCommunities(communities);
     });

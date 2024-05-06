@@ -9,9 +9,9 @@ import { TrashIcon } from '@/components/icons';
 
 import { useCustomerStore } from '@/stores';
 
-import { CustomerService } from '@/services';
+import { CustomerService, HttpService } from '@/services';
 
-import { IRange, ITableColumn } from '@/interfaces';
+import { ICustomer, IRange, ITableColumn } from '@/interfaces';
 
 import styles from './CustomerHome.module.scss';
 
@@ -32,11 +32,12 @@ export function CustomerHome() {
   const [sort, setSort] = useState('');
   const [category, setCategory] = useState('');
   const [range, setRange] = useState<IRange>(initialRange);
-  const {
-    customers: storeCustomers,
-    setCustomers: setStoreCustomers,
-    deleteCustomer: deleteStoreCustomer,
-  } = useCustomerStore();
+  const [customers, setCustomers] = useState<ICustomer[]>([]);
+  // const {
+  //   customers: storeCustomers,
+  //   setCustomers: setStoreCustomers,
+  //   deleteCustomer: deleteStoreCustomer,
+  // } = useCustomerStore();
 
   const columns: ITableColumn[] = [
     {
@@ -109,26 +110,9 @@ export function CustomerHome() {
     };
 
   const onDeleteClick = (id: string) => () => {
-    CustomerService.deleteOne(id)
-      .then(() => {
-        deleteStoreCustomer(id);
-        enqueueSnackbar('Customer deleted successfully!', {
-          variant: 'success',
-        });
-      })
-      .catch(err => {
-        enqueueSnackbar('Error occured!', { variant: 'error' });
-      });
   };
 
   const onSubmitClick = () => {
-    CustomerService.findAll(filter, category)
-      .then(customers => {
-        setStoreCustomers(customers);
-      })
-      .catch(err => {
-        enqueueSnackbar('Error occured!', { variant: 'error' });
-      });
   };
 
   const onResetClick = () => {
@@ -142,13 +126,9 @@ export function CustomerHome() {
   };
 
   useEffect(() => {
-    CustomerService.findAll(filter, category)
-      .then(customers => {
-        setStoreCustomers(customers);
-      })
-      .catch(err => {
-        enqueueSnackbar('Error occured!', { variant: 'error' });
-      });
+    HttpService.get('/user/customer').then(response => {
+      setCustomers(response);
+    })
   }, []);
 
   return (
@@ -195,7 +175,7 @@ export function CustomerHome() {
       />
       <TableBody
         columns={columns}
-        rows={storeCustomers}
+        rows={customers}
         className={styles.tableBody}
       />
     </Card>
