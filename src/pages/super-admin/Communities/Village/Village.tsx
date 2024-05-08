@@ -4,11 +4,8 @@ import clsx from 'clsx';
 
 import { Card, TableBody, TableToolbar } from '@/components';
 import { Input, Select } from '@/components/forms';
-
 import { HttpService } from '@/services';
-
 import { IRange, ITableColumn } from '@/interfaces';
-
 import { formatDate } from '@/utils';
 
 import styles from './Village.module.scss';
@@ -38,7 +35,7 @@ export interface ICommunityRow {
 
 const initialTableData: ICommunityRow[] = [];
 
-const communityViewPath = '/admin/community/village';
+const COMMUNITY_PATH = '/admin/community/village';
 
 export function VillageCommunity() {
   const navigate = useNavigate();
@@ -91,7 +88,7 @@ export function VillageCommunity() {
         <Select
           rounded="full"
           value={row.status}
-          options={statusOpts}
+          options={statusOpts.map(item => ({ name: item, value: item.toLowerCase() }))}
           className={styles.statusSelector}
         />
       ),
@@ -104,7 +101,7 @@ export function VillageCommunity() {
         <div className={styles.actionCell}>
           <button
             className={styles.actionButton}
-            onClick={() => navigate(`${communityViewPath}/${row._id}`)}
+            onClick={() => navigate(`${COMMUNITY_PATH}/${row._id}`)}
           >
             View
           </button>
@@ -165,7 +162,7 @@ export function VillageCommunity() {
         sort={sort}
         updateSort={(_sort: string) => setSort(_sort)}
         selectTitle="Status"
-        selectOpts={statusOpts}
+        selectOpts={statusOpts.map(item => ({ name: item, value: item.toLowerCase() }))}
         category={category}
         updateCategory={(_cat: string) => setCategory(_cat)}
         className={styles.tableToolbar}
@@ -195,7 +192,7 @@ export function VillageCommunity() {
               <p>New</p>
               <button
                 className={clsx(styles.button, styles.new)}
-                onClick={() => navigate(`${communityViewPath}/create`)}
+                onClick={() => navigate(`${COMMUNITY_PATH}/create`)}
               >
                 New
               </button>

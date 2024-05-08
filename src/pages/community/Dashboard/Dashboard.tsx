@@ -2,7 +2,6 @@ import { useContext } from 'react';
 import { enqueueSnackbar } from 'notistack';
 
 import { Card } from '@/components/common';
-
 import { AuthContext } from '@/providers';
 
 import styles from './Dashboard.module.scss';

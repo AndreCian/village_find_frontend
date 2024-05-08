@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
-import { Card, Select } from '@/components';
+import { enqueueSnackbar } from 'notistack';
 
+import { Card, Select } from '@/components';
 import { HttpService } from '@/services';
 import { SERVER_URL } from '@/config/global';
+
 import styles from './Community.module.scss';
-import { enqueueSnackbar } from 'notistack';
 
 const options = [
   {
@@ -19,7 +20,7 @@ const options = [
 
 interface ICommunity {
   name: string;
-  images: {
+  images?: {
     logoUrl: string;
   };
 }
@@ -60,9 +61,9 @@ export function Community() {
 
   return (
     <Card title="Community" className={styles.root}>
-      <div className={styles.artisan}>
+      {community && <div className={styles.artisan}>
         <img
-          src={`${SERVER_URL}/${community.images.logoUrl}`}
+          src={`${SERVER_URL}/${community.images?.logoUrl}`}
           className={styles.image}
         />
         <p>{community.name}</p>
@@ -74,7 +75,7 @@ export function Community() {
           value={status}
           updateValue={onCommunityStatusChange}
         />
-      </div>
+      </div>}
     </Card>
   );
 }

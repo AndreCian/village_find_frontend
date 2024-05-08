@@ -5,64 +5,37 @@ import { enqueueSnackbar } from 'notistack';
 import { Card, TableBody } from '@/components/common';
 import { Input, Select, RadioGroup, Radio } from '@/components/forms';
 import { MagnifierIcon } from '@/components/icons';
-
-import { CouponService } from '@/services';
-
-import { IRange, ITableColumn } from '@/interfaces';
-
+import { CouponService, HttpService } from '@/services';
+import { ChangeInputEvent, ITableColumn } from '@/interfaces';
 import { getBubbleObject } from '@/utils/data/getBubbleObject';
+import { ICoupon, couponTypes } from '@/pages/super-admin';
 
 import ProductSvg from '/assets/admin/backs/product.svg';
 import styles from './CouponEdit.module.scss';
 
-export type CouponType = 'Free Shipping' | 'Percent' | 'Tiered';
-export type UsageType = 'Use Code' | 'Amount Spent';
-export type TargetType =
-  | 'Global Coupon'
-  | 'Product Specific'
-  | 'Customer Specific';
-
-interface ICondition {
-  discount: number;
-  minimum?: number;
-  maximum?: number;
+interface ICustomer {
+  firstName: string;
+  lastName: string;
+  email: string;
 }
-
-export interface IEditingCoupon {
-  type: CouponType;
-  date: IRange;
-  usage?: {
-    type: UsageType;
-    code?: string;
-    amount?: number;
-  };
-  code?: string;
-  discount?: number;
-  conditions?: ICondition[];
-  target: {
-    type: TargetType;
-    id?: string;
-  };
-}
-
-const couponTypes: string[] = ['Free Shipping', 'Percent', 'Tiered'];
 
 const customerColumns: ITableColumn[] = [
   {
     title: 'Select',
     name: 'select',
     width: 100,
-    cell: (row: any) => <Radio value={row.id} />,
+    cell: (row: any) => <Radio value={row._id} />,
   },
   {
     title: 'Customer Name',
     name: 'name',
     width: 200,
+    cell: (row: any) => <p>{`${row.firstName} ${row.lastName}`}</p>
   },
   {
     title: 'Email',
     name: 'email',
-    width: 250,
+    width: 350,
   },
 ];
 
@@ -72,7 +45,7 @@ const productColumns: ITableColumn[] = [
     name: 'select',
     width: 100,
     cell: (row: any) => (
-      <Radio label={<img src={ProductSvg} />} value={row.id} />
+      <Radio label={<img src={ProductSvg} />} value={row._id} />
     ),
   },
   {
@@ -100,24 +73,6 @@ const productColumns: ITableColumn[] = [
   },
 ];
 
-const initialCustomers: any[] = [
-  {
-    id: 1,
-    name: 'Jenny Boom',
-    email: 'brandon@gmail.com',
-  },
-  {
-    id: 2,
-    name: 'Will Smith',
-    email: 'brandon@gmail.com',
-  },
-  {
-    id: 3,
-    name: 'William Defo',
-    email: 'brandon@gmail.com',
-  },
-];
-
 const initialProducts: any[] = [
   {
     id: 1,
@@ -142,38 +97,39 @@ const initialProducts: any[] = [
   },
 ];
 
-const initialCoupon: IEditingCoupon = {
-  type: 'Free Shipping',
-  date: {
-    from: '',
-    to: '',
+const initialCoupon: ICoupon = {
+  type: 'freeshipping',
+  name: '',
+  shipping: {
+    mode: 'code',
   },
-  usage: {
-    type: 'Use Code',
-    code: '',
-  },
-  code: '',
-  discount: 0,
-  conditions: [],
   target: {
-    type: 'Global Coupon',
+    mode: 'global'
   },
-};
+  startDate: '',
+  endDate: '',
+  status: 'inactive'
+}
 
-const homePath = '/admin/customers/coupon';
+const COUPON_PATH = '/admin/customers/coupon';
+
+const getDateStr = (date: string) => {
+  return date.split('T')[0];
+}
 
 export function CouponEdit() {
   const { id: couponId } = useParams();
   const navigate = useNavigate();
 
-  const [coupon, setCoupon] = useState<IEditingCoupon>(initialCoupon);
+  const [coupon, setCoupon] = useState<ICoupon>(initialCoupon);
+  const [customers, setCustomers] = useState<ICustomer[]>([]);
 
   const updateStrForm = (field: string) => (value: string) => {
     setCoupon(getBubbleObject(field, coupon, value));
   };
 
   const updateInputForm = (field: string) => (e: any) => {
-    setCoupon(getBubbleObject(field, coupon, e.target.value));
+    setCoupon(getBubbleObject(field, coupon, typeof e === 'string' ? e : e.target.value));
   };
 
   const updateCondition = (field: string, index: number) => (e: any) => {
@@ -190,46 +146,33 @@ export function CouponEdit() {
   const onConditionAddClick = () => {
     setCoupon({
       ...coupon,
-      conditions: [...(coupon.conditions as ICondition[]), { discount: 0 }],
+      conditions: [...(coupon.conditions as any[]), { discount: 0 }],
     });
   };
 
   const onAddBtnClick = () => {
-    let couponJson: IEditingCoupon = {
-      type: coupon.type,
-      date: coupon.date,
-      code: coupon.code,
-      target: { type: coupon.target.type },
-    };
-    if (coupon.target.type !== 'Global Coupon') {
-      couponJson.target.id = coupon.target.id;
-    }
-
-    if (coupon.type === 'Free Shipping') {
-      couponJson = { ...couponJson, usage: coupon.usage };
-    } else if (coupon.type === 'Percent') {
-      couponJson = { ...coupon, discount: coupon.discount };
-    } else {
-      couponJson = { ...coupon, conditions: coupon.conditions };
-    }
-
-    CouponService.createOne(couponJson)
-      .then(response => {
+    if (couponId === 'create') {
+      HttpService.post('/coupons', coupon).then(response => {
         const { status } = response;
         if (status === 200) {
-          setCoupon(initialCoupon);
-          navigate(homePath);
-          enqueueSnackbar(`${coupon.code} added successfully!`, {
-            variant: 'success',
-          });
+          enqueueSnackbar('Coupon created.', { variant: 'success' });
+          navigate(COUPON_PATH);
+        }
+      });
+    } else {
+      HttpService.put(`/coupons/${couponId}`, coupon).then(response => {
+        const { status } = response;
+        if (status === 200) {
+          enqueueSnackbar('Coupon updated.', { variant: 'success' });
+          navigate(COUPON_PATH);
         }
       })
-      .catch(err => {
-        enqueueSnackbar('Something went wrong with server.', {
-          variant: 'error',
-        });
-      });
+    }
   };
+
+  const onCouponChange = (e: ChangeInputEvent) => {
+    setCoupon({ ...coupon, [e.target.name]: e.target.value });
+  }
 
   useEffect(() => {
     if (!couponId || couponId === 'create') return;
@@ -239,10 +182,26 @@ export function CouponEdit() {
     });
   }, [couponId]);
 
+  useEffect(() => {
+    HttpService.get('/user/customer').then(response => {
+      setCustomers(response);
+    });
+  }, []);
+
   return (
     <Card title="Coupon Center" className={styles.root}>
       <div className={styles.container}>
         <div className={styles.form}>
+          <div className={styles.control}>
+            <p>Coupon Name</p>
+            <Input
+              name='name'
+              placeholder='Name'
+              value={coupon.name}
+              updateValue={onCouponChange}
+              className={styles.nameInput}
+            />
+          </div>
           <div className={styles.control}>
             <p>Coupon Type</p>
             <Select
@@ -253,13 +212,13 @@ export function CouponEdit() {
               className={styles.typeSelector}
             />
           </div>
-          {coupon.type === 'Percent' && (
+          {coupon.type === 'percent' && (
             <div className={styles.control}>
               <p>Code</p>
               <Input
                 placeholder="Code"
-                value={coupon.code}
-                updateValue={updateInputForm('code')}
+                value={coupon.percent?.code}
+                updateValue={updateInputForm('percent.code')}
                 className={styles.amountInput}
               />
             </div>
@@ -268,51 +227,53 @@ export function CouponEdit() {
             <div className={styles.control}>
               <p>Start Date</p>
               <Input
+                name='startDate'
                 type="date"
-                value={coupon.date.from}
-                updateValue={updateInputForm('date.from')}
+                value={getDateStr(coupon.startDate || '')}
+                updateValue={onCouponChange}
               />
             </div>
             <div className={styles.control}>
               <p>End Date</p>
               <Input
+                name='endDate'
                 type="date"
-                value={coupon.date.to}
-                updateValue={updateInputForm('date.to')}
+                value={getDateStr(coupon.endDate || '')}
+                updateValue={onCouponChange}
               />
             </div>
           </div>
-          {coupon.type === 'Free Shipping' && (
+          {coupon.type === 'freeshipping' && (
             <>
               <div className={styles.control}>
                 <p>Coupon Use</p>
                 <RadioGroup
-                  value={coupon.usage?.type}
-                  updateValue={updateStrForm('usage.type')}
+                  value={coupon.shipping?.mode || 'code'}
+                  updateValue={updateStrForm('shipping.mode')}
                 >
-                  <Radio label="Use Code" value="Use Code" />
-                  <Radio label="Amount Spent" value="Amount Spent" />
+                  <Radio label="Use Code" value="code" />
+                  <Radio label="Amount Spent" value="amount" />
                 </RadioGroup>
               </div>
               <div className={styles.control}>
                 <p>
-                  {coupon.usage?.type === 'Use Code'
+                  {(coupon.shipping?.mode || 'code') === 'code'
                     ? 'Code'
                     : 'Amount needed to spend'}
                 </p>
                 <Input
                   placeholder={
-                    coupon.usage?.type === 'Use Code' ? 'Code' : 'Amount Spent'
+                    (coupon.shipping?.mode || 'code') === 'code' ? 'Code' : 'Amount Spent'
                   }
                   value={
-                    coupon.usage?.type === 'Use Code'
-                      ? coupon.usage?.code
-                      : coupon.usage?.amount
+                    (coupon.shipping?.mode || 'code') === 'code'
+                      ? coupon.shipping?.code
+                      : coupon.shipping?.amount
                   }
                   updateValue={updateInputForm(
-                    coupon.usage?.type === 'Use Code'
-                      ? 'usage.code'
-                      : 'usage.amount',
+                    (coupon.shipping?.mode || 'code') === 'code'
+                      ? 'shipping.code'
+                      : 'shipping.amount',
                   )}
                   className={styles.amountInput}
                   adornment={{
@@ -323,13 +284,13 @@ export function CouponEdit() {
               </div>
             </>
           )}
-          {coupon.type === 'Percent' && (
+          {coupon.type === 'percent' && (
             <div className={styles.control}>
               <p>Discount %</p>
               <Input
                 placeholder="Discount"
-                value={coupon.discount}
-                updateValue={updateInputForm('discount')}
+                value={coupon.percent?.discount}
+                updateValue={updateInputForm('percent.discount')}
                 className={styles.amountInput}
                 adornment={{
                   position: 'left',
@@ -338,9 +299,9 @@ export function CouponEdit() {
               />
             </div>
           )}
-          {coupon.type === 'Tiered' && (
+          {coupon.type === 'tiered' && (
             <div className={styles.tiered}>
-              {coupon.conditions?.map((condition: any, index: number) => (
+              {(coupon.conditions || []).map((condition: any, index: number) => (
                 <div className={styles.horizon}>
                   <div className={styles.control}>
                     {index === 0 && <p>Discount</p>}
@@ -391,30 +352,29 @@ export function CouponEdit() {
           <div className={styles.control}>
             <p>Who's it for?</p>
             <RadioGroup
-              value={coupon.target?.type}
-              updateValue={updateStrForm('target.type')}
+              value={coupon.target.mode}
+              updateValue={updateStrForm('target.mode')}
             >
-              <Radio label="Global Coupon" value="Global Coupon" />
-              <Radio label="Product Specific" value="Product Specific" />
-              {coupon.type !== 'Tiered' && (
-                <Radio label="Customer Specific" value="Customer Specific" />
+              <Radio label="Global Coupon" value="global" />
+              <Radio label="Product Specific" value="product" />
+              {coupon.target.mode !== 'tiered' && (
+                <Radio label="Customer Specific" value="customer" />
               )}
             </RadioGroup>
           </div>
-          {coupon.target?.type !== 'Global Coupon' && (
+          {coupon.target.mode !== 'global' && (
             <div className={styles.control}>
               <p>
-                {coupon.target?.type === 'Customer Specific'
+                {coupon.target.mode === 'customer'
                   ? 'Customers'
                   : 'Products'}
               </p>
               <div className={styles.dataTable}>
                 <Input
-                  placeholder={`Search for a ${
-                    coupon.target?.type === 'Customer Specific'
-                      ? 'customer'
-                      : 'product'
-                  }`}
+                  placeholder={`Search for a ${coupon.target.mode === 'customer'
+                    ? 'customer'
+                    : 'product'
+                    }`}
                   size="large"
                   adornment={{
                     position: 'right',
@@ -423,16 +383,16 @@ export function CouponEdit() {
                   rounded="full"
                   className={styles.searchInput}
                 />
-                <RadioGroup value="">
+                <RadioGroup value={coupon.target.id} updateValue={updateInputForm('target.id')}>
                   <TableBody
                     columns={
-                      coupon.target?.type === 'Customer Specific'
+                      coupon.target.mode === 'customer'
                         ? customerColumns
                         : productColumns
                     }
                     rows={
-                      coupon.target?.type === 'Customer Specific'
-                        ? initialCustomers
+                      coupon.target.mode === 'customer'
+                        ? customers
                         : initialProducts
                     }
                   />
@@ -445,7 +405,7 @@ export function CouponEdit() {
       <div className={styles.buttonBar}>
         <button
           className={styles.cancelButton}
-          onClick={() => navigate(homePath)}
+          onClick={() => navigate(COUPON_PATH)}
         >
           Cancel
         </button>

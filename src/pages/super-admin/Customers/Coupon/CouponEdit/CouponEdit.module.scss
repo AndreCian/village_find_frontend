@@ -29,6 +29,10 @@
       @apply flex flex-wrap gap-x-4;
     }
 
+    .nameInput {
+      @apply max-w-[250px];
+    }
+
     .typeSelector {
       @apply w-fit;
     }

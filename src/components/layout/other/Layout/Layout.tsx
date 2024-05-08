@@ -18,7 +18,6 @@ export function Layout() {
 
   useEffect(() => {
     if (isLogin || !isVendor) {
-      console.log('Already logged in------------------');
       setIsLoading(false);
       return;
     }

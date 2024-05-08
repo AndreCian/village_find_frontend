@@ -1,5 +1,5 @@
 import { useState, useContext, useEffect } from 'react';
-import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { enqueueSnackbar } from 'notistack';
 import clsx from 'clsx';
 
