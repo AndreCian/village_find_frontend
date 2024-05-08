@@ -31,18 +31,17 @@ export function Products() {
 
   const { categories } = useContext(CategoryContext);
   const [products, setProducts] = useState([]);
+  const [type, setType] = useState('');
+  const [search, setSearch] = useState('');
   const [category, setCategory] = useState('');
   const [sortValue, setSortValue] = useState('');
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
 
   useEffect(() => {
-    const type = searchParams.get('type') || '';
-    const search = searchParams.get('search') || '';
-    const params: any = {
-      type: type === 'subscription' ? type : '',
-      search,
-    };
+    const params: any = {};
+    if (type) params.type = type;
+    if (search) params.search = search;
     if (category) params.category = category;
     if (sortValue !== 'none') params.sort = sortValue;
     if (minPrice) params.minPrice = Number(minPrice);
@@ -50,7 +49,16 @@ export function Products() {
     HttpService.get('/products/public', params).then(response => {
       setProducts(response);
     });
-  }, [searchParams, category, sortValue, minPrice, maxPrice]);
+  }, [search, type, category, sortValue, minPrice, maxPrice]);
+
+  useEffect(() => {
+    const type = searchParams.get('type') || '';
+    const search = searchParams.get('search') || '';
+    const category = searchParams.get('category') || '';
+    if (search) setSearch(search);
+    if (type) setType(type);
+    if (category) setCategory(category);
+  }, [searchParams]);
 
   return (
     <Container className={styles.root}>

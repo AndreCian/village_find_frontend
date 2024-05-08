@@ -1,4 +1,5 @@
 import { useContext, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { Input } from '@/components/forms';
 import { MagnifierIcon } from '@/components/icons';
@@ -9,10 +10,16 @@ import styles from './Categories.module.scss';
 import { useOnClickOutside } from '@/utils';
 
 export function Categories() {
+  const navigate = useNavigate();
   const { categories, filter, setFilter } = useContext(CategoryContext);
   const { setCategoryBar } = useContext(CategoryContext);
 
   const catRef = useRef<HTMLDivElement>(null);
+
+  const onCatClick = (category: string) => () => {
+    navigate(`/market?category=${category.toLowerCase()}`);
+    setCategoryBar(false);
+  }
 
   useOnClickOutside(catRef, () => setCategoryBar(false), 'mousedown');
 
@@ -34,7 +41,7 @@ export function Categories() {
       </div>
       <ul className={styles.categories}>
         {categories.map((category: any, index: number) => (
-          <li key={`category-${index}`}>
+          <li key={`category-${index}`} onClick={onCatClick(category.name)}>
             <span>{category.name}</span>
           </li>
         ))}

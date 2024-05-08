@@ -76,7 +76,7 @@ export function VendorSignup() {
   const [community, setCommunity] = useState<ICommunity | null>(null);
   const [subscription, setSubscription] = useState('');
   const [subscriptions, setSubscriptions] = useState<ISubscription[]>([]);
-  const [codes, setCodes] = useState<string[]>(Array(6).fill(''));
+  const [codes, setCodes] = useState<string[]>(Array(5).fill(''));
   const [codeIssue, setCodeIssue] = useState('');
   const fullCode = useMemo(() => {
     return codes.join('');
@@ -92,7 +92,7 @@ export function VendorSignup() {
     setMaxCollapseId(0);
     setCodeIssue('');
     setSubscription('');
-    setCodes(Array(6).fill(''));
+    setCodes(Array(5).fill(''));
     setCommunity(null);
   };
 
@@ -187,7 +187,7 @@ export function VendorSignup() {
       setStep(1);
 
       if (communtiyCode === 'none') {
-        setCodes(Array(6).fill(''));
+        setCodes(Array(5).fill(''));
         setCollapseId(1);
         setMaxCollapseId(1);
         setCommunity(null);
@@ -316,7 +316,7 @@ export function VendorSignup() {
                 <div className={styles.verifyBox}>
                   <div className={styles.inputBox}>
                     <div className={styles.form}>
-                      {[...Array(6)].map((item: number, index: number) => (
+                      {[...Array(5)].map((item: number, index: number) => (
                         <Input
                           key={index}
                           className={styles.input}

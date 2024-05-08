@@ -78,13 +78,13 @@ export function Signup() {
         />
         <Input
           name="code"
-          placeholder="Six Letter Code"
+          placeholder="Five Letter Code"
           className={styles.input}
           value={account.code}
           updateValue={onAccountChange}
         />
         <p>
-          A Six letter code that the vendors can use to signup with your
+          A Five letter code that the vendors can use to signup with your
           community.
         </p>
         <Input

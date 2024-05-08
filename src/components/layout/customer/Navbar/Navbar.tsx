@@ -45,15 +45,15 @@ export function Navbar() {
   ];
 
   const onCatClick = () => {
-    setCategoryBar(true);
+    setCategoryBar(!isCategoryBar);
   };
 
   return (
     <div className={styles.root}>
       <Container className={styles.container}>
         <ul className={styles.navbar}>
-          <li onClick={onCatClick}>
-            <div>
+          <li>
+            <div onClick={onCatClick}>
               Categories {isCategoryBar ? <FaChevronUp /> : <FaChevronDown />}
             </div>
           </li>

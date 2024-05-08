@@ -7,6 +7,7 @@ import { MagnifierIcon } from '@/components/icons';
 import { SERVER_URL } from '@/config/global';
 import { SearchbarContext } from '@/providers';
 
+import HeroVideo from '/assets/customer/videos/hero.mp4';
 import styles from './DashPage.module.scss';
 
 export interface IDashPageProps {
@@ -42,7 +43,7 @@ export function DashPage({ title, subtitle, images }: IDashPageProps) {
   return (
     <div className={styles.root}>
       <div className={styles.imageWrapper}>
-        <img src={`${SERVER_URL}/${images[0]}`} className={styles.dashImage} />
+        <video src={HeroVideo} controls autoPlay muted loop />
         <div className={styles.grayLayer} />
       </div>
       <Container className={styles.searchBar}>
