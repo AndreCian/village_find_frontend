@@ -8,22 +8,23 @@ import {
   FaChevronUp,
 } from 'react-icons/fa6';
 import { AiOutlineClose } from 'react-icons/ai';
+import { MdLogout } from "react-icons/md";
 import clsx from 'clsx';
 
 import { Button, Input } from '@/components/forms';
-import { MagnifierIcon, CartIcon, UserIcon } from '@/components/icons';
+import { MagnifierIcon, CartIcon, UserIcon, LogoutIcon } from '@/components/icons';
 import { Logo } from '@/components/layout/customer';
 
 import { AuthContext, SearchbarContext, ZipcodeContext } from '@/providers';
 
 import { useWindowWidth } from '@/utils/hook/useWindowWidth';
 
-import styles from './Header.module.scss';
 import { ChangeInputEvent } from '@/interfaces';
 import { HttpService } from '@/services';
 import { LocationConfirmDialog } from '@/components/customer';
 import { getLocationFromZipcode } from '@/utils/third-api/zipcode';
-import { capitalizeFirstLetter } from '@/utils';
+import { capitalizeFirstLetter, setupToken } from '@/utils';
+import styles from './Header.module.scss';
 
 export interface IHeaderProps {
   switchToScreen: (isScreen: boolean) => void;
@@ -34,14 +35,14 @@ const screenBlackList = ['/login/vendor'];
 
 export function Header({
   className = '',
-  switchToScreen = () => {},
+  switchToScreen = () => { },
 }: IHeaderProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const pathname = location.pathname;
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const { isLogin, account } = useContext(AuthContext);
+  const { isLogin, setIsLogin, account, setAccount } = useContext(AuthContext);
   const { isSearchbar } = useContext(SearchbarContext);
   const { zipcode, cityName, changeZipcode, changeCityName } =
     useContext(ZipcodeContext);
@@ -86,6 +87,12 @@ export function Header({
     navigate('/login/customer');
   };
 
+  const onLogoutClick = () => {
+    setupToken(null, 'customer');
+    setIsLogin(false);
+    setAccount({ role: 'customer', profile: null });
+  }
+
   const onSignupClick = () => {
     setCollapseAnchor(false);
     switchToScreen(false);
@@ -103,9 +110,8 @@ export function Header({
       const result = await getLocationFromZipcode(zipcodeInput);
       if (result) {
         const { _normalized_city, county, state_code } = result;
-        const normalizedCity = `${
-          _normalized_city || county
-        }, ${capitalizeFirstLetter(state_code)}`;
+        const normalizedCity = `${_normalized_city || county
+          }, ${capitalizeFirstLetter(state_code)}`;
         changeZipcode(zipcodeInput);
         changeCityName(normalizedCity);
         localStorage.setItem('zipcode', zipcodeInput);
@@ -216,6 +222,9 @@ export function Header({
                 <span>{cartItemCount}</span>
               </div>
             </div>
+            {isLogin && <div onClick={onLogoutClick} className={styles.logout}>
+              <MdLogout />
+            </div>}
           </>
         ) : (
           <div className={styles.buttonBar}>
@@ -310,9 +319,9 @@ export function Header({
             className={styles.shopCollapse}
             style={
               shopLocAnchor !== -1 &&
-              ['sm', 'md', 'lg', 'xl', '2xl', '3xl'].includes(
-                breakpoint as string,
-              )
+                ['sm', 'md', 'lg', 'xl', '2xl', '3xl'].includes(
+                  breakpoint as string,
+                )
                 ? { left: `${shopLocAnchor}px` }
                 : {}
             }

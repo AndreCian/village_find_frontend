@@ -66,6 +66,13 @@
       }
     }
 
+    .logout {
+      @apply cursor-pointer;
+      > svg {
+        @apply text-[32px];
+      }
+    }
+
     .collapseIcon {
       @apply flex aspect-square h-full cursor-pointer items-center justify-center bg-success sm:hidden;
 

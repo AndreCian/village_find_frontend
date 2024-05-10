@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { enqueueSnackbar } from 'notistack';
 import clsx from 'clsx';
 
-import { Card, Input, Select, TableBody } from '@/components';
+import { Card, Input, TableBody } from '@/components';
 import { HttpService } from '@/services';
 import { ChangeInputEvent, ITableColumn } from '@/interfaces';
 import { formatDate, getBubbleObject, useOnClickOutside } from '@/utils';
