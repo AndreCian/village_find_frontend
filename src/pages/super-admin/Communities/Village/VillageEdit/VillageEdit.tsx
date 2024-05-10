@@ -1,19 +1,29 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { enqueueSnackbar } from 'notistack';
 import clsx from 'clsx';
 
-import { Card, Input, TableBody } from '@/components';
-
+import { Card, Input, Select, TableBody } from '@/components';
 import { HttpService } from '@/services';
-
-import { ITableColumn } from '@/interfaces';
-
-import { formatDate, getBubbleObject } from '@/utils';
+import { ChangeInputEvent, ITableColumn } from '@/interfaces';
+import { formatDate, getBubbleObject, useOnClickOutside } from '@/utils';
 
 import styles from './VillageEdit.module.scss';
 
 type PayStatus = 'Paid' | 'Unpaid';
+
+export interface IVendor {
+  _id: string;
+  owner?: {
+    name: string;
+    email: string;
+    phone: string;
+  };
+  business?: {
+    name: string;
+  };
+  isLeader?: boolean;
+}
 
 export interface ICommunity {
   name: string;
@@ -24,6 +34,7 @@ export interface ICommunity {
     firstName: string;
     lastName: string;
   };
+  vendors: IVendor[]
 }
 
 export interface ICommission {
@@ -46,11 +57,7 @@ const initialCommunity: ICommunity = {
     firstName: '',
     lastName: '',
   },
-};
-
-const initialStatis: IStatis = {
-  count: 234,
-  total: 40,
+  vendors: []
 };
 
 const commissionTableColumns: ITableColumn[] = [
@@ -83,27 +90,26 @@ const commissionTableColumns: ITableColumn[] = [
   },
 ];
 
-const commissionTableRows: ICommission[] = [
-  {
-    date: new Date('04/22/2023'),
-    total: 20,
-    status: 'Paid',
-  },
-  {
-    date: new Date('04/22/2023'),
-    total: 20,
-    status: 'Unpaid',
-  },
-];
+const VILLAGE_PATH = '/admin/community/village';
 
-const backToHomePath = '/admin/community/village';
+const isVendorSearchable = (search: string, vendor: IVendor) => {
+  return vendor.business?.name.includes(search)
+    || vendor.owner?.name.includes(search)
+    || vendor.owner?.email.includes(search)
+    || vendor.owner?.phone.includes(search);
+}
 
 export function VillageEdit() {
   const navigate = useNavigate();
   const { id: communityId } = useParams();
 
   const [community, setCommunity] = useState<ICommunity>(initialCommunity);
-  const [statis, setStatis] = useState<IStatis>(initialStatis);
+  const [vendors, setVendors] = useState<IVendor[]>([]);
+  const [commissions, setCommissions] = useState<ICommission[]>([]);
+  const [vendorFilter, setVendorFilter] = useState('');
+  const [isAssociation, setIsAssociation] = useState(false);
+
+  const associateRef = useRef<HTMLUListElement>(null);
 
   const onCommunityChange = (e: any) => {
     setCommunity(getBubbleObject(e.target.name, community, e.target.value));
@@ -117,39 +123,67 @@ export function VillageEdit() {
           enqueueSnackbar(`${community.name} community added successfully!`, {
             variant: 'success',
           });
-          navigate(backToHomePath);
+          navigate(VILLAGE_PATH);
         }
       });
     } else {
-      HttpService.put(`/communities/${communityId}`, community).then(
+      const reqJson: any = { ...community };
+      const leaderVendor = vendors.find(item => item.isLeader);
+      if (leaderVendor) {
+        reqJson.leader = leaderVendor._id;
+        const vendorName = leaderVendor.owner?.name.split(' ') || [];
+        reqJson.organizer = { firstName: vendorName[0] || '', lastName: vendorName[1] || '' };
+        reqJson.email = leaderVendor.owner?.email || '';
+        reqJson.phone = leaderVendor.owner?.phone || '';
+      }
+      HttpService.put(`/communities/${communityId}`, reqJson).then(
         response => {
-          if (response) {
+          const { status } = response;
+          if (status === 200) {
             enqueueSnackbar(
               `${community.name} community updated successfully!`,
               {
                 variant: 'success',
               },
             );
-            navigate(backToHomePath);
+            navigate(VILLAGE_PATH);
           }
         },
       );
     }
   };
 
+  const onVendorToggle = (id: string) => () => {
+    setVendors(vendors.map(item => item._id === id ? ({ ...item, isLeader: !item.isLeader }) : ({ ...item, isLeader: false })));
+  }
+
   useEffect(() => {
     if (!!communityId === false || communityId === 'create') return;
     HttpService.get(`/communities/${communityId}`).then(response => {
-      const result = response || initialCommunity;
-      setCommunity(result);
+      const { status, community } = response;
+      if (status === 200) {
+        setCommunity({ ...community, password: '' });
+      } else {
+        enqueueSnackbar('Community not found.', { variant: 'warning' });
+      }
     });
+    HttpService.get('/commissions', { community: communityId }).then(response => {
+      const { commissions, total } = response;
+    })
   }, [communityId]);
+
+  useEffect(() => {
+    const vendors = community.vendors || [];
+    setVendors(vendors.filter(item => isVendorSearchable(vendorFilter, item)))
+  }, [community.vendors, vendorFilter]);
+
+  useOnClickOutside(associateRef, () => setIsAssociation(false), 'mouseup');
 
   return (
     <div className={styles.root}>
       <button
         className={styles.backButton}
-        onClick={() => navigate(backToHomePath)}
+        onClick={() => navigate(VILLAGE_PATH)}
       >
         Back
       </button>
@@ -157,7 +191,27 @@ export function VillageEdit() {
         <div className={styles.container}>
           <div className={styles.control}>
             <p className={styles.label}>Associated with an existing vendor</p>
-            <Input placeholder="Search Vendor Name, Email, Phone" />
+            <Input
+              placeholder="Search Vendor Name, Email, Phone"
+              value={vendorFilter}
+              updateValue={(e: ChangeInputEvent) => setVendorFilter(e.target.value)}
+              onClick={() => setIsAssociation(true)}
+            />
+            {isAssociation && <ul ref={associateRef}>
+              {
+                vendors.map((item, index) =>
+                  <li
+                    key={index}
+                    onClick={onVendorToggle(item._id)}
+                  >
+                    <p>{item.owner?.name} at <span>{item.business?.name}</span></p>
+                    <span className={clsx({ [styles.leader]: item.isLeader })}>
+                      {item.isLeader ? 'Community Leader' : 'Vendor'}
+                    </span>
+                  </li>
+                )
+              }
+            </ul>}
           </div>
           <div className={styles.horizon}>
             <div className={styles.control}>
@@ -225,7 +279,7 @@ export function VillageEdit() {
         <div className={styles.buttonBar}>
           <button
             className={styles.cancelButton}
-            onClick={() => navigate(backToHomePath)}
+            onClick={() => navigate(VILLAGE_PATH)}
           >
             Cancel
           </button>
@@ -233,27 +287,29 @@ export function VillageEdit() {
             {communityId === 'create' ? 'Add' : 'Update'}
           </button>
         </div>
-      </Card>
+      </Card >
       {communityId !== 'create' && (
         <div className={styles.statisSection}>
           <Card className={styles.subStatis}>
             <p>Vendor Count</p>
-            <p>{statis.count}</p>
+            <p>{(community.vendors || []).length}</p>
           </Card>
           <Card className={styles.subStatis}>
             <p>Total Commission</p>
-            <p>${statis.total.toFixed(2)}</p>
+            <p>$0</p>
           </Card>
         </div>
       )}
-      {communityId !== 'create' && (
-        <Card title="Commission">
-          <TableBody
-            columns={commissionTableColumns}
-            rows={commissionTableRows}
-          />
-        </Card>
-      )}
-    </div>
+      {
+        communityId !== 'create' && (
+          <Card title="Commission">
+            <TableBody
+              columns={commissionTableColumns}
+              rows={commissions}
+            />
+          </Card>
+        )
+      }
+    </div >
   );
 }

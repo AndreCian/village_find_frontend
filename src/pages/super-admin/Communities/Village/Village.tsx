@@ -1,5 +1,6 @@
 import { ChangeEvent, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { enqueueSnackbar } from 'notistack';
 import clsx from 'clsx';
 
 import { Card, TableBody, TableToolbar } from '@/components';
@@ -11,10 +12,10 @@ import { formatDate } from '@/utils';
 import styles from './Village.module.scss';
 
 const sortOpts = [
-  'Alphabetical Order',
-  'Recently Added',
-  'Highest Revenue',
-  'Lowest Revenue',
+  { name: 'Alphabetical Order', value: 'alphabeta' },
+  { name: 'Recently Added', value: 'recent' },
+  { name: 'Highest Revenue', value: 'highest' },
+  { name: 'Lowest Revenue', value: 'lowest' },
 ];
 const statusOpts = ['Active', 'Blocked', 'Paused', 'Inactive'];
 
@@ -23,18 +24,17 @@ const initialRange = {
   to: '',
 };
 
-type StatusType = 'Active' | 'Blocked' | 'Paused' | 'Inactive';
+const statusValues = statusOpts.map(item => item.toLowerCase());
+type Status = typeof statusValues[number];
 
 export interface ICommunityRow {
+  _id?: string;
   name: string;
   organizer: string;
   date: Date;
   total: number;
-  status: StatusType;
+  status: Status;
 }
-
-const initialTableData: ICommunityRow[] = [];
-
 const COMMUNITY_PATH = '/admin/community/village';
 
 export function VillageCommunity() {
@@ -43,7 +43,17 @@ export function VillageCommunity() {
   const [sort, setSort] = useState('');
   const [category, setCategory] = useState('');
   const [range, setRange] = useState<IRange>(initialRange);
-  const [tableData, setTableData] = useState(initialTableData);
+  const [communities, setCommunities] = useState<ICommunityRow[]>([]);
+
+  const onStatusChange = (id: string) => (value: string) => {
+    HttpService.put(`/communities/${id}`, { status: value }).then(response => {
+      const { status } = response;
+      if (status === 200) {
+        enqueueSnackbar('Status changed.', { variant: 'success' });
+        setCommunities(communities.map(item => item._id === id ? ({ ...item, status: value }) : item))
+      }
+    })
+  }
 
   const columns: ITableColumn[] = [
     {
@@ -57,8 +67,7 @@ export function VillageCommunity() {
       width: 150,
       cell: (row: any) => (
         <span>
-          {row.organizer &&
-            `${row.organizer.firstName} ${row.organizer.lastName}`}
+          {row.organizer && `${row.organizer.firstName} ${row.organizer.lastName}`}
         </span>
       ),
     },
@@ -70,6 +79,7 @@ export function VillageCommunity() {
         <Input
           type="text"
           rounded="full"
+          bgcolor='secondary'
           value={formatDate(new Date(row.signup_at))}
         />
       ),
@@ -78,7 +88,7 @@ export function VillageCommunity() {
       title: 'Total Vendors',
       name: 'total',
       width: 150,
-      cell: (row: any) => <span>{row.total || 0}</span>,
+      cell: (row: any) => <span>{(row.vendors || []).length}</span>,
     },
     {
       title: 'Status',
@@ -88,6 +98,7 @@ export function VillageCommunity() {
         <Select
           rounded="full"
           value={row.status}
+          updateValue={onStatusChange(row._id)}
           options={statusOpts.map(item => ({ name: item, value: item.toLowerCase() }))}
           className={styles.statusSelector}
         />
@@ -110,16 +121,16 @@ export function VillageCommunity() {
     },
   ];
 
-  const loadCommunities = () => {
-    HttpService.get('/communities', {
-      name: filter,
-      order: sort,
-      status: category,
-      from: range.from,
-      to: range.to,
-    }).then(response => {
-      const result = response || initialTableData;
-      setTableData(result);
+  const loadCommunities = ({ filter = '', sort = '', category = '', range = { from: '', to: '' } }: any = {}) => {
+    const params: any = {};
+    if (filter) params.name = filter;
+    if (sort) params.sort = sort;
+    if (category) params.status = category;
+    if (range.from) params.from = range.from;
+    if (range.to) params.to = range.to;
+    HttpService.get('/communities/admin', params).then(response => {
+      const result = response || [];
+      setCommunities(result);
     });
   };
 
@@ -133,7 +144,7 @@ export function VillageCommunity() {
     };
 
   const onSubmitClick = () => {
-    loadCommunities();
+    loadCommunities({ filter, sort, category, range });
   };
 
   const onResetClick = () => {
@@ -141,6 +152,7 @@ export function VillageCommunity() {
     setSort('');
     setCategory('');
     setRange(initialRange);
+    loadCommunities();
   };
 
   useEffect(() => {
@@ -150,7 +162,8 @@ export function VillageCommunity() {
   return (
     <Card title="Village Communities" className={styles.root}>
       <TableToolbar
-        searchTitle="Search Shop Owner or Vendor Name"
+        searchTitle="Search Village Name"
+        searchPlaceholder='Search Customer or Vendor Name'
         search={filter}
         updateSearch={onFilterChange}
         rangable={true}
@@ -202,7 +215,7 @@ export function VillageCommunity() {
       />
       <TableBody
         columns={columns}
-        rows={tableData}
+        rows={communities}
         className={styles.tableBody}
       />
     </Card>

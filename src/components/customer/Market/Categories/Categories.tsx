@@ -5,9 +5,9 @@ import { Input } from '@/components/forms';
 import { MagnifierIcon } from '@/components/icons';
 import { CategoryContext } from '@/providers';
 import { ChangeInputEvent } from '@/interfaces';
+import { useOnClickOutside } from '@/utils';
 
 import styles from './Categories.module.scss';
-import { useOnClickOutside } from '@/utils';
 
 export function Categories() {
   const navigate = useNavigate();

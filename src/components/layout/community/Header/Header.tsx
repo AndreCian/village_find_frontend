@@ -3,12 +3,13 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import clsx from 'clsx';
 
 import { Logo } from '..';
-
 import { AuthContext } from '@/providers';
+import { setupToken } from '@/utils';
 
 import styles from './Header.module.scss';
 
-const homePath = '/village-community';
+const COMMUNITY_AUTH_HOME_PATH = '/village-community';
+const LOGIN_PATH = '/auth/login';
 
 export function Header() {
   const { isLogin, setIsLogin } = useContext(AuthContext);
@@ -17,11 +18,12 @@ export function Header() {
   const pathname = location.pathname;
 
   const onBtnClick = () => {
-    if (pathname === homePath) {
+    if (pathname === COMMUNITY_AUTH_HOME_PATH) {
       navigate('dashboard');
     } else {
       setIsLogin(false);
-      navigate(homePath);
+      setupToken(null, 'community');
+      navigate(COMMUNITY_AUTH_HOME_PATH);
     }
   };
 
@@ -32,12 +34,12 @@ export function Header() {
       <Logo />
       {isLogin ? (
         <button className={styles.button} onClick={onBtnClick}>
-          {pathname === homePath ? 'Dashboard' : 'Logout'}
+          {pathname === COMMUNITY_AUTH_HOME_PATH ? 'Dashboard' : 'Logout'}
         </button>
       ) : (
         <button
           className={styles.button}
-          onClick={() => navigate('/village-community/auth/login')}
+          onClick={() => navigate(`${COMMUNITY_AUTH_HOME_PATH}${LOGIN_PATH}`)}
         >
           Login
         </button>

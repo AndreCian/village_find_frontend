@@ -27,7 +27,7 @@ export interface ISelectProps {
 
 export function Select({
   value = '',
-  updateValue = () => {},
+  updateValue = () => { },
   placeholder = 'Select',
   options = [],
   rounded = 'small',
@@ -58,8 +58,8 @@ export function Select({
     return !currentOption
       ? placeholder
       : typeof currentOption === 'object'
-      ? currentOption.name
-      : currentOption;
+        ? currentOption.name
+        : currentOption;
   }, [value]);
 
   const selectRef = useRef<HTMLDivElement>(null);
@@ -85,16 +85,16 @@ export function Select({
     bgcolor === 'primary'
       ? styles.bgColorPrimary
       : bgcolor === 'secondary'
-      ? styles.bgColorSecondary
-      : bgcolor === 'blue'
-      ? styles.bgColorBlue
-      : bgcolor === 'red'
-      ? styles.bgColorRed
-      : bgcolor === 'dark'
-      ? styles.bgColorDark
-      : colorable === true
-      ? colorClasses()
-      : '',
+        ? styles.bgColorSecondary
+        : bgcolor === 'blue'
+          ? styles.bgColorBlue
+          : bgcolor === 'red'
+            ? styles.bgColorRed
+            : bgcolor === 'dark'
+              ? styles.bgColorDark
+              : colorable === true
+                ? colorClasses()
+                : '',
     className,
   );
 

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { enqueueSnackbar } from 'notistack';
 
 import { Input } from '@/components/forms';
@@ -26,16 +27,23 @@ const initialAccount: IAccount = {
   confirm: '',
 };
 
+const LOGIN_PATH = '/village-community/auth/login';
+
 export function Signup() {
+  const navigate = useNavigate();
+
   const [account, setAccount] = useState<IAccount>(initialAccount);
 
   const onRegister = () => {
     if (account.password === account.confirm) {
       delete account.confirm;
       HttpService.post('/communities/register', account).then(response => {
-        if (response) {
+        const { status } = response;
+        if (status === 200) {
           enqueueSnackbar('Signup successfully!', { variant: 'success' });
-          setAccount(initialAccount);
+          navigate(LOGIN_PATH);
+        } else if (status === 400) {
+          enqueueSnackbar('Email or phone number is already used.', { variant: 'warning' });
         }
       });
     }

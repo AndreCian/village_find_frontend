@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import clsx from 'clsx';
 
 import { Input, Select } from '@/components/forms';
@@ -17,6 +17,7 @@ import styles from './TableToolbar.module.scss';
 export interface ITableToolbarProps {
   searchable?: boolean;
   searchTitle?: string;
+  searchPlaceholder?: string;
   searchTitleHidden?: boolean;
   search?: string;
   updateSearch?: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -27,7 +28,7 @@ export interface ITableToolbarProps {
   ) => (e: React.ChangeEvent<HTMLInputElement>) => void;
   downloadable?: boolean;
   sortable?: boolean;
-  sortOpts?: string[];
+  sortOpts?: { name: string; value: string }[] | string[];
   sort?: string;
   updateSort?: (e: string) => void;
   selectable?: boolean;
@@ -39,27 +40,28 @@ export interface ITableToolbarProps {
   className?: string;
 }
 
-export interface IOrder {}
+export interface IOrder { }
 
 export function TableToolbar({
   searchable = true,
   searchTitle = 'Search',
+  searchPlaceholder = '',
   searchTitleHidden = false,
   search = '',
-  updateSearch = () => {},
+  updateSearch = () => { },
   rangable = false,
   range = { from: '', to: '' },
-  updateRange = () => () => {},
+  updateRange = () => () => { },
   downloadable = false,
   sortable = false,
   sortOpts = [],
   sort = '',
-  updateSort = () => {},
+  updateSort = () => { },
   selectable = true,
   selectTitle = 'Select',
   selectOpts = [],
   category = '',
-  updateCategory = () => {},
+  updateCategory = () => { },
   actions = null,
   className = '',
 }: ITableToolbarProps) {
@@ -78,7 +80,7 @@ export function TableToolbar({
           <Input
             value={search}
             updateValue={updateSearch}
-            placeholder={searchTitle}
+            placeholder={searchPlaceholder || searchTitle}
             adornment={{
               position: 'right',
               content: <MagnifierIcon />,
