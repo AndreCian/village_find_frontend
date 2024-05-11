@@ -174,6 +174,12 @@ const Transactions = lazy(() =>
   })),
 );
 
+const Logout = lazy(() =>
+  import('@/pages/super-admin').then(module => ({
+    default: module.Logout
+  }))
+)
+
 export const superAdminRoutes = [
   {
     index: true,
@@ -487,7 +493,7 @@ export const superAdminRoutes = [
   {
     title: 'Logout',
     path: 'logout',
-    element: <></>,
+    element: <Logout />,
     icon: <LogoutIcon />,
   },
 ];

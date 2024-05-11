@@ -28,8 +28,8 @@ export function TableBody({
   selectable = false,
   className = '',
   expandPanel,
-  setRows = () => {},
-  onRowMove = () => {},
+  setRows = () => { },
+  onRowMove = () => { },
 }: ITableBodyProps) {
   const moveItem = (dragIndex: number, hoverIndex: number): void => {
     if (!selectable) return;

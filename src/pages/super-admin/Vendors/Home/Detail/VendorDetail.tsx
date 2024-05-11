@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import clsx from 'clsx';
 
-import { Card, TableBody } from '@/components/common';
+import { Card, Rater, TableBody } from '@/components/common';
 import { Input, Select } from '@/components/forms';
 import { ClipboardIcon, StarIcon } from '@/components/icons';
 
@@ -13,42 +13,48 @@ import { formatDate } from '@/utils';
 import { ITableColumn } from '@/interfaces';
 
 import styles from './VendorDetail.module.scss';
+import { SERVER_URL } from '@/config/global';
 
-type ScrType = 'Seedling';
-type StatusType = 'Active' | 'Blocked' | 'Paused' | 'Inactive';
-type PayStatusType = 'Paid' | 'Unpaid';
-
-export interface IVendorDetail {
-  id: number;
-  shopName: string;
-  date: string;
-  scrType: ScrType;
-  monFee: number;
-  shopPos: string;
-  status: StatusType;
-}
-
-export interface IContactDetail {
-  owner: string;
-  email: string;
-  phone: string;
-}
-
-export interface IExtraInfo {
-  rate: number;
-  commission: number;
-  community: {
-    _id: string;
+interface IVendor {
+  vendorId: number;
+  business?: {
     name: string;
-    images: string[];
+    owner: string;
+    email: string;
+    phone: string;
+    address: string;
   };
+  community?: {
+    name: string;
+    images: {
+      logoUrl: string;
+    }
+  };
+  subscription?: {
+    name: string;
+    monthInvest: string;
+    expectedFee: number;
+  };
+  communityStatus?: string;
+  commission: string;
+  monthlyFee: string;
+  signupAt: string;
+  status: string;
+}
+
+const initialVendor: IVendor = {
+  vendorId: 0,
+  commission: '',
+  monthlyFee: '',
+  signupAt: '',
+  status: 'inactive'
 }
 
 export interface IOrder {
   date: string;
   total: number;
   commission: number;
-  status: PayStatusType;
+  status: string;
 }
 
 const statusOpts: string[] = ['Active', 'Blocked', 'Paused', 'Inactive'];
@@ -95,9 +101,7 @@ export function VendorDetail() {
   const navigate = useNavigate();
   const { id: vendorId } = useParams();
 
-  const [vendor, setVendor] = useState<IVendorDetail | null>(null);
-  const [contact, setContact] = useState<IContactDetail | null>(null);
-  const [extraInfo, setExtraInfo] = useState<IExtraInfo | null>(null);
+  const [vendor, setVendor] = useState<IVendor>(initialVendor);
   const [orders, setOrders] = useState<IOrder[]>([]);
 
   const onBackToHome = () => {
@@ -106,43 +110,13 @@ export function VendorDetail() {
 
   useEffect(() => {
     if (!vendorId) return;
-    HttpService.get(`/user/vendor?vendorId=${vendorId}`).then(response => {
+    HttpService.get(`/user/vendor/admin/${vendorId}`).then(response => {
       const { status, vendor } = response;
       if (status === 200) {
-        const {
-          shopName,
-          vendorId: id,
-          owner,
-          status,
-          commission,
-          community,
-          signupAt,
-          subscription,
-          monthlyFee,
-          address,
-        } = vendor;
-        setVendor({
-          id,
-          shopName,
-          date: signupAt,
-          scrType: (subscription && subscription.name) ?? '',
-          monFee: monthlyFee ?? 0,
-          shopPos: address ?? '',
-          status,
-        });
-        setContact({
-          owner: (owner && owner.name) ?? '',
-          email: (owner && owner.email) ?? '',
-          phone: (owner && owner.phone) ?? '',
-        });
-        setExtraInfo({
-          rate: 0,
-          commission: commission ?? 0,
-          community: community,
-        });
+        setVendor(vendor);
       }
-    });
-  }, []);
+    })
+  }, [vendorId]);
 
   return (
     <div className={styles.root}>
@@ -150,23 +124,21 @@ export function VendorDetail() {
         Back
       </button>
       <div className={styles.topSection}>
-        <Card title={vendor && vendor.shopName}>
+        <Card title={vendor.business?.name}>
           <div className={styles.rateBar}>
-            {[0, 1, 2, 3, 4].map((rate: number) => (
-              <StarIcon active={rate < ((extraInfo && extraInfo.rate) ?? 0)} />
-            ))}
+            <Rater rating={3.5} />
           </div>
           <p>
-            <span>Vendor Id:</span> {vendor && vendor.id}
+            <span>Vendor Id:</span> {vendor.vendorId}
           </p>
           <p>
-            <span>Shop Owner</span> - {contact && contact.owner}
+            <span>Shop Owner</span> - {vendor.business?.owner}
           </p>
         </Card>
         <Card title="Status">
           <Select
             placeholder="Status"
-            value={(vendor && vendor.status) ?? ''}
+            value={vendor.status}
             options={statusOpts}
             rounded="full"
             className={styles.statusSelector}
@@ -175,8 +147,7 @@ export function VendorDetail() {
         <Card title="Commission">
           <Input
             type="number"
-            placeholder="Commission"
-            value={(extraInfo && extraInfo.commission) ?? ''}
+            value={vendor.commission || vendor.subscription?.expectedFee}
             adornment={{
               position: 'left',
               content: '%',
@@ -186,12 +157,10 @@ export function VendorDetail() {
           />
         </Card>
         <Card title="Village Community">
-          <div className={styles.communities}>
-            <img />
-            <span>
-              {extraInfo && extraInfo.community && extraInfo.community.name}
-            </span>
-          </div>
+          {vendor.community && <div className={styles.communities}>
+            <img src={`${SERVER_URL}/${vendor.community.images?.logoUrl}`} />
+            <span>{vendor.community.name}</span>
+          </div>}
         </Card>
       </div>
       <Card className={styles.vendorSection}>
@@ -199,11 +168,11 @@ export function VendorDetail() {
           <h2>Vendor Information</h2>
           <div className={styles.horizon}>
             <p className={styles.label}>Signup Date</p>
-            <p>{formatDate(new Date((vendor && vendor.date) ?? ''))}</p>
+            <p>{formatDate(new Date(vendor.signupAt))}</p>
           </div>
           <div className={styles.horizon}>
             <p className={styles.label}>Subscription Type</p>
-            <p>{vendor && vendor.scrType}</p>
+            <p>{vendor.subscription?.name}</p>
           </div>
           <div className={styles.horizon}>
             <p className={styles.label}>Monthly Fee</p>
@@ -211,7 +180,7 @@ export function VendorDetail() {
               type="number"
               rounded="full"
               adornment={{ position: 'left', content: '$' }}
-              value={(vendor && vendor.monFee.toFixed(2)) ?? 0}
+              value={vendor.monthlyFee || vendor.subscription?.monthInvest}
               className={styles.feeInput}
             />
           </div>
@@ -221,7 +190,7 @@ export function VendorDetail() {
               rounded="full"
               bgcolor="secondary"
               adornment={{ position: 'right', content: <ClipboardIcon /> }}
-              value={(vendor && vendor.shopPos) ?? ''}
+              value={vendor.business?.address}
               className={styles.locationInput}
             />
           </div>
@@ -230,15 +199,15 @@ export function VendorDetail() {
           <h2>Contact Information</h2>
           <div className={styles.horizon}>
             <p className={styles.label}>Shop Owner Name</p>
-            <p>{contact && contact.owner}</p>
+            <p>{vendor.business?.name}</p>
           </div>
           <div className={styles.horizon}>
             <p className={styles.label}>Email</p>
-            <p>{contact && contact.email}</p>
+            <p>{vendor.business?.email}</p>
           </div>
           <div className={styles.horizon}>
             <p className={styles.label}>Phone Number</p>
-            <p>{contact && contact.phone}</p>
+            <p>{vendor.business?.phone}</p>
           </div>
         </div>
       </Card>

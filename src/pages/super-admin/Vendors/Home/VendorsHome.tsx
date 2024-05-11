@@ -4,20 +4,19 @@ import clsx from 'clsx';
 
 import { Card, TableBody, TableToolbar } from '@/components';
 import { Select } from '@/components/forms';
-
 import { HttpService } from '@/services';
-
 import { IRange, ITableColumn } from '@/interfaces';
-
 import { formatNumber } from '@/utils';
+import { useAppSelector } from '@/redux/store';
 
 import styles from './VendorsHome.module.scss';
+import { enqueueSnackbar } from 'notistack';
 
 const sortOpts = [
-  'Alphabetical Order',
-  'Recently Added',
-  'Highest Revenue',
-  'Lowest Revenue',
+  { name: 'Alphabetical Order', value: 'alphabeta' },
+  { name: 'Recently Added', value: 'recent' },
+  { name: 'Highest Revenue', value: 'highest' },
+  { name: 'Lowest Revenue', value: 'lowest' },
 ];
 
 const statusOpts = ['Active', 'Blocked', 'Paused', 'Inactive'];
@@ -27,48 +26,56 @@ const initialRange = {
   to: '',
 };
 
-type StatusType = 'Active' | 'Blocked' | 'Paused' | 'Inactive';
+const statusValues = statusOpts.map(item => item.toLowerCase());
+type Status = typeof statusValues[number];
 
-export interface IVendor {
-  shopName: string;
-  owner?: any;
-  address?: string;
-  subscription: any;
+interface IVendor {
+  _id: string;
+  business?: {
+    name: string;
+    owner: string;
+    address: string;
+  };
   revenue?: number;
-  status: string;
+  status: Status;
 }
 
-const formatMonthlyFee = (price: number) => {
-  return price === 0 ? 'Free' : `$${price.toFixed(2)}`;
+const formatMonthlyFee = (price: any) => {
+  return !price ? 'Free' : `$${price.toFixed(2)}`;
 };
 
 export function VendorsHome() {
   const navigate = useNavigate();
+
+  const subscriptions = useAppSelector(state => state.subscription.subscriptions);
   const [filter, setFilter] = useState('');
   const [sort, setSort] = useState('');
   const [category, setCategory] = useState('');
   const [range, setRange] = useState<IRange>(initialRange);
-  const [vendors, setVendors] = useState([]);
+  const [vendors, setVendors] = useState<IVendor[]>([]);
 
   const columns: ITableColumn[] = [
     {
       title: 'Vendor Name',
       name: 'shopName',
-      width: 150,
+      width: 180,
+      cell: (row: any) => (
+        <p>{row.business?.name}</p>
+      )
     },
     {
       title: 'Shop Owner',
       name: 'owner',
-      width: 150,
+      width: 200,
       cell: (row: any) => (
-        <div className={styles.cell}>{row.owner && row.owner.name}</div>
+        <div className={styles.cell}>{row.business?.owner}</div>
       ),
     },
     {
       title: 'Address',
       name: 'address',
       width: 200,
-      cell: (row: any) => <div className={styles.cell}>{row.address}</div>,
+      cell: (row: any) => <div className={styles.cell}>{row.business?.address}</div>,
     },
     {
       title: 'Subscription',
@@ -76,14 +83,12 @@ export function VendorsHome() {
       width: 150,
       cell: (row: any) => (
         <div className={styles.subscription}>
-          {row.subscription && (
-            <>
-              <span>{row.subscription.name}</span>
-              {row.subscription.monthlyFee && (
-                <span>{formatMonthlyFee(row.subscription.monthlyFee)}</span>
-              )}
+          {
+            getSubscription(row.subscription) && <>
+              <p>{getSubscription(row.subscription)?.name}</p>
+              <p>{formatMonthlyFee(getSubscription(row.subscription)?.monthInvest)}</p>
             </>
-          )}
+          }
         </div>
       ),
     },
@@ -101,7 +106,8 @@ export function VendorsHome() {
         <Select
           rounded="full"
           value={row.status}
-          options={statusOpts}
+          updateValue={onStatusChange(row._id)}
+          options={statusOpts.map(item => ({ name: item, value: item.toLowerCase() }))}
           className={styles.statusSelector}
         />
       ),
@@ -123,6 +129,23 @@ export function VendorsHome() {
     },
   ];
 
+  const getSubscription = (id: string) => {
+    const item = subscriptions.find(item => item._id === id);
+    return item;
+  }
+
+  const loadVendors = ({ filter = '', sort = '', category = '', range = { from: '', to: '' } }: any) => {
+    const params: any = {};
+    if (filter) params.name = filter;
+    if (sort) params.sort = sort;
+    if (category) params.status = category;
+    if (range.from) params.from = range.from;
+    if (range.to) params.to = range.to;
+    HttpService.get('/user/vendor/admin', params).then(response => {
+      setVendors(response);
+    });
+  }
+
   const onFilterChange = (e: ChangeEvent<HTMLInputElement>) => {
     setFilter(e.target.value);
   };
@@ -132,12 +155,30 @@ export function VendorsHome() {
       setRange({ ...range, [which]: new Date(e.target.value) });
     };
 
-  useEffect(() => {
-    HttpService.get('/user/vendor').then(response => {
-      if (response) {
-        setVendors(response);
+  const onStatusChange = (id: string) => (value: string) => {
+    HttpService.put(`/user/vendor/${id}`, { status: value }).then(response => {
+      const { status } = response;
+      if (status === 200) {
+        enqueueSnackbar('Status changed.', { variant: 'success' });
+        setVendors(vendors.map(item => item._id === id ? ({ ...item, status: value }) : item));
       }
-    });
+    })
+  }
+
+  const onSubmitClick = () => {
+    loadVendors({ filter, sort, category, range });
+  }
+
+  const onResetClick = () => {
+    setFilter('');
+    setSort('');
+    setCategory('');
+    setRange({ from: '', to: '' });
+    loadVendors({});
+  }
+
+  useEffect(() => {
+    loadVendors({});
   }, []);
 
   return (
@@ -155,7 +196,7 @@ export function VendorsHome() {
         sort={sort}
         updateSort={(_sort: string) => setSort(_sort)}
         selectTitle="Status"
-        selectOpts={statusOpts}
+        selectOpts={statusOpts.map(item => ({ name: item, value: item.toLowerCase() }))}
         category={category}
         updateCategory={(_cat: string) => setCategory(_cat)}
         className={styles.tableToolbar}
@@ -163,13 +204,13 @@ export function VendorsHome() {
           <div className={styles.actions}>
             <div>
               <p>Submit</p>
-              <button className={clsx(styles.button, styles.submit)}>
+              <button className={clsx(styles.button, styles.submit)} onClick={onSubmitClick}>
                 Submit
               </button>
             </div>
             <div>
               <p>Reset</p>
-              <button className={clsx(styles.button, styles.reset)}>
+              <button className={clsx(styles.button, styles.reset)} onClick={onResetClick}>
                 Reset
               </button>
             </div>

@@ -5,10 +5,13 @@ import { Sidebar, Header } from '@/components/layout/other';
 import { HttpService } from '@/services';
 import { AuthContext } from '@/providers';
 import { setupToken } from '@/utils';
+import { useAppDispatch } from '@/redux/store';
+import { loadSubscriptions } from '@/redux/reducers/subscription';
 
 import styles from './Layout.module.scss';
 
 export function Layout() {
+  const dispatch = useAppDispatch();
   const location = useLocation();
   const navigate = useNavigate();
   const isVendor = location.pathname.startsWith('/vendor');
@@ -50,6 +53,12 @@ export function Layout() {
     } else {
       navigate(userRole === 'vendor' ? '/login/vendor' : '');
     }
+  }, []);
+
+  useEffect(() => {
+    HttpService.get('/subscriptions').then(response => {
+      dispatch(loadSubscriptions(response));
+    });
   }, []);
 
   return (

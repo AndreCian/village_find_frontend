@@ -30,7 +30,10 @@ type Status = typeof statusValues[number];
 export interface ICommunityRow {
   _id?: string;
   name: string;
-  organizer: string;
+  organizer: {
+    firstName: string;
+    lastName: string;
+  };
   date: Date;
   total: number;
   status: Status;

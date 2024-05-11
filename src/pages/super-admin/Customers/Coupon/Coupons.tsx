@@ -162,7 +162,6 @@ export function Coupons() {
     if (filter) params.name = filter;
     if (category) params.status = category;
     HttpService.get('/coupons', params).then(response => {
-      console.log('--------------Coupons', coupons);
       setCoupons(response);
     });
   }, [filter, category]);

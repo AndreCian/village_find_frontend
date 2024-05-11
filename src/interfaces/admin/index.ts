@@ -28,6 +28,7 @@ export interface ICustomer {
   name: string;
   firstName?: string;
   lastName?: string;
+  fullName: string;
   email: string;
   status: string;
   phone: string;

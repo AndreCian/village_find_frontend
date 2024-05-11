@@ -183,6 +183,10 @@ const Coupons = lazy(() =>
   import('@/pages').then(module => ({ default: module.Coupons })),
 );
 
+const Logout = lazy(() =>
+  import('@/pages/vendor').then(module => ({ default: module.Logout })),
+)
+
 export const vendorRoutes = [
   {
     title: 'Index',
@@ -467,6 +471,7 @@ export const vendorRoutes = [
   {
     title: 'Logout',
     path: 'logout',
+    element: <Logout />,
     icon: <LogoutIcon />,
   },
 ];

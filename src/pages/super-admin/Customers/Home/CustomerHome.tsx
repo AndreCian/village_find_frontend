@@ -7,24 +7,25 @@ import { Card, TableBody, TableToolbar } from '@/components';
 import { Select } from '@/components/forms';
 import { TrashIcon } from '@/components/icons';
 
-import { useCustomerStore } from '@/stores';
-
-import { CustomerService, HttpService } from '@/services';
+import { HttpService } from '@/services';
 
 import { ICustomer, IRange, ITableColumn } from '@/interfaces';
 
 import styles from './CustomerHome.module.scss';
-
-const initialSort = ['Alphabetical Order', 'Most Recent', 'Oldest'];
-
-const initialStatus = ['Active', 'Inactive'];
 
 const initialRange = {
   from: '',
   to: '',
 };
 
-const customerPathPrefix = '/admin/customers/home';
+const sortOpts = [
+  { name: 'Alphabetical Order', value: 'alphabeta' },
+  { name: 'Recently Added', value: 'recent' },
+  { name: 'Highest Revenue', value: 'highest' },
+  { name: 'Lowest Revenue', value: 'lowest' },
+];
+const statusOpts = ['Active', 'Inactive'];
+const CUSTOMER_PATH = '/admin/customers/home';
 
 export function CustomerHome() {
   const navigate = useNavigate();
@@ -33,11 +34,6 @@ export function CustomerHome() {
   const [category, setCategory] = useState('');
   const [range, setRange] = useState<IRange>(initialRange);
   const [customers, setCustomers] = useState<ICustomer[]>([]);
-  // const {
-  //   customers: storeCustomers,
-  //   setCustomers: setStoreCustomers,
-  //   deleteCustomer: deleteStoreCustomer,
-  // } = useCustomerStore();
 
   const columns: ITableColumn[] = [
     {
@@ -46,7 +42,7 @@ export function CustomerHome() {
       width: 200,
       cell: (row: any) => (
         <span className={styles.cell}>
-          {row.firstName} {row.lastName}
+          {row.fullName}
         </span>
       ),
     },
@@ -63,7 +59,8 @@ export function CustomerHome() {
         <Select
           rounded="full"
           value={row.status}
-          options={['Active', 'Inactive']}
+          updateValue={onStatusChange(row._id)}
+          options={statusOpts.map(item => ({ name: item, value: item.toLowerCase() }))}
           className={styles.statusSelector}
         />
       ),
@@ -88,7 +85,7 @@ export function CustomerHome() {
         <div className={styles.actionCell}>
           <button
             className={styles.actionButton}
-            onClick={() => navigate(`${customerPathPrefix}/${row._id}`)}
+            onClick={() => navigate(`${CUSTOMER_PATH}/${row._id}`)}
           >
             Edit
           </button>
@@ -100,6 +97,18 @@ export function CustomerHome() {
     },
   ];
 
+  const loadCustomers = ({ filter = '', sort = '', category = '', range = { from: '', to: '' } }: any) => {
+    const params: any = {};
+    if (filter) params.name = filter;
+    if (sort) params.sort = sort;
+    if (category) params.status = category;
+    if (range.from) params.from = range.from;
+    if (range.to) params.to = range.to;
+    HttpService.get('/user/customer/admin', params).then(response => {
+      setCustomers(response || []);
+    })
+  }
+
   const onFilterChange = (e: ChangeEvent<HTMLInputElement>) => {
     setFilter(e.target.value);
   };
@@ -109,10 +118,28 @@ export function CustomerHome() {
       setRange({ ...range, [which]: e.target.value });
     };
 
+  const onStatusChange = (id: string) => (value: string) => {
+    HttpService.put(`/user/customer/${id}`, { status: value }).then(response => {
+      const { status } = response;
+      if (status === 200) {
+        enqueueSnackbar('Status changed.', { variant: 'success' });
+        setCustomers(customers.map(item => item._id === id ? ({ ...item, status: value }) : item));
+      }
+    })
+  }
+
   const onDeleteClick = (id: string) => () => {
+    HttpService.delete(`/user/customer/${id}`).then(response => {
+      const { status } = response;
+      if (status === 200) {
+        enqueueSnackbar('Customer removed.', { variant: 'success' });
+        setCustomers(customers.filter(item => item._id !== id));
+      }
+    })
   };
 
   const onSubmitClick = () => {
+    loadCustomers({ filter, sort, category, range });
   };
 
   const onResetClick = () => {
@@ -123,12 +150,11 @@ export function CustomerHome() {
       from: '',
       to: '',
     });
+    loadCustomers({});
   };
 
   useEffect(() => {
-    HttpService.get('/user/customer').then(response => {
-      setCustomers(response);
-    })
+    loadCustomers({});
   }, []);
 
   return (
@@ -142,11 +168,11 @@ export function CustomerHome() {
         updateRange={onRangeChange}
         downloadable={true}
         sortable={true}
-        sortOpts={initialSort}
+        sortOpts={sortOpts}
         sort={sort}
         updateSort={(_sort: string) => setSort(_sort)}
         selectTitle="Status"
-        selectOpts={initialStatus}
+        selectOpts={statusOpts.map(item => ({ name: item, value: item.toLowerCase() }))}
         category={category}
         updateCategory={(_cat: string) => setCategory(_cat)}
         className={styles.tableToolbar}

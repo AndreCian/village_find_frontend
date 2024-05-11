@@ -2,10 +2,12 @@ import { configureStore } from '@reduxjs/toolkit';
 import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
 
 import loadingReducer from '@/redux/reducers/loader';
+import subscriptionReducer from '@/redux/reducers/subscription';
 
 export const store = configureStore({
   reducer: {
     loader: loadingReducer,
+    subscription: subscriptionReducer,
   },
 });
 

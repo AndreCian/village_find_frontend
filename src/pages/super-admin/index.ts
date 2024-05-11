@@ -4,3 +4,4 @@ export * from './Customers';
 export * from './Orders';
 export * from './Vendors';
 export * from './Communities';
+export * from './Logout';

@@ -13,7 +13,7 @@ const pathPrefix = '/vendor/goals';
 const navItems: INavItem[] = [
   {
     title: 'Goals',
-    path: '/',
+    path: '',
   },
   {
     title: 'Rewards',
