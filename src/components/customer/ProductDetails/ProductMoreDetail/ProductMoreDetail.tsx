@@ -15,6 +15,21 @@ interface IProductMoreDetailProps {
   vendorStory?: string;
 }
 
+const SPEC_KEYS = [
+  'SKU',
+  'UPC',
+  'Weight',
+  'Height',
+  'Width',
+  'Length',
+  'Package Quantity',
+];
+
+const getSpecName = (value: string) => {
+  const specification = SPEC_KEYS.find(item => item.toLowerCase() === value.toLowerCase());
+  return specification || '';
+}
+
 export function ProductMoreDetail({
   category = '',
   shortDesc,
@@ -50,7 +65,7 @@ export function ProductMoreDetail({
                   index: number,
                 ) => (
                   <div key={`detail-item-${index}`} className={styles.detItem}>
-                    <p className={styles.head}>{item.name}</p>
+                    <p className={styles.head}>{getSpecName(item.name)}</p>
                     <p className={styles.body}>{item.value}</p>
                   </div>
                 ),
