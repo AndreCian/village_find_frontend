@@ -128,6 +128,9 @@ export function ProductInfo({
     if (!cartProduct.quantity) {
       return enqueueSnackbar('Select product quantity.', { variant: 'warning' });
     }
+    if (selectedStyle && !selectedInvent) {
+      return enqueueSnackbar('Select attributes.', { variant: 'warning' });
+    }
 
     const reqJson: any = {
       vendorId: vendor._id,
@@ -139,6 +142,11 @@ export function ProductInfo({
       discount: productDiscount
     };
     if (subscription) reqJson.subscription = subscription;
+    if (selectedStyle && selectedInvent) {
+      reqJson.attributes =
+        selectedStyle.attributes
+          .map((item, index) => ({ name: item.name, value: attributes[index] }))
+    }
 
     const params: any = {};
     if (isLogin) {

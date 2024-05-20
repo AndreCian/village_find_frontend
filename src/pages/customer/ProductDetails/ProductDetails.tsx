@@ -54,7 +54,7 @@ export interface IOrderDetail {
   }[];
   inventories: {
     _id: string;
-    attrs: object;
+    attrs: string[];
     image: string;
     price: number;
   }[];

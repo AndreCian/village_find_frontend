@@ -38,6 +38,7 @@ const routes = [
 
 function Routes() {
   const [isRouteLoading, setIsRouteLoading] = useState(false);
+  const appRoutes = useRoutes(routes);
 
   useEffect(() => {
     if (customerRoutes.length && vendorRoutes.length && communityRoutes.length && customerRoutes.length) {
@@ -45,7 +46,7 @@ function Routes() {
     }
   }, [superAdminRoutes, customerRoutes, vendorRoutes, communityRoutes]);
 
-  return !isRouteLoading ? <LoadingSpinner isPageLoading={true} /> : useRoutes(routes);
+  return !isRouteLoading ? <LoadingSpinner isPageLoading={true} /> : appRoutes;
 }
 
 export { superAdminRoutes, customerRoutes, vendorRoutes, routes };

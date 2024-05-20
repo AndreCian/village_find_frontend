@@ -4,16 +4,15 @@ import { Navigate } from "react-router-dom";
 import { AuthContext } from "@/providers";
 import { setupToken } from "@/utils";
 
-const HOME_PATH = '/login/admin';
+const HOME_PATH = '/admin/login';
 
 export function Logout() {
-    const { setIsLogin, setAccount } = useContext(AuthContext);
+    const { setIsLogin } = useContext(AuthContext);
 
     useEffect(() => {
         setIsLogin(false);
-        setupToken(null, 'token');
-        setAccount({ role: 'admin', profile: null });
-    }, []);
+        setupToken(null, 'admin');
+    }, [])
 
     return <Navigate to={HOME_PATH} />;
 }
