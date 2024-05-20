@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
+import { enqueueSnackbar } from 'notistack';
 import clsx from 'clsx';
 import _ from 'lodash';
 
 import { Input, Radio, RadioGroup } from '@/components/forms';
+import { HttpService } from '@/services';
 import { ChangeInputEvent } from '@/interfaces';
 
 import styles from './Pickup.module.scss';
-import { HttpService } from '@/services';
-import { enqueueSnackbar } from 'notistack';
 
 const weekdays = [
   'Monday',
@@ -21,6 +21,7 @@ const weekdays = [
 
 export function Pickup() {
   const [leadTime, setLeadTime] = useState<number>(0);
+  const [pickupFee, setPickupFee] = useState<number>(0);
   const [pickDays, setPickDays] = useState<number[]>([]);
   const [pickTimes, setPickTimes] = useState<{ from: string; to: string }[]>(
     Array(weekdays.length).fill({ from: '', to: '' }),
@@ -46,6 +47,7 @@ export function Pickup() {
   const onUpdateBtnClick = () => {
     HttpService.put('/user/vendor/profile/fulfillment/pickup', {
       leadTime,
+      pickupFee,
       pickupDays: pickDays.map(weekday => ({ ...pickTimes[weekday], weekday })),
     }).then(response => {
       const { status } = response;
@@ -58,18 +60,18 @@ export function Pickup() {
   useEffect(() => {
     HttpService.get('/user/vendor/profile/fulfillment/pickup').then(
       (response: any) => {
-        console.log(response);
-        const { leadTime, days } = response;
+        const { leadTime, pickupFee, days } = response;
         const allowDays = (days || []).map((item: any) => item.weekday);
         setLeadTime(leadTime);
+        setPickupFee(pickupFee);
         setPickDays(allowDays);
         setPickTimes(
           pickTimes.map((item: any, index: number) =>
             allowDays.includes(index)
               ? _.pick(
-                  days.find((item: any) => item.weekday === index),
-                  ['from', 'to'],
-                )
+                days.find((item: any) => item.weekday === index),
+                ['from', 'to'],
+              )
               : _.pick(item, ['from', 'to']),
           ),
         );
@@ -128,7 +130,7 @@ export function Pickup() {
                       updateValue={
                         pickDays.includes(index)
                           ? onPickTimeChange(index, 'from')
-                          : () => {}
+                          : () => { }
                       }
                     />
                   </div>
@@ -145,7 +147,7 @@ export function Pickup() {
                       updateValue={
                         pickDays.includes(index)
                           ? onPickTimeChange(index, 'to')
-                          : () => {}
+                          : () => { }
                       }
                     />
                   </div>
@@ -155,6 +157,23 @@ export function Pickup() {
           </div>
         </RadioGroup>
         <div className={styles.buttonBar}>
+          <div className={styles.control}>
+            <p>
+              Pickup Fee
+            </p>
+            <Input
+              type="number"
+              placeholder="Pickup Fee"
+              rounded="full"
+              border="none"
+              bgcolor="secondary"
+              className={styles.timeInput}
+              value={pickupFee}
+              updateValue={(e: ChangeInputEvent) =>
+                setPickupFee(Number(e.target.value))
+              }
+            />
+          </div>
           <button onClick={onUpdateBtnClick}>Update</button>
         </div>
       </div>

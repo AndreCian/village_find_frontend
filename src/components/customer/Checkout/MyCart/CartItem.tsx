@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { FaMapMarkerAlt } from 'react-icons/fa';
 import { PiUsersFill } from 'react-icons/pi';
 import { FaMinus, FaPlus, FaPhone } from 'react-icons/fa6';
@@ -14,45 +14,80 @@ import {
   PickupLocationDialog,
 } from '@/components/customer/common';
 import { HttpService } from '@/services';
-import { IOrder } from './MyCart';
+import { IAddress, IOrder } from './MyCart';
 
 import GiftIcon from '/assets/customer/svgs/gift.svg';
 import styles from './CartItem.module.scss';
 
-const initialFrequencies = [
-  { name: 'Every month', unit: 'month', interval: 1 },
-  { name: 'Every 2 months', unit: 'month', interval: 2 },
-  { name: 'Every 3 months', unit: 'month', interval: 3 },
-  { name: 'Every 6 months', unit: 'month', interval: 6 },
+const frequencyOpts = [
+  { name: 'Weekly', value: '1-week' },
+  { name: 'Every month', value: '1-month' },
+  { name: 'Every 2 months', value: '2-month' },
+  { name: 'Every 3 months', value: '3-month' },
+  { name: 'Every 6 months', value: '6-month' },
 ];
+
+const getFrequencyUnit = (duration: number, frequency: string) => {
+  const values = frequency.split('-');
+  return values[1] ? `${values[1]}${duration === 1 ? '' : 's'}` : '';
+}
+
+const getFrequencyName = (frequency: string) => {
+  const option = frequencyOpts.find(item => item.value === frequency);
+  return option?.name || '';
+}
+
+const getFrequencyPeriod = (frequency: string) => {
+  const values = frequency.split('-');
+  return Number(values[0]) || 0;
+}
+
+const getFrequencyLabel = (frequency: string) => {
+  const values = frequency.split('-');
+  if (values.length !== 2) return '';
+  const interval = Number(values[0]), unit = values[1];
+  return interval === 1 ? `Every ${unit}` : `Every ${interval} ${unit}s`;
+};
+
+const getFrequencyOpts = (options: string[]) => {
+  return options.reduce((total: any, item: string) => {
+    const option = frequencyOpts.find(opt => opt.value === item);
+    return option ? [...total, option] : total;
+  }, []);
+}
 
 export function CartItem({
   cartId,
   orderId,
   vendor,
   product,
-  inventory,
   price,
   quantity,
+  image,
   personalization,
+  buymode,
   subscription,
   deliveryType,
   pickuplocation,
   fulfillday,
   gift,
+  addressList,
   onDeleteCart,
   onSubscribeChange,
   onGiftChange,
   onDeliveryToggle,
   onPickupLocationChange,
   onQuantityChange,
+  onBuymodeChange
 }: IOrder & {
+  addressList: IAddress[];
   onDeleteCart: () => void;
   onSubscribeChange: (subscribe: any) => void;
   onGiftChange: (gift: any) => void;
   onDeliveryToggle: (option: string) => void;
   onPickupLocationChange: (data: any) => void;
   onQuantityChange: (quantity: number) => void;
+  onBuymodeChange: (mode: string) => void;
 }) {
   const [isGiftDialog, setIsGiftDialog] = useState(false);
   const [isPickupLocationDialog, setIsPickupLocationDialog] = useState(false);
@@ -60,6 +95,13 @@ export function CartItem({
   const [isSafePickupDateDialog, setIsSafePickupDateDialog] = useState(false);
   const [deliveryDate, setDeliveryDate] = useState(new Date());
   const [safePickupDate, setSafePickupDate] = useState(new Date());
+
+  const csaCycle = useMemo(() => {
+    if (!subscription?.iscsa) return 0;
+    const duration = subscription?.csa.duration || 0;
+    const period = getFrequencyPeriod(subscription?.csa.frequency || '');
+    return Math.floor(duration / period);
+  }, [subscription]);
 
   const isDaySame = (day1: Date, day2: Date) => {
     return (
@@ -83,23 +125,13 @@ export function CartItem({
     });
   };
 
-  const getFrequency = ({
-    unit,
-    interval,
-  }: {
-    unit: string;
-    interval: number;
-  }) => {
-    return interval === 1 ? `Every ${unit}` : `Every ${interval} ${unit}s`;
-  };
-
   const getDeliveryTypes = () => {
     const options = product.deliveryTypes.map((item: string) =>
       item === 'Local Subscriptions'
         ? ''
         : item === 'Near By'
-        ? 'Near Me'
-        : item,
+          ? 'Near Me'
+          : item,
     );
     return options.filter((item: string) => item);
   };
@@ -114,8 +146,8 @@ export function CartItem({
         item === 'Shipping'
           ? ['Shipping']
           : item === 'Local Subscriptions'
-          ? ['Home Delivery', 'Pickup Location']
-          : ['Home Delivery', 'Pickup Location', 'Safe Pickup'],
+            ? ['Home Delivery', 'Pickup Location']
+            : ['Home Delivery', 'Pickup Location', 'Safe Pickup'],
       )
       .flat();
   };
@@ -125,10 +157,10 @@ export function CartItem({
       const deliveryDates = vendor.fulfillment[method].days;
 
       const firstDayOfMonth = new Date(
-          deliveryDate.getFullYear(),
-          deliveryDate.getMonth(),
-          1,
-        ),
+        deliveryDate.getFullYear(),
+        deliveryDate.getMonth(),
+        1,
+      ),
         lastDayOfMonth = new Date(
           deliveryDate.getFullYear(),
           deliveryDate.getMonth() + 1,
@@ -208,15 +240,13 @@ export function CartItem({
   };
 
   const onFrequencyChange = (value: string) => {
-    const frequency = initialFrequencies.find(
-      item => item.interval.toString() === value,
-    );
     HttpService.put(`/cart/${cartId}`, {
-      subscription: { ...subscription, frequency, issubscribed: true },
+      subscription: { ...subscription, subscribe: value },
     }).then(response => {
       const { status } = response;
       if (status === 200) {
-        onSubscribeChange({ frequency, issubscribed: true });
+        // onSubscribeChange({ ...subscription, subscribe: value });
+        onBuymodeChange('recurring');
         enqueueSnackbar('Subscription frequency updated.', {
           variant: 'success',
         });
@@ -320,15 +350,13 @@ export function CartItem({
     });
   };
 
-  useEffect(() => {}, [cartId]);
-
   return (
     <div className={styles.root}>
       <div className={styles.header}>
         <div className={styles.vendor}>
           <img src={`${SERVER_URL}/${vendor.images.logoUrl}`} />
           <div className={styles.order}>
-            <p className={styles.name}>{vendor.shopName}</p>
+            <p className={styles.name}>{vendor.business.name}</p>
             <p className={styles.orderId}>
               Order ID: <span>{orderId}</span>
             </p>
@@ -348,7 +376,7 @@ export function CartItem({
           <div className={styles.main}>
             <div className={styles.imageBar}>
               <img
-                src={`${SERVER_URL}/${inventory.image}`}
+                src={`${SERVER_URL}/${image}`}
                 alt="The Product Image"
               />
               <div className={styles.quantity}>
@@ -369,7 +397,7 @@ export function CartItem({
                   {product.soldByUnit}
                 </p>
               </div>
-              {product.deliveryTypes.includes('Shipping') ? (
+              {!subscription?.iscsa ? (
                 <div className={styles.shipping}>
                   <p className={styles.title}>Would you like to</p>
                   <div className={styles.form}>
@@ -386,11 +414,8 @@ export function CartItem({
                     </Button>
                     {subscription && (
                       <Select
-                        value={subscription.frequency?.interval?.toString()}
-                        options={initialFrequencies.map(item => ({
-                          ...item,
-                          value: item.interval.toString(),
-                        }))}
+                        value={subscription.subscribe}
+                        options={getFrequencyOpts(subscription.frequencies)}
                         placeholder="Subscribe"
                         className={styles.subscSelect}
                         updateValue={onFrequencyChange}
@@ -398,61 +423,58 @@ export function CartItem({
                     )}
                   </div>
                 </div>
-              ) : subscription?.iscsa ? (
-                <div className={styles.subscription}>
-                  <p className={styles.head}>Would you like to</p>
-                  <div className={styles.body}>
-                    <div className={styles.text}>
-                      <span>Subscribed:</span>
-                      <p>{}</p>
-                    </div>
-                    <div className={clsx(styles.text, styles.duration)}>
-                      <span>Subscription Duration:</span>
-                      <p>
-                        {subscription?.duration} weeks from{' '}
-                        {getDateStr(subscription.startDate)} -{' '}
-                        {getDateStr(subscription.endDate)}
-                      </p>
-                    </div>
-                    <div className={clsx(styles.text, styles.frequency)}>
-                      <span>Subscription Frequency:</span>
-                      <p>{product.subscription?.frequency}</p>
-                    </div>
-                    <p className={styles.text}>
-                      Your card will be charged{' '}
-                      <span>
-                        {price * quantity * subscription.duration} every{' '}
-                        {subscription.duration} weeks
-                      </span>{' '}
-                      or until cancelation
+              ) : (<div className={styles.subscription}>
+                <p className={styles.head}>Would you like to</p>
+                <div className={styles.body}>
+                  <div className={styles.text}>
+                    <span>Subscribed:</span>
+                    <p>{ }</p>
+                  </div>
+                  <div className={clsx(styles.text, styles.duration)}>
+                    <span>Subscription Duration:</span>
+                    <p>
+                      {subscription?.csa.duration} {getFrequencyUnit(subscription.csa.duration, subscription?.csa.frequency)}{' '}
+                      {subscription.csa.startDate && subscription.csa.endDate &&
+                        `${getDateStr(subscription?.csa.startDate || '')} - ${getDateStr(subscription?.csa.endDate || '')}`}
                     </p>
                   </div>
+                  <div className={clsx(styles.text, styles.frequency)}>
+                    <span>Subscription Frequency:</span>
+                    <p>{getFrequencyName(product.subscription?.csa.frequency || '')}</p>
+                  </div>
+                  <p className={styles.text}>
+                    Your card will be charged{' '}
+                    <span>
+                      ${(price * quantity * csaCycle).toFixed(2)} every{' '}
+                      {subscription.csa.duration} {getFrequencyUnit(subscription.csa.duration, subscription?.csa.frequency)}
+                    </span>{' '}
+                    or until cancelation
+                  </p>
                 </div>
-              ) : (
-                <></>
+              </div>
               )}
-              {product.deliveryTypes.includes('Shipping') &&
-              subscription?.issubscribed ? (
+              {!subscription?.iscsa &&
+                buymode === 'recurring' ? (
                 <div className={styles.subscribed}>
                   <div className={styles.frequency}>
                     <span>Subscribed: </span>
-                    <p>{getFrequency(subscription.frequency)}</p>
+                    <p>{getFrequencyLabel(subscription?.subscribe || '')}</p>
                   </div>
                   <p className={styles.hint}>
                     Your card will be charged ${(price * quantity).toFixed(2)}{' '}
-                    {getFrequency(subscription.frequency)} plus shipping fees or
+                    {getFrequencyLabel(subscription?.subscribe || '')} plus shipping fees or
                     until cancelation
                   </p>
                 </div>
               ) : subscription?.iscsa === false ? (
                 <div className={styles.extra}>
                   <div className={styles.style}>
-                    {inventory.styleId.attributes.map((attribute: any) => (
+                    {/* {inventory.styleId.attributes.map((attribute: any) => (
                       <p className={styles.attr} key={attribute._id}>
                         <span>{attribute.name}: </span>
                         {inventory.attrs[attribute._id]}
                       </p>
-                    ))}
+                    ))} */}
                   </div>
                   {personalization && (
                     <div className={styles.personalization}>
@@ -508,7 +530,7 @@ export function CartItem({
           ))}
         </div>
         {deliveryType === 'Pickup Location' ||
-        deliveryType === 'Safe Pickup' ? (
+          deliveryType === 'Safe Pickup' ? (
           <div className={styles.detail}>
             <div className={styles.date}>
               <p>

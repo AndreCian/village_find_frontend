@@ -54,6 +54,7 @@ export default {
         info: '#DEC0F1',
         danger: '#652F90',
         light: '#84A98C',
+        lightgray: '#F5F5F5',
       },
       placeholderColor: {
         primary: '#616161',

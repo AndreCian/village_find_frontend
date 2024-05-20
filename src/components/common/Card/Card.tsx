@@ -9,11 +9,12 @@ export interface ICardProps {
   className?: string;
   children: React.ReactNode;
   cardID?: string;
+  onClick?: () => void;
 };
 
-export const Card = forwardRef(({ cardID = uniqueId(), title = '', className = '', children }: ICardProps, ref: ForwardedRef<HTMLDivElement>) => {
+export const Card = forwardRef(({ cardID = uniqueId(), title = '', className = '', children, onClick }: ICardProps, ref: ForwardedRef<HTMLDivElement>) => {
   return (
-    <div id={cardID} className={clsx(styles.root, className)} ref={ref}>
+    <div id={cardID} className={clsx(styles.root, className)} onClick={onClick} ref={ref} >
       {title && <h1>{title}</h1>}
       {children}
     </div>

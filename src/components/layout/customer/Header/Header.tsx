@@ -211,7 +211,7 @@ export function Header({
               {!screenBlackList.includes(pathname) && (
                 <p>Hi, {account?.profile && account.profile.firstName}</p>
               )}
-              <UserIcon className={styles.icon} />
+              <UserIcon className={styles.icon} onClick={() => navigate('/profile')} />
             </div>
             <div
               className={styles.navToCart}

@@ -28,7 +28,7 @@
   }
 
   .statusSelector {
-    @apply min-w-0 max-w-[200px] text-base;
+    @apply w-fit min-w-0 text-base;
     > div:nth-child(1) {
       @apply bg-primary;
       * {
@@ -36,7 +36,7 @@
       }
     }
     > div:nth-child(2) {
-      @apply max-w-[250px];
+      @apply min-w-[250px];
     }
   }
 

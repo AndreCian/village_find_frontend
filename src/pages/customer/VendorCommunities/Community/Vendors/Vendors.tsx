@@ -19,6 +19,7 @@ import { AuthContext, CategoryContext } from '@/providers';
 import { useWindowWidth } from '@/utils';
 
 import styles from './Vendors.module.scss';
+import { SERVER_URL } from '@/config/global';
 
 interface IVendorsProps {
   announcement: {
@@ -32,6 +33,10 @@ interface IVendorsProps {
   }[];
   community: {
     _id: string;
+    images: {
+      logoUrl: string;
+      backgroundUrl: string;
+    };
     vendors: any[];
   };
   categories: string[];
@@ -91,10 +96,10 @@ export function Vendors({
     return !date
       ? ''
       : new Date(date).toLocaleString('en-US', {
-          year: 'numeric',
-          month: 'short',
-          day: 'numeric',
-        });
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+      });
   };
 
   const onCategoryChange = (value: string) => {
@@ -156,7 +161,7 @@ export function Vendors({
     <>
       <Container className={styles.root}>
         <div className={styles.dashImage}>
-          <img src="/assets/customer/vcom/individual.png" />
+          <img src={`${SERVER_URL}/${community.images && community.images.backgroundUrl}`} />
         </div>
         <div className={styles.vendors}>
           <p>
@@ -206,7 +211,7 @@ export function Vendors({
             vendors={[
               { name: 'All Vendors', value: '' },
               ...community.vendors.map(item => ({
-                name: item.shopName,
+                name: item.business.name,
                 value: item._id,
               })),
             ]}

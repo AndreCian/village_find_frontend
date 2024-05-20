@@ -77,66 +77,34 @@ export interface IDashStore {
 }
 
 const initialSalesSurvey: ISales = {
-  yearToDate: 150258,
-  thisMonth: 9025,
-  thisWeek: 3058,
+  yearToDate: 0,
+  thisMonth: 0,
+  thisWeek: 0,
   total: {
-    transaction: 410,
-    averageOrder: 158,
+    transaction: 0,
+    averageOrder: 0,
   },
 };
 
 const initialActivitySurvey: IActivitySurvey = {
   customers: {
-    count: 45,
-    data: [10, 15, 22, 18, 20, 24, 21],
+    count: 0,
+    data: [0, 0, 0, 0, 0, 0, 0],
   },
-  popularItems: [
-    {
-      image: <img src={ProductImg} />,
-      product: 'Black Polish Radish',
-      inventory: 120,
-      sold: 34,
-      revenue: 258.22,
-    },
-    {
-      image: <img src={ProductImg} />,
-      product: 'Artisan Bowls',
-      inventory: 8,
-      sold: 124,
-      revenue: 2482,
-    },
-  ],
+  popularItems: [],
   totals: {
-    customer: 158,
-    order: 250,
-    product: 65,
+    customer: 0,
+    order: 0,
+    product: 0,
     revenue: {
-      yearly: 150258,
-      goal: 300516,
-      all: 265000,
+      yearly: 0,
+      goal: 0,
+      all: 0,
     },
   },
 };
 
-const initialCurrentOrders: IOrderRow[] = [
-  {
-    id: 653,
-    customer: 'Brandon Monti',
-    type: 'Shipping',
-    date: new Date('02/28/2024'),
-    amount: 200.58,
-    status: 'Pending',
-  },
-  {
-    id: 652,
-    customer: 'Jeff Kenny',
-    type: 'Safe Pickup',
-    date: new Date('02/29/2024'),
-    amount: 89.25,
-    status: 'Under Process',
-  },
-];
+const initialCurrentOrders: IOrderRow[] = [];
 
 export const useDashStore = create<IDashStore>(set => ({
   step: 1,

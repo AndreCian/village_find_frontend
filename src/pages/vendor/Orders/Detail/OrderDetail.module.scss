@@ -125,3 +125,12 @@
     }
   }
 }
+
+.productName,
+.netPrice {
+  @apply font-bold;
+}
+
+.productImage {
+  @apply h-12 w-12;
+}

@@ -8,3 +8,4 @@ export * from './VendorCommunities';
 export * from './Checkout';
 export * from './About';
 export * from './VendorSignup';
+export * from './Profile';

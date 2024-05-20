@@ -12,8 +12,11 @@ import {
 } from '@/components/forms';
 import { AIDialog } from '@/components/super-admin/common';
 import { MagicIcon } from '@/components/icons';
-import { HttpService } from '@/services';
 import { CategoryContext } from '@/providers';
+import { ProductContext } from '../Provider';
+import { useAppDispatch, useAppSelector } from '@/redux/store';
+import { IGeneral, updateGeneral } from '@/redux/reducers';
+import { HttpService } from '@/services';
 import { ChangeInputEvent } from '@/interfaces';
 
 import styles from './General.module.scss';
@@ -25,24 +28,7 @@ type TopicType =
   | 'long product description'
   | 'disclaimer';
 
-interface IProductGeneralInfo {
-  name: string;
-  deliveryTypes: PayType[];
-  category: string;
-  shortDesc: string;
-  longDesc: string;
-  disclaimer: string;
-  soldByUnit: string;
-  tax: number;
-}
-
-type IMetric = {
-  _id: string;
-  name: string;
-  value: string;
-}
-
-const initialInfo: IProductGeneralInfo = {
+const initialInfo: IGeneral = {
   name: '',
   deliveryTypes: [],
   category: '',
@@ -50,22 +36,27 @@ const initialInfo: IProductGeneralInfo = {
   longDesc: '',
   disclaimer: '',
   soldByUnit: '',
+  price: 0,
+  quantity: 0,
   tax: 0,
 };
 
-const ROOT_PATH = '/vendor/products/create/general';
+const CREATE_PATH = '/vendor/products/create';
+const NEXT_PATH = `${CREATE_PATH}/style`;
 
 export function General() {
+  const dispatch = useAppDispatch();
   const { productId } = useParams();
   const navigate = useNavigate();
+  const storeGeneral = useAppSelector(state => state.product.general);
+  const metrics = useAppSelector(state => state.metric.metrics);
 
   const { categories } = useContext(CategoryContext);
+  const { nutrition, setNutrition, image, setImage } = useContext(ProductContext);
   const [productDialogOpen, setProductDialogOpen] = useState(false);
-  const [nutrition, setNutrition] = useState<File | null>(null);
   const [generalInfo, setGeneralInfo] =
-    useState<IProductGeneralInfo>(initialInfo);
+    useState<IGeneral>(initialInfo);
   const [dialogTopic, setDialogTopic] = useState<TopicType>('product name');
-  const [metrics, setMetrics] = useState<IMetric[]>([]);
 
   const onAnswerSelect = (answer: string) => {
     setGeneralInfo({
@@ -94,16 +85,20 @@ export function General() {
   const onNutritionChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return;
     setNutrition(e.target.files[0] as File);
-    // console.log(e.target.files);
+  };
+
+  const onImageChange = (e: ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    setImage(e.target.files[0] as File);
   };
 
   const onDeliveryTypeChange = (value: string) => {
     const deliveryTypes = generalInfo.deliveryTypes;
-    const isExist = deliveryTypes.includes(value as PayType);
+    const isExist = deliveryTypes.includes(value);
     if (isExist) {
       setGeneralInfo({
         ...generalInfo,
-        deliveryTypes: deliveryTypes.filter(item => (item as string) !== value),
+        deliveryTypes: deliveryTypes.filter(item => item !== value),
       });
       return;
     }
@@ -130,54 +125,44 @@ export function General() {
   };
 
   const onSubmitClick = () => {
-    const formData = new FormData();
-    formData.append('name', generalInfo.name);
-    formData.append('category', generalInfo.category);
-    formData.append('deliveryTypes', JSON.stringify(generalInfo.deliveryTypes));
-    formData.append('shortDesc', generalInfo.shortDesc);
-    formData.append('longDesc', generalInfo.longDesc);
-    formData.append('disclaimer', generalInfo.disclaimer);
-    formData.append('soldByUnit', generalInfo.soldByUnit);
-    formData.append('tax', `${generalInfo.tax}`);
-    if (nutrition) formData.append('nutrition', nutrition);
-
     if (productId === 'create') {
-      HttpService.post('/products', formData).then(response => {
-        const { status, product } = response;
+      dispatch(updateGeneral(generalInfo));
+      navigate(NEXT_PATH);
+    } else {
+      const formData = new FormData();
+      formData.append('name', generalInfo.name);
+      formData.append('category', generalInfo.category);
+      formData.append('deliveryTypes', JSON.stringify(generalInfo.deliveryTypes));
+      formData.append('shortDesc', generalInfo.shortDesc);
+      formData.append('longDesc', generalInfo.longDesc);
+      formData.append('disclaimer', generalInfo.disclaimer);
+      formData.append('soldByUnit', generalInfo.soldByUnit);
+      formData.append('price', generalInfo.price.toString());
+      formData.append('quantity', generalInfo.quantity.toString());
+      formData.append('tax', `${generalInfo.tax}`);
+      if (nutrition) formData.append('nutrition', nutrition);
+      if (image) formData.append('image', image);
+      HttpService.put(`/products/${productId}`, formData).then(response => {
+        const { status } = response;
         if (status === 200) {
-          enqueueSnackbar('One product added.', { variant: 'success' });
-          navigate(ROOT_PATH.replace('create', product._id));
-        } else {
-          enqueueSnackbar('Something went wrong!', { variant: 'error' });
+          enqueueSnackbar('Product updated.', { variant: 'success' });
         }
-      });
-      return;
+      })
     }
-    HttpService.put(`/products/${productId}`, formData).then(response => {
-      const { status } = response;
-      if (status === 200) {
-        enqueueSnackbar('Product updated!', { variant: 'success' });
-      } else {
-        enqueueSnackbar('Something went wrong!', { variant: 'error' });
-      }
-    });
   };
 
   useEffect(() => {
-    if (productId === 'create') return;
-    HttpService.get(`/products/vendor/${productId}`).then(response => {
-      const { status, product } = response;
-      if (status === 200) {
-        setGeneralInfo(product);
-      }
-    });
-  }, [productId]);
-
-  useEffect(() => {
-    HttpService.get('/settings/general/metric').then(response => {
-      setMetrics(response);
-    })
-  }, []);
+    if (productId === 'create') {
+      setGeneralInfo(storeGeneral);
+    } else {
+      HttpService.get(`/products/vendor/${productId}`).then(response => {
+        const { status, product } = response;
+        if (status === 200) {
+          setGeneralInfo(product);
+        }
+      });
+    }
+  }, [productId, storeGeneral]);
 
   return (
     <div className={styles.root}>
@@ -288,7 +273,7 @@ export function General() {
               />
             </div>
             <div className={styles.control}>
-              <p>Discalimer</p>
+              <p>Disclaimer</p>
               <TextField
                 name="disclaimer"
                 rounded="full"
@@ -315,6 +300,47 @@ export function General() {
                 bgcolor="secondary"
                 value={nutrition}
                 updateValue={onNutritionChange}
+              />
+            </div>
+            <div className={styles.control}>
+              <p>Price</p>
+              <Input
+                type="number"
+                name="price"
+                rounded="full"
+                border="none"
+                bgcolor="secondary"
+                placeholder="Price"
+                value={generalInfo.price}
+                updateValue={onProductChange}
+                adornment={{
+                  position: 'left',
+                  content: '$'
+                }}
+              />
+            </div>
+            <div className={styles.control}>
+              <p>Quantity</p>
+              <Input
+                type="number"
+                name="quantity"
+                rounded="full"
+                border="none"
+                bgcolor="secondary"
+                placeholder="Quantity"
+                value={generalInfo.quantity}
+                updateValue={onProductChange}
+              />
+            </div>
+            <div className={styles.control}>
+              <p>Product Image</p>
+              <Input
+                type="file"
+                rounded="full"
+                border="none"
+                bgcolor="secondary"
+                value={image}
+                updateValue={onImageChange}
               />
             </div>
             <div className={styles.control}>
@@ -351,7 +377,7 @@ export function General() {
               className={clsx(styles.button, styles.updateButton)}
               onClick={onSubmitClick}
             >
-              {productId === 'create' ? 'Add' : 'Update'}
+              {productId === 'create' ? 'Save' : 'Update'}
             </button>
           </div>
         </div>

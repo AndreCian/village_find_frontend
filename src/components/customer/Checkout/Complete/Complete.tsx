@@ -10,7 +10,7 @@ import styles from './Complete.module.scss';
 
 export function Complete() {
   const { account } = useContext(AuthContext);
-  const userName = account?.profile.owner.name || '';
+  const userName = `${account?.profile?.firstName} ${account?.profile?.lastName}`;
 
   return (
     <div className={styles.root}>

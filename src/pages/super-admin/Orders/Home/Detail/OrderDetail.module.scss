@@ -72,6 +72,12 @@
   .label {
     @apply shrink-0 basis-60 font-bold;
   }
+
+  > .addressInput {
+    span {
+      @apply cursor-pointer;
+    }
+  }
 }
 
 .orderImage {
@@ -118,4 +124,13 @@
       @apply w-24;
     }
   }
+}
+
+.productName,
+.netPrice {
+  @apply font-bold;
+}
+
+.productImage {
+  @apply h-12 w-12;
 }

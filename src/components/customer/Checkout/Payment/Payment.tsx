@@ -6,15 +6,15 @@ import {
   CardExpiryElement,
   CardCvcElement,
 } from '@stripe/react-stripe-js';
+import { StripeCardNumberElement } from '@stripe/stripe-js';
 import { enqueueSnackbar } from 'notistack';
 import { FaCheck } from 'react-icons/fa6';
 
+import { ICartItem, ISummary } from '@/pages/customer';
 import { Button, Input } from '@/components/forms';
 import { HttpService } from '@/services';
 
 import styles from './Payment.module.scss';
-import { ICartItem, ISummary } from '@/pages/customer';
-import { StripeCardNumberElement } from '@stripe/stripe-js';
 
 interface IPayment {
   email: string;
@@ -44,6 +44,8 @@ interface IPaymentProps {
   onNextStep: () => void;
   summary: ISummary;
   cartItems: ICartItem[];
+  donation: number;
+  shipping: string;
 }
 
 const CARD_ELEMENT_OPTIONS = {
@@ -63,9 +65,11 @@ const CARD_ELEMENT_OPTIONS = {
 };
 
 export function Payment({
-  onNextStep = () => {},
+  onNextStep = () => { },
   summary,
   cartItems,
+  donation,
+  shipping
 }: IPaymentProps) {
   const stripe = useStripe();
   const elements = useElements();
@@ -99,21 +103,45 @@ export function Payment({
         return;
       }
 
-      const { error, token } = await stripe.createToken(cardNumberElement);
+      const { paymentMethod, error } =
+        await stripe.createPaymentMethod({ type: 'card', card: cardNumberElement });
       if (error) {
-        enqueueSnackbar(error.message, { variant: 'warning' });
-        return;
+        console.error(error);
+      } else {
+        fetch('/create-payment-intent', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ paymentMethodId: paymentMethod.id })
+        }).then(response => response.json()).then(data => {
+          stripe.confirmCardPayment(data.clientSecret);
+        });
       }
 
-      HttpService.post('/stripe/create-payment-method', {
-        detail: payment,
-        token: token.id,
-      }).then(response => {
-        const { status } = response;
-        if (status === 200) {
-          enqueueSnackbar('Payment success.', { variant: 'success' });
-        }
-      });
+      // const { error, token } = await stripe.createToken(cardNumberElement);
+      // if (error) {
+      //   enqueueSnackbar(error.message, { variant: 'warning' });
+      //   return;
+      // }
+
+      // HttpService.post('/cart/checkout', {
+      //   cartItems,
+      //   donation,
+      // }).then(response => {
+      //   const { status } = response;
+      //   if (status === 200) {
+      //     onNextStep();
+      //   }
+      // })
+
+      // HttpService.post('/stripe/create-payment-method', {
+      //   detail: payment,
+      //   token: token.id,
+      // }).then(response => {
+      //   const { status } = response;
+      //   if (status === 200) {
+      //     enqueueSnackbar('Payment success.', { variant: 'success' });
+      //   }
+      // });
     })();
   };
 

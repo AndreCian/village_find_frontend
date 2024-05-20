@@ -14,13 +14,11 @@ type PayStatus = 'Paid' | 'Unpaid';
 
 export interface IVendor {
   _id: string;
-  owner?: {
-    name: string;
-    email: string;
-    phone: string;
-  };
   business?: {
     name: string;
+    owner: string;
+    email: string;
+    phone: string;
   };
   isLeader?: boolean;
 }
@@ -94,9 +92,9 @@ const VILLAGE_PATH = '/admin/community/village';
 
 const isVendorSearchable = (search: string, vendor: IVendor) => {
   return vendor.business?.name.includes(search)
-    || vendor.owner?.name.includes(search)
-    || vendor.owner?.email.includes(search)
-    || vendor.owner?.phone.includes(search);
+    || vendor.business?.owner.includes(search)
+    || vendor.business?.email.includes(search)
+    || vendor.business?.phone.includes(search);
 }
 
 export function VillageEdit() {
@@ -131,10 +129,10 @@ export function VillageEdit() {
       const leaderVendor = vendors.find(item => item.isLeader);
       if (leaderVendor) {
         reqJson.leader = leaderVendor._id;
-        const vendorName = leaderVendor.owner?.name.split(' ') || [];
-        reqJson.organizer = { firstName: vendorName[0] || '', lastName: vendorName[1] || '' };
-        reqJson.email = leaderVendor.owner?.email || '';
-        reqJson.phone = leaderVendor.owner?.phone || '';
+        const ownerName = leaderVendor.business?.owner.split(' ') || [];
+        reqJson.organizer = { firstName: ownerName[0] || '', lastName: ownerName[1] || '' };
+        reqJson.email = leaderVendor.business?.email || '';
+        reqJson.phone = leaderVendor.business?.phone || '';
       }
       HttpService.put(`/communities/${communityId}`, reqJson).then(
         response => {
@@ -204,7 +202,7 @@ export function VillageEdit() {
                     key={index}
                     onClick={onVendorToggle(item._id)}
                   >
-                    <p>{item.owner?.name} at <span>{item.business?.name}</span></p>
+                    <p>{item.business?.owner} at <span>{item.business?.name}</span></p>
                     <span className={clsx({ [styles.leader]: item.isLeader })}>
                       {item.isLeader ? 'Community Leader' : 'Vendor'}
                     </span>

@@ -1,23 +1,19 @@
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { enqueueSnackbar } from 'notistack';
 
 import { TableBody } from '@/components/common';
 import { GridIcon, TrashIcon } from '@/components/icons';
-
+import { HttpService } from '@/services';
+import { useAppDispatch, useAppSelector } from '@/redux/store';
+import { ISpecification, deleteSpec } from '@/redux/reducers';
 import { ITableColumn } from '@/interfaces';
 
 import styles from './Specifications.module.scss';
-import { useEffect, useState } from 'react';
-import { HttpService } from '@/services';
-import { enqueueSnackbar } from 'notistack';
 
-const subPath = '/vendor/products';
+export type ISpecWithID = ISpecification & { _id?: string };
 
-interface ISpec {
-  _id: string;
-  name: string;
-}
-
-const specs = [
+const SPEC_KEYS = [
   'SKU',
   'UPC',
   'Weight',
@@ -25,26 +21,42 @@ const specs = [
   'Width',
   'Length',
   'Package Quantity',
-].map((spec: string) => ({ name: spec, value: spec.toLowerCase() }));
+];
+const PRODUCT_PATH = '/vendor/products';
+
+const getSpecName = (name: string) => {
+  const spec = SPEC_KEYS.find(item => item.toLowerCase() === name);
+  return spec;
+}
 
 export function Specifications() {
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { productId } = useParams();
+  const storeSpecs = useAppSelector(state => state.product.specifications);
 
-  const [specifications, setSpecifications] = useState<ISpec[]>([]);
+  const [specifications, setSpecifications] = useState<ISpecWithID[]>([]);
 
   const onDeleteClick = (id: string) => () => {
-    HttpService.put(
-      `/products/${productId}/specification`,
-      specifications.filter(item => item._id !== id),
-    ).then(response => {
-      const { status } = response;
-      if (status === 200) {
-        enqueueSnackbar('Specification deleted.', { variant: 'success' });
-        setSpecifications(specifications.filter(item => item._id !== id));
-      }
-    });
+    if (productId === 'create') {
+      dispatch(deleteSpec(Number(id)));
+    } else {
+      HttpService.put(
+        `/products/${productId}/specification`,
+        specifications.filter(item => item._id !== id),
+      ).then(response => {
+        const { status } = response;
+        if (status === 200) {
+          enqueueSnackbar('Specification deleted.', { variant: 'success' });
+          setSpecifications(specifications.filter(item => item._id !== id));
+        }
+      });
+    }
   };
+
+  const onEditClick = (id: number | string) => () => {
+    navigate(`${PRODUCT_PATH}/${productId}/specifications/${id}`);
+  }
 
   const stylesTableColumns: ITableColumn[] = [
     {
@@ -54,7 +66,7 @@ export function Specifications() {
       cell: (row: any) => (
         <div className={styles.name}>
           <GridIcon />
-          <span>{specs.find(spec => spec.value === row.name)?.name || ''}</span>
+          <span>{getSpecName(row.name)}</span>
         </div>
       ),
     },
@@ -64,10 +76,10 @@ export function Specifications() {
       width: 250,
       cell: (row: any) => (
         <div className={styles.action}>
-          <button className={styles.button} onClick={() => navigate(row._id)}>
+          <button className={styles.button} onClick={onEditClick(productId === 'create' ? row.index : row._id)}>
             Edit
           </button>
-          <span onClick={onDeleteClick(row._id)}>
+          <span onClick={onDeleteClick(productId === 'create' ? row.index : row._id)}>
             <TrashIcon />
           </span>
         </div>
@@ -86,13 +98,17 @@ export function Specifications() {
   }
 
   useEffect(() => {
-    HttpService.get(`/products/${productId}/specification`).then(response => {
-      const { status, specifications } = response;
-      if (status === 200) {
-        setSpecifications(specifications);
-      }
-    });
-  }, []);
+    if (productId === 'create') {
+      setSpecifications(storeSpecs);
+    } else {
+      HttpService.get(`/products/${productId}/specification`).then(response => {
+        const { status, specifications } = response;
+        if (status === 200) {
+          setSpecifications(specifications);
+        }
+      });
+    }
+  }, [productId, storeSpecs]);
 
   return (
     <div className={styles.container}>
@@ -100,7 +116,7 @@ export function Specifications() {
         <button
           className={styles.button}
           onClick={() =>
-            navigate(`${subPath}/${productId}/specifications/create`)
+            navigate(`${PRODUCT_PATH}/${productId}/specifications/create`)
           }
         >
           New

@@ -46,7 +46,7 @@
       @apply hidden items-center gap-x-2 sm:flex;
 
       .icon {
-        @apply h-8 w-8;
+        @apply h-8 w-8 cursor-pointer;
       }
     }
 

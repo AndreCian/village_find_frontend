@@ -1,34 +1,49 @@
 import { useContext, useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-
-import { StyleCreateContext } from '../Layout';
+import { FaTimes } from 'react-icons/fa';
+import { enqueueSnackbar } from 'notistack';
 
 import { Input } from '@/components/forms';
 import { ChangeInputEvent } from '@/interfaces';
+import { HttpService } from '@/services';
+import { StyleCreateContext } from '../Layout';
+import { useAppDispatch, useAppSelector } from '@/redux/store';
+import { createStyle, updateStyle } from '@/redux/reducers';
+import { IAttribute } from '@/redux/reducers';
 
 import styles from './StyleCreate.module.scss';
-import { HttpService } from '@/services';
-import { enqueueSnackbar } from 'notistack';
-import { FaTimes } from 'react-icons/fa';
 
-export interface IAttribute {
-  _id?: string;
-  name: string;
-  values: string[];
-}
+const getSubRows = (
+  attrs: IAttribute[],
+  index: number,
+  current: { attrs: String[] },
+): any[] => {
+  if (attrs.length === 0) return [current];
+  return attrs[0].values
+    .map((value: string) =>
+      getSubRows(attrs.slice(1), index + 1, {
+        attrs: [
+          ...current.attrs,
+          value
+        ],
+      }),
+    )
+    .flat(1);
+};
 
 export function StyleCreate() {
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const location = useLocation();
   const pathname = location.pathname;
   const { productId, styleId } = useParams();
+  const storeStyles = useAppSelector(state => state.product.styles);
 
   const { attributes, setAttributes, styleName, setStyleName } =
     useContext(StyleCreateContext);
   const [currentAttrIndex, setCurrentAttrIndex] = useState(-1);
   const [currentValueIndex, setCurrentValueIndex] = useState(-1);
   const [isDirty, setIsDirty] = useState(false);
-  // const [isAttr]
 
   const onCreateAttrClick = () => {
     setAttributes([...attributes, { name: '', values: [] }]);
@@ -56,12 +71,12 @@ export function StyleCreate() {
       attributes.map((attribute: IAttribute, index: number) =>
         index === attrIndex
           ? {
-              ...attribute,
-              values: [
-                ...attribute.values,
-                `Value${attribute.values.length + 1}`,
-              ],
-            }
+            ...attribute,
+            values: [
+              ...attribute.values,
+              `Value${attribute.values.length + 1}`,
+            ],
+          }
           : attribute,
       ),
     );
@@ -91,11 +106,11 @@ export function StyleCreate() {
         attributes.map((attribute: IAttribute, _attrIndex: number) =>
           attrIndex === _attrIndex
             ? {
-                ...attribute,
-                values: attribute.values.map((value: string, _vIndex: number) =>
-                  _vIndex === vIndex ? e.target.value : value,
-                ),
-              }
+              ...attribute,
+              values: attribute.values.map((value: string, _vIndex: number) =>
+                _vIndex === vIndex ? e.target.value : value,
+              ),
+            }
             : attribute,
         ),
       );
@@ -108,52 +123,91 @@ export function StyleCreate() {
   };
 
   const onNextClick = () => {
-    if (styleId !== 'create') {
-      if (!isDirty) {
-        return navigate('attribute');
+    if (productId === 'create') {
+      if (styleId === 'create') {
+        const inventRows = getSubRows(attributes, 0, { attrs: [] }).map(
+          (row: any, index: number) => ({
+            ...row,
+            index,
+            inventory: 0,
+            price: 0,
+            status: 'active',
+          }));
+        dispatch(createStyle({
+          index: -1,
+          name: styleName,
+          attributes,
+          inventories: inventRows,
+          images: Array(inventRows.length).fill(null),
+          imageSrcs: Array(inventRows.length).fill(''),
+          status: 'active'
+        }));
+      } else {
+        dispatch(updateStyle({
+          id: Number(styleId),
+          style: {
+            name: styleName,
+            attributes,
+          }
+        }));
       }
-      return HttpService.put(`/styles/${styleId}`, {
-        name: styleName,
-        attributes,
-      }).then(response => {
-        const { status } = response;
+      navigate('attribute');
+    } else {
+      if (styleId !== 'create') {
+        if (!isDirty) {
+          return navigate('attribute');
+        }
+        return HttpService.put(`/styles/${styleId}`, {
+          name: styleName,
+          attributes,
+        }).then(response => {
+          const { status } = response;
+          if (status === 200) {
+            enqueueSnackbar('Attributes saved!', { variant: 'success' });
+            navigate('attribute');
+          }
+        });
+      }
+      HttpService.post(
+        `/styles`,
+        {
+          name: styleName,
+          attributes,
+        },
+        { productId },
+      ).then(response => {
+        const { status, styleId } = response;
         if (status === 200) {
           enqueueSnackbar('Attributes saved!', { variant: 'success' });
-          return navigate('attribute');
+          navigate(pathname.replace('create', `${styleId}/attribute`));
         }
       });
     }
-    HttpService.post(
-      `/styles`,
-      {
-        name: styleName,
-        attributes,
-      },
-      { productId },
-    ).then(response => {
-      const { status, styleId } = response;
-      if (status === 200) {
-        enqueueSnackbar('Attributes saved!', { variant: 'success' });
-        navigate(pathname.replace('create', `${styleId}/attribute`));
-      }
-    });
   };
 
   useEffect(() => {
-    if (styleId === 'create') {
-      setAttributes([]);
-      setStyleName('');
-      setCurrentAttrIndex(-1);
-      setCurrentValueIndex(-1);
-      return;
-    }
-    HttpService.get(`/styles/${styleId}`).then(response => {
-      const { status, style } = response;
-      if (status === 200) {
-        setAttributes(style.attributes || []);
-        setStyleName(style.name || '');
+    if (productId === 'create') {
+      const style = storeStyles.find(item => item.index === Number(styleId));
+      if (style) {
+        setStyleName(style.name);
+        setAttributes(style.attributes);
       }
-    });
+    } else {
+      if (styleId === 'create') {
+        setAttributes([]);
+        setStyleName('');
+        setCurrentAttrIndex(-1);
+        setCurrentValueIndex(-1);
+        return;
+      }
+      HttpService.get(`/styles/${styleId}`).then(response => {
+        const { status, style } = response;
+        if (status === 200) {
+          setAttributes(style.attributes || []);
+          setStyleName(style.name || '');
+        }
+      });
+    }
   }, [productId, styleId]);
 
   return (
@@ -194,7 +248,7 @@ export function StyleCreate() {
               <div className={styles.valueBar}>
                 {attribute.values.map((value: string, vIndex: number) =>
                   currentAttrIndex === attrIndex &&
-                  currentValueIndex === vIndex ? (
+                    currentValueIndex === vIndex ? (
                     <Input
                       key={vIndex}
                       className={styles.valueInput}

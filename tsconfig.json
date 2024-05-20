@@ -27,7 +27,8 @@
       "@/services/*": ["services/*"],
       "@/interfaces/*": ["interfaces/*"],
       "@/config/*": ["config/*"]
-    }
+    },
+    "typeRoots": ["node_modules/@types", "src/types"]
   },
   "include": ["src/**/*.ts", "src/**/*.tsx"],
   "exclude": ["node_modules"],

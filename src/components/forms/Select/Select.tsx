@@ -12,7 +12,7 @@ type BorderType = 'solid' | 'none';
 type BgColorType = 'primary' | 'secondary' | 'blue' | 'red' | 'white' | 'dark';
 
 export interface ISelectProps {
-  value?: string | null;
+  value?: string | string[];
   updateValue?: (e: string) => void;
   placeholder?: string;
   options?: (string | { _id?: string; name: string; value: string })[];
@@ -22,6 +22,7 @@ export interface ISelectProps {
   className?: string;
   disabled?: boolean;
   colorable?: boolean;
+  multiple?: boolean;
   colors?: { status: string; color: string }[];
 }
 
@@ -36,6 +37,7 @@ export function Select({
   className = '',
   disabled = false,
   colorable = false,
+  multiple = false,
   colors = [],
 }: ISelectProps) {
   const [anchor, setAnchor] = useState<boolean>(false);
@@ -50,16 +52,16 @@ export function Select({
   });
   const currentName = useMemo(() => {
     if (disabled) return placeholder;
-    const currentOption = options.find(item =>
-      typeof item === 'object'
-        ? item.value.toLowerCase() === value?.toLowerCase()
-        : item.toLowerCase() === value?.toLowerCase(),
-    );
-    return !currentOption
-      ? placeholder
-      : typeof currentOption === 'object'
-        ? currentOption.name
-        : currentOption;
+    if (multiple) {
+      const multiOpts = options.filter((item: any) => value.includes(typeof item === 'object' ? item.value : item.toLowerCase()));
+      return !multiOpts.length
+        ? placeholder
+        : multiOpts.map(item => typeof item === 'object' ? item.name : item).join(', ');
+    }
+    const curOpt = options.find((item: any) => typeof item === 'object'
+      ? item.value === value
+      : item.toLowerCase() === (value as string)?.toLowerCase())
+    return !curOpt ? placeholder : typeof curOpt === 'object' ? curOpt.name : curOpt;
   }, [value]);
 
   const selectRef = useRef<HTMLDivElement>(null);
@@ -101,7 +103,7 @@ export function Select({
   const onSelectOption = (option: string) => {
     if (disabled) return;
     updateValue(option);
-    setAnchor(false);
+    if (!multiple) setAnchor(false);
   };
 
   const onPositionFix = () => {
@@ -153,11 +155,12 @@ export function Select({
                     typeof option === 'object' ? option.value : option,
                   )
                 }
-                className={
-                  option === value || (option as any).value === value
-                    ? styles.activeItem
-                    : ''
-                }
+                className={clsx({
+                  [styles.activeItem]:
+                    option === value
+                    || (option as any).value === value
+                    || (multiple && value.includes((option as any).value))
+                })}
               >
                 {typeof option === 'object' ? option.name : option}
               </span>

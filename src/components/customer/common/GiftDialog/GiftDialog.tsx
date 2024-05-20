@@ -19,8 +19,8 @@ interface IGiftDialogProps {
 }
 
 interface IGiftInfo {
-  fullName: string;
-  contactNumber: string;
+  name: string;
+  phone: string;
   email: string;
   message: string;
 }
@@ -36,8 +36,8 @@ interface IDeliveryInfo {
 }
 
 const initialGiftInfo: IGiftInfo = {
-  fullName: '',
-  contactNumber: '',
+  name: '',
+  phone: '',
   email: '',
   message: '',
 };
@@ -57,8 +57,8 @@ const initialAddrOptions: string[] = [];
 export function GiftDialog({
   open,
   existing = true,
-  onClose = () => {},
-  onApply = () => {},
+  onClose = () => { },
+  onApply = () => { },
 }: IGiftDialogProps) {
   const [isGiftNew, setIsGiftNew] = useState(!existing);
   const [giftStage, setGiftStage] = useState(0);
@@ -162,17 +162,17 @@ export function GiftDialog({
               <div className={styles.elements}>
                 <div className={styles.horizon}>
                   <Input
-                    name="fullName"
+                    name="name"
                     placeholder="Full Name"
                     className={styles.input}
-                    value={giftInfo.fullName}
+                    value={giftInfo.name}
                     updateValue={onGiftInfoChange}
                   />
                   <Input
-                    name="contactNumber"
+                    name="phone"
                     placeholder="Contact Number"
                     className={styles.input}
-                    value={giftInfo.contactNumber}
+                    value={giftInfo.phone}
                     updateValue={onGiftInfoChange}
                   />
                 </div>
@@ -251,16 +251,16 @@ export function GiftDialog({
                 <p className={styles.title}>Who's receiving this order?</p>
                 <div className={styles.horizon}>
                   <Input
-                    name="fullName"
+                    name="name"
                     placeholder="Full Name"
-                    value={giftInfo.fullName}
+                    value={giftInfo.name}
                     updateValue={onGiftInfoChange}
                     className={styles.input}
                   />
                   <Input
-                    name="contactNumber"
+                    name="phone"
                     placeholder="Contact Number"
-                    value={giftInfo.contactNumber}
+                    value={giftInfo.phone}
                     updateValue={onGiftInfoChange}
                     className={styles.input}
                   />

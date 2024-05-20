@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import clsx from 'clsx';
 
 import { Button } from '@/components/forms';
@@ -7,26 +7,36 @@ import {
   CartItem,
   AddressPanel,
   Donation,
-  IShipping,
+  IRecipient,
   IDelivery,
 } from '@/components/customer/Checkout';
-import { HttpService } from '@/services';
 import { ICartItem } from '@/pages/customer';
+import { HttpService } from '@/services';
 
 import styles from './MyCart.module.scss';
+
+export interface IAddress {
+  _id?: string;
+  name: string;
+  address: string;
+  extras: string;
+  default?: boolean;
+}
 
 interface IMyCartProps {
   isLogin: boolean;
   onNextStep: () => void;
   cartItems: ICartItem[];
   setCartItems: (items: ICartItem[]) => void;
+  donation: number;
+  setDonation: (value: number) => void;
 }
 
 export interface IOrder {
+  _id?: string;
   cartId: string;
   orderId: number;
   vendor: {
-    shopName: string;
     images: {
       logoUrl: string;
     };
@@ -59,6 +69,9 @@ export interface IOrder {
         charge: number;
       }[];
     };
+    business: {
+      name: string;
+    }
   };
   inventory: {
     image: string;
@@ -72,33 +85,40 @@ export interface IOrder {
   };
   product: {
     name: string;
+    image: string;
     soldByUnit: string;
     deliveryTypes: string[];
     subscription?: {
-      frequency: string;
+      iscsa: boolean;
+      frequencies: string[];
       discount: number;
-      duration?: number;
-      startDate?: number;
-      endDate?: number;
+      csa: {
+        frequency: string;
+        duration: number;
+        startDate?: number;
+        endDate?: number;
+      }
     };
   };
   price: number;
   quantity: number;
+  image: string;
   deliveryType?: string;
   personalization: {
     message: string;
   };
+  buymode: string;
   subscription?: {
-    issubscribed: boolean;
     iscsa: boolean;
-    frequency: {
-      unit: string;
-      interval: number;
-    };
-    duration: number;
+    frequencies: string[];
+    subscribe?: string;
     discount: number;
-    startDate: string;
-    endDate: string;
+    csa: {
+      frequency: string;
+      duration: number;
+      startDate?: string;
+      endDate?: string;
+    }
   };
   pickuplocation?: {
     name: string;
@@ -113,31 +133,17 @@ export interface IOrder {
   gift: any;
 }
 
-const initialShipping: IShipping = {
-  fullName: '',
-  phone: '',
-  email: '',
-};
-
-const initialDelivery: IDelivery = {
-  street: '',
-  city: '',
-  country: '',
-  extra: '',
-  instruction: '',
-  state: '',
-  zipcode: 0,
-};
-
 export function MyCart({
   isLogin,
   onNextStep,
   cartItems,
   setCartItems,
+  donation,
+  setDonation,
 }: IMyCartProps) {
-  const [shipping, setShipping] = useState<IShipping>(initialShipping);
-  const [delivery, setDelivery] = useState<IDelivery>(initialDelivery);
-  const [donation, setDonation] = useState(0);
+  const [isShippingForm, setIsShippingForm] = useState(false);
+  const [currentCartID, setCurrentCartID] = useState('');
+  const [addressList, setAddressList] = useState<IAddress[]>([]);
 
   const onRemoveCartClick = (id: string) => () => {
     setCartItems(cartItems.filter(item => item._id !== id));
@@ -148,9 +154,9 @@ export function MyCart({
       cartItems.map(item =>
         item._id === id
           ? {
-              ...item,
-              subscription,
-            }
+            ...item,
+            subscription
+          }
           : item,
       ),
     );
@@ -164,18 +170,22 @@ export function MyCart({
 
   const onDeliveryChange = (id: string) => (_option: string) => {
     let option = _option;
-    if (
-      cartItems.find(item => item._id === id && item.deliveryType === _option)
-    ) {
+    const cartItem = cartItems.find(item => item._id === id && item.deliveryType === _option);
+    if (cartItem) {
       option = '';
+    } else {
+      if (_option === 'Home Delivery' || _option === 'Shipping') {
+        setIsShippingForm(true);
+        setCurrentCartID(id);
+      }
     }
     setCartItems(
       cartItems.map(item =>
         item._id === id
           ? {
-              ...item,
-              deliveryType: option,
-            }
+            ...item,
+            deliveryType: option,
+          }
           : item,
       ),
     );
@@ -186,15 +196,23 @@ export function MyCart({
       cartItems.map(item =>
         item._id === id
           ? {
-              ...item,
-              pickuplocation: data.location,
-              fulfillday: data.fulfillday,
-              deliveryType: 'Pickup Location',
-            }
+            ...item,
+            pickuplocation: data.location,
+            fulfillday: data.fulfillday,
+            deliveryType: 'Pickup Location',
+          }
           : item,
       ),
     );
   };
+
+  const onCurrentDeliveryChange = (delivery: IDelivery) => {
+    setCartItems(cartItems.map(item => item._id === currentCartID ? { ...item, delivery } : item));
+  }
+
+  const onCurrentRecipientChange = (recipient: IRecipient) => {
+    setCartItems(cartItems.map(item => item._id === currentCartID ? { ...item, recipient } : item));
+  }
 
   const onQuantityChange = (id: string) => (quantity: number) => {
     setCartItems(
@@ -202,18 +220,43 @@ export function MyCart({
     );
   };
 
+  const onBuymodeChange = (id: string) => (mode: string) => {
+    setCartItems(cartItems.map(item => item._id === id ? { ...item, buymode: mode } : item));
+  }
+
   const onCheckoutClick = () => {
-    HttpService.post('/cart/checkout', {
-      shipping,
-      delivery,
-      donation,
-  }).then(response => {
-      const { status } = response;
-      if (status === 200) {
-        onNextStep();
-      }
-    });
+    if (!isLogin) {
+      window.scrollTo(0, 0);
+    } else {
+      onNextStep();
+    }
   };
+
+  const getItemDelivery = () => {
+    const item = cartItems.find(item => item._id === currentCartID);
+    if (item?.gift) {
+      return item.gift.delivery;
+    }
+    return item?.delivery;
+  }
+
+  const getItemRecipient = () => {
+    const item = cartItems.find(item => item._id === currentCartID);
+    if (item?.gift) {
+      return item.gift.receiver;
+    }
+    return item?.recipient;
+  }
+
+  useEffect(() => {
+    if (!isLogin) {
+      setAddressList([]);
+    } else {
+      HttpService.get('/user/customer/address').then(response => {
+        setAddressList(response || []);
+      });
+    }
+  }, [isLogin]);
 
   return (
     <div className={styles.root}>
@@ -227,31 +270,36 @@ export function MyCart({
               orderId={cartItem.orderId}
               vendor={cartItem.vendorId}
               inventory={cartItem.inventoryId}
-              product={cartItem.inventoryId.productId}
+              product={cartItem.productId}
               price={cartItem.price}
               quantity={cartItem.quantity}
+              image={cartItem.image}
               personalization={cartItem.personalization}
+              buymode={cartItem.buymode}
               subscription={cartItem.subscription}
               deliveryType={cartItem.deliveryType}
               pickuplocation={cartItem.pickuplocation}
               fulfillday={cartItem.fulfillday}
               gift={cartItem.gift}
               onSubscribeChange={onSubscribeChange(cartItem._id)}
+              onBuymodeChange={onBuymodeChange(cartItem._id)}
               onGiftChange={onGiftChange(cartItem._id)}
               onDeleteCart={onRemoveCartClick(cartItem._id)}
               onDeliveryToggle={onDeliveryChange(cartItem._id)}
               onPickupLocationChange={onPickupLocationChange(cartItem._id)}
               onQuantityChange={onQuantityChange(cartItem._id)}
+              addressList={addressList}
             />
           ))}
         </div>
       </div>
-      <AddressPanel
-        shipping={shipping}
-        setShipping={setShipping}
-        delivery={delivery}
-        setDelivery={setDelivery}
-      />
+      {isShippingForm && <AddressPanel
+        addressList={addressList}
+        recipient={getItemRecipient()}
+        setRecipient={onCurrentRecipientChange}
+        delivery={getItemDelivery()}
+        setDelivery={onCurrentDeliveryChange}
+      />}
       <Donation donation={donation} setDonation={setDonation} />
       <Button
         className={clsx(

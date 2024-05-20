@@ -4,46 +4,51 @@ import { enqueueSnackbar } from 'notistack';
 import clsx from 'clsx';
 
 import { Input, Radio, TextField } from '@/components/forms';
-import { ChangeInputEvent } from '@/interfaces';
 import { HttpService } from '@/services';
+import { useAppDispatch, useAppSelector } from '@/redux/store';
+import { ICustomization, updateCustomization } from '@/redux/reducers';
+import { ChangeInputEvent } from '@/interfaces';
 
 import styles from './Customization.module.scss';
-
-const subPath = '/vendor/products';
-
-interface ICustomization {
-  customText?: string;
-  fee?: Number;
-}
 
 const initialCustomization: ICustomization = {
   customText: '',
   fee: 0,
 };
+const PRODUCT_PATH = '/vendor/products';
 
 export function Customization() {
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { productId } = useParams();
 
+  const isCustomizable = useAppSelector(state => state.product.iscustomizable);
+  const storeCustomization = useAppSelector(state => state.product.customization);
+
   const [isActivated, setIsActivated] = useState(false);
-  const [customization, setCustomization] = useState<ICustomization | null>(
-    null,
+  const [customization, setCustomization] = useState<ICustomization>(
+    initialCustomization
   );
 
   const onUpdateClick = () => {
-    HttpService.post(
-      `/products/${productId}/customization`,
-      customization,
-    ).then(response => {
-      const { status } = response;
-      if (status === 200) {
-        enqueueSnackbar('Customization updated successfully!', {
-          variant: 'success',
-        });
-      } else {
-        enqueueSnackbar('Something went wrong.', { variant: 'error' });
-      }
-    });
+    if (productId === 'create') {
+      dispatch(updateCustomization({ iscustomizable: isActivated, customization }));
+      navigate(`${PRODUCT_PATH}/${productId}/subscription`);
+    } else {
+      HttpService.post(
+        `/products/${productId}/customization`,
+        customization,
+      ).then(response => {
+        const { status } = response;
+        if (status === 200) {
+          enqueueSnackbar('Customization updated.', {
+            variant: 'success',
+          });
+        } else {
+          enqueueSnackbar('Something went wrong.', { variant: 'error' });
+        }
+      });
+    }
   };
 
   const onCustomChange = (e: ChangeInputEvent) => {
@@ -58,15 +63,19 @@ export function Customization() {
   };
 
   useEffect(() => {
-    HttpService.get(`/products/${productId}/customization`).then(response => {
-      const { status, customization } = response;
-      if (status === 200) {
-        const { customText, fee } = customization;
-        if (customText && fee) setIsActivated(true);
-        setCustomization(customization || initialCustomization);
-      }
-    });
-  }, []);
+    if (productId === 'create') {
+      setIsActivated(isCustomizable);
+      setCustomization(storeCustomization);
+    } else {
+      HttpService.get(`/products/${productId}/customization`).then(response => {
+        const { status, iscustomizable, customization } = response;
+        if (status === 200) {
+          setIsActivated(iscustomizable);
+          setCustomization(customization || initialCustomization);
+        }
+      });
+    }
+  }, [productId, isCustomizable, storeCustomization]);
 
   return (
     <div className={styles.container}>
@@ -116,14 +125,14 @@ export function Customization() {
         </div>
       </div>
       <div className={styles.buttonBar}>
-        <button className={styles.button} onClick={() => navigate(subPath)}>
+        <button className={styles.button} onClick={() => navigate(PRODUCT_PATH)}>
           Cancel
         </button>
         <button
           className={clsx(styles.button, styles.updateBtn)}
           onClick={onUpdateClick}
         >
-          Update
+          {productId === 'create' ? 'Save' : 'Update'}
         </button>
       </div>
     </div>

@@ -1,0 +1,26 @@
+.root {
+  @apply flex flex-col gap-y-8 rounded-md border-3 border-lightgray px-10 py-5;
+
+  > .header {
+    @apply flex items-center gap-x-4;
+    > p {
+      @apply text-[32px] font-bold leading-[43px];
+    }
+    > div {
+      @apply flex items-center gap-x-2;
+    }
+    svg {
+      @apply text-2xl;
+    }
+  }
+
+  > .control {
+    @apply flex gap-x-4;
+    > .input {
+      @apply w-[450px];
+      > input {
+        @apply p-4 focus:border-3 focus:border-danger;
+      }
+    }
+  }
+}

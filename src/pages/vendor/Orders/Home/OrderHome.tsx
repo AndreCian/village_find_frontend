@@ -1,26 +1,24 @@
 import { ChangeEvent, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { enqueueSnackbar } from 'notistack';
 import clsx from 'clsx';
 
 import { Card, TableBody, TableToolbar } from '@/components';
 import { Select, Input } from '@/components/forms';
 import { PrintIcon } from '@/components/icons';
-
+import { HttpService } from '@/services';
 import { IRange, ITableColumn } from '@/interfaces';
-
-import { formatDate, formatNumber } from '@/utils';
+import { formatNumber } from '@/utils';
 
 import styles from './OrderHome.module.scss';
-import { HttpService } from '@/services';
-import { enqueueSnackbar } from 'notistack';
 
 const sortOpts = [
-  'Home Delivery Only',
-  'Shipping Only',
-  'Pickup Only',
-  'Safe Pickup Only',
-  'Subscriptions Only',
-  'Alphabetical',
+  { name: 'Home Delivery Only', value: 'Home Delivery' },
+  { name: 'Shipping Only', value: 'Shipping' },
+  { name: 'Pickup Only', value: 'Pickup Location' },
+  { name: 'Safe Pickup Only', value: 'Safe Pickup' },
+  { name: 'Subscriptions Only', value: 'subscription' },
+  { name: 'Alphabetical', value: 'alphabeta' },
 ];
 
 const statusOpts = [
@@ -45,10 +43,9 @@ export interface IVendorOrder {
     name: string;
     email: string;
     phone: string;
-    message: string;
   };
+  deliveryType: string;
   deliveryInfo: {
-    orderDate: string;
     classification: string;
   };
   product: {
@@ -58,8 +55,8 @@ export interface IVendorOrder {
     quantity: number;
     discount: number;
   };
-  createdAt: string;
   status: string;
+  orderDate: string;
 }
 
 const statusList = [
@@ -118,7 +115,7 @@ export function OrderHome() {
       name: 'fulfillment',
       width: 200,
       cell: (row: IVendorOrder) => (
-        <span className={styles.cell}>{row.deliveryInfo.classification}</span>
+        <span className={styles.cell}>{row.deliveryType}</span>
       ),
     },
     {
@@ -130,7 +127,7 @@ export function OrderHome() {
           type="date"
           rounded="full"
           bgcolor="secondary"
-          value={row.deliveryInfo.orderDate}
+          value={row.orderDate.split('T')[0]}
         />
       ),
     },
@@ -145,7 +142,7 @@ export function OrderHome() {
             (row.product.price *
               row.product.quantity *
               (100 - row.product.discount)) /
-              100,
+            100,
           )}
         </span>
       ),
@@ -158,15 +155,6 @@ export function OrderHome() {
         <Select
           rounded="full"
           border="none"
-          bgcolor={
-            row.status === 'under process'
-              ? 'blue'
-              : row.status === 'canceled'
-              ? 'red'
-              : row.status === 'pause'
-              ? 'primary'
-              : 'white'
-          }
           value={row.status}
           updateValue={onStatusChange(row._id)}
           options={statusList.map(item => ({
@@ -202,7 +190,7 @@ export function OrderHome() {
 
   const onRangeChange =
     (which: string) => (e: ChangeEvent<HTMLInputElement>) => {
-      setRange({ ...range, [which]: new Date(e.target.value) });
+      setRange({ ...range, [which]: e.target.value });
     };
 
   const onStatusChange = (id: string) => (value: string) => {
@@ -219,6 +207,34 @@ export function OrderHome() {
     });
   };
 
+  const onSubmitClick = () => {
+    loadOrders({ filter, sort, category, range });
+  }
+
+  const onResetClick = () => {
+    setFilter('');
+    setSort('');
+    setCategory('');
+    setRange({ from: '', to: '' });
+    loadOrders();
+  }
+
+  const loadOrders = ({ filter = '', sort = '', category = '', range = { from: '', to: '' } }: any = {}) => {
+    const params: any = {};
+    if (filter) params.name = filter;
+    if (sort) params.sort = sort;
+    if (category) params.status = category;
+    if (range.from) params.from = range.from;
+    if (range.to) params.to = range.to;
+    HttpService.get('/order/vendor', params).then(response => {
+      setTableData(response);
+    });
+  }
+
+  useEffect(() => {
+    loadOrders();
+  }, []);
+
   return (
     <Card title="All Orders" className={styles.root}>
       <TableToolbar
@@ -234,7 +250,7 @@ export function OrderHome() {
         sort={sort}
         updateSort={(_sort: string) => setSort(_sort)}
         selectTitle="Status"
-        selectOpts={statusOpts}
+        selectOpts={statusOpts.map(item => ({ name: item, value: item.toLowerCase() }))}
         category={category}
         updateCategory={(_cat: string) => setCategory(_cat)}
         className={styles.tableToolbar}
@@ -242,13 +258,13 @@ export function OrderHome() {
           <div className={styles.actions}>
             <div>
               <p>Submit</p>
-              <button className={clsx(styles.button, styles.submit)}>
+              <button className={clsx(styles.button, styles.submit)} onClick={onSubmitClick}>
                 Submit
               </button>
             </div>
             <div>
               <p>Reset</p>
-              <button className={clsx(styles.button, styles.reset)}>
+              <button className={clsx(styles.button, styles.reset)} onClick={onResetClick}>
                 Reset
               </button>
             </div>

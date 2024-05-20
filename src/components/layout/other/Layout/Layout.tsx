@@ -6,13 +6,18 @@ import { HttpService } from '@/services';
 import { AuthContext } from '@/providers';
 import { setupToken } from '@/utils';
 import { useAppDispatch } from '@/redux/store';
-import { loadSubscriptions } from '@/redux/reducers/subscription';
+import { loadSubscriptions, loadMetrics } from '@/redux/reducers';
 
 import styles from './Layout.module.scss';
+
+const blackList = [
+  '/admin/login'
+];
 
 export function Layout() {
   const dispatch = useAppDispatch();
   const location = useLocation();
+  const pathname = location.pathname;
   const navigate = useNavigate();
   const isVendor = location.pathname.startsWith('/vendor');
 
@@ -20,7 +25,7 @@ export function Layout() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (isLogin || !isVendor) {
+    if (isLogin) {
       setIsLoading(false);
       return;
     }
@@ -29,29 +34,42 @@ export function Layout() {
     const token = localStorage.getItem(tokenKey);
     if (token) {
       setupToken(token, userRole);
-      HttpService.post(`/user/${userRole}/login`, {})
-        .then(response => {
-          const { status, profile } = response;
+      if (isVendor) {
+        HttpService.post(`/user/vendor/login`, {})
+          .then(response => {
+            const { status, profile } = response;
+            if (status === 200) {
+              setIsLogin(true);
+              setAccount({
+                role: 'vendor',
+                profile,
+              });
+            } else {
+              setupToken(null, 'vendor');
+              navigate('/login/vendor');
+            }
+          })
+          .catch(err => {
+            setupToken(null, 'vendor');
+            navigate('/login/vendor');
+          })
+          .finally(() => {
+            setIsLoading(false);
+          });
+      } else {
+        HttpService.post('/admin/login', {}).then(response => {
+          const { status } = response;
           if (status === 200) {
             setIsLogin(true);
-            setAccount({
-              role: userRole,
-              profile,
-            });
           } else {
-            setupToken(null, userRole);
-            navigate(userRole === 'vendor' ? '/login/vendor' : '');
+            setupToken(null, 'admin');
           }
-        })
-        .catch(err => {
-          setupToken(null, userRole);
-          navigate(userRole === 'vendor' ? '/login/vendor' : '');
-        })
-        .finally(() => {
-          setIsLoading(false);
-        });
+        }).catch(err => {
+          setupToken(null, 'admin')
+        }).finally(() => { setIsLoading(false) });
+      }
     } else {
-      navigate(userRole === 'vendor' ? '/login/vendor' : '');
+      navigate(isVendor ? '/login/vendor' : '/admin/login');
     }
   }, []);
 
@@ -59,15 +77,20 @@ export function Layout() {
     HttpService.get('/subscriptions').then(response => {
       dispatch(loadSubscriptions(response));
     });
+    HttpService.get('/settings/general/metric').then(response => {
+      dispatch(loadMetrics(response));
+    })
   }, []);
 
   return (
-    <div className={styles.root}>
-      <Sidebar />
-      <div className={styles.container}>
-        <Header />
-        {!isLoading && <Outlet />}
+    blackList.includes(pathname)
+      ? <Outlet />
+      : <div className={styles.root}>
+        <Sidebar />
+        <div className={styles.container}>
+          <Header />
+          {!isLoading && <Outlet />}
+        </div>
       </div>
-    </div>
   );
 }

@@ -1,93 +1,107 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { enqueueSnackbar } from 'notistack';
 import clsx from 'clsx';
 
 import { Input, Select } from '@/components';
+import { useAppDispatch, useAppSelector } from '@/redux/store';
+import { updateSubscription, ISubscription, updateGeneral } from '@/redux/reducers';
+import { ProductContext } from '../Provider';
 import { HttpService } from '@/services';
+import { ChangeInputEvent } from '@/interfaces';
+import { getBubbleObject } from '@/utils';
 
 import styles from './Subscription.module.scss';
-import { enqueueSnackbar } from 'notistack';
-import { ChangeInputEvent } from '@/interfaces';
-
-interface ISubscription {
-  frequency: string;
-  discount: number;
-  duration?: number;
-  startDate?: string;
-  endDate?: string;
-}
 
 const initialSubscription: ISubscription = {
-  frequency: '',
+  iscsa: false,
+  frequencies: [],
   discount: 0,
-  duration: 0,
-  startDate: '',
-  endDate: '',
 };
 
-const freqOpts = [
-  'Weekly',
-  'Every month',
-  'Every 2 months',
-  'Every 3 months',
-  'Every 6 months',
+const frequencyOpts = [
+  { name: 'Weekly', value: '1-week' },
+  { name: 'Every month', value: '1-month' },
+  { name: 'Every 2 months', value: '2-month' },
+  { name: 'Every 3 months', value: '3-month' },
+  { name: 'Every 6 months', value: '6-month' },
 ];
 
-const subPath = '/vendor/products';
+const PRODUCT_PATH = '/vendor/products';
 
 export function Subscription() {
-  const { productId } = useParams();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const { productId } = useParams();
+
+  const storeSubscription = useAppSelector(state => state.product.subscription);
+  const { deliveryTypes, setDeliveryTypes } = useContext(ProductContext);
 
   const [subscription, setSubscription] =
     useState<ISubscription>(initialSubscription);
-  const [deliveryTypes, setDeliveryTypes] = useState<string[]>([]);
+
+  const isCsa = useMemo(() => {
+    if (deliveryTypes.length > 0) {
+      const result = deliveryTypes.includes('Local Subscriptions');
+      setSubscription({ ...subscription, iscsa: result });
+      return result;
+    } else {
+      return subscription.iscsa;
+    }
+  }, [deliveryTypes, subscription]);
 
   const onCancelClick = () => {
-    navigate(`${subPath}`);
+    navigate(`${PRODUCT_PATH}/${productId}`);
   };
 
   const onSubscInputChange = (e: ChangeInputEvent) => {
-    setSubscription({ ...subscription, [e.target.name]: e.target.value });
+    setSubscription(getBubbleObject(e.target.name, subscription, e.target.value));
   };
 
   const onSubscFrequencyChange = (value: string) => {
-    setSubscription({ ...subscription, frequency: value });
+    if (subscription.frequencies.includes(value)) {
+      setSubscription({
+        ...subscription, frequencies: subscription.frequencies.filter(item => item !== value)
+      });
+    } else {
+      setSubscription({ ...subscription, frequencies: [...subscription.frequencies, value] });
+    }
   };
 
-  const onUpdateClick = () => {
-    const reqJson: ISubscription = {
-      frequency: subscription.frequency,
-      discount: subscription.discount,
-    };
-    if (deliveryTypes.includes('Local Subscriptions')) {
-      reqJson.duration = subscription.duration;
-      reqJson.startDate = subscription.startDate;
-      reqJson.endDate = subscription.endDate;
-    }
-    HttpService.post(`/products/${productId}/subscription`, reqJson).then(
-      response => {
-        const { status } = response;
+  const onCsaSubscFrequencyChange = (value: string) => {
+    setSubscription({ ...subscription, csa: { duration: 1, ...subscription.csa, frequency: value } })
+  }
 
+  const onUpdateClick = () => {
+    if (productId === 'create') {
+      dispatch(updateSubscription(subscription));
+      navigate(`${PRODUCT_PATH}/${productId}`);
+    } else {
+      HttpService.post(`/products/${productId}/subscription`, subscription).then(response => {
+        const { status } = response;
         if (status === 200) {
           enqueueSnackbar('Subscription updated.', { variant: 'success' });
-        } else {
-          enqueueSnackbar('Something went wrong!', { variant: 'error' });
         }
-      },
-    );
+      })
+    }
   };
 
   useEffect(() => {
-    HttpService.get(`/products/vendor/${productId}`).then(response => {
-      const { status, product } = response;
+    if (productId === 'create') {
+      setSubscription(storeSubscription);
+    } else {
+      HttpService.get(`/products/vendor/${productId}`).then(response => {
+        const { status, product } = response;
 
-      if (status === 200) {
-        setDeliveryTypes(product.deliveryTypes || []);
-        setSubscription(product.subscription || initialSubscription);
-      }
-    });
-  }, []);
+        if (status === 200) {
+          setSubscription({
+            ...product.subscription,
+            iscsa: product.deliveryTypes.includes('Local Subscriptions')
+          });
+        }
+      });
+    }
+  }, [productId, storeSubscription]);
 
   return (
     <div className={styles.container}>
@@ -102,10 +116,11 @@ export function Subscription() {
                 border="none"
                 bgcolor="primary"
                 placeholder="Select frequency"
-                value={subscription.frequency}
+                value={subscription.frequencies}
+                multiple={true}
                 updateValue={onSubscFrequencyChange}
-                options={freqOpts}
-                disabled={deliveryTypes.includes('Local Subscriptions')}
+                options={frequencyOpts}
+                disabled={isCsa}
               />
             </div>
             <div className={styles.control}>
@@ -117,9 +132,9 @@ export function Subscription() {
                 bgcolor="secondary"
                 adornment={{ position: 'left', content: '%' }}
                 placeholder="Subscription Discount"
-                value={subscription.discount}
+                value={(!isCsa && subscription.discount) || ''}
                 updateValue={onSubscInputChange}
-                disabled={deliveryTypes.includes('Local Subscriptions')}
+                disabled={isCsa}
               />
             </div>
           </div>
@@ -134,10 +149,10 @@ export function Subscription() {
                 border="none"
                 bgcolor="primary"
                 placeholder="Select frequency"
-                value={subscription.frequency}
-                updateValue={onSubscFrequencyChange}
-                disabled={deliveryTypes.includes('Shipping')}
-                options={freqOpts}
+                value={subscription.csa?.frequency}
+                updateValue={onCsaSubscFrequencyChange}
+                disabled={!isCsa}
+                options={frequencyOpts}
               />
             </div>
             <div className={styles.control}>
@@ -149,9 +164,9 @@ export function Subscription() {
                 bgcolor="secondary"
                 adornment={{ position: 'left', content: '%' }}
                 placeholder="Subscription Discount"
-                value={subscription.discount}
+                value={(isCsa && subscription.discount) || ''}
                 updateValue={onSubscInputChange}
-                disabled={deliveryTypes.includes('Shipping')}
+                disabled={!isCsa}
               />
             </div>
           </div>
@@ -159,14 +174,14 @@ export function Subscription() {
             <div className={styles.control}>
               <p>Subscription Duration</p>
               <Input
-                name="duration"
+                name="csa.duration"
                 border="none"
                 bgcolor="secondary"
                 adornment={{ position: 'right', content: 'Weeks' }}
                 placeholder="Number"
-                value={subscription.duration}
+                value={(isCsa && subscription.csa?.duration) || ''}
                 updateValue={onSubscInputChange}
-                disabled={deliveryTypes.includes('Shipping')}
+                disabled={!isCsa}
               />
             </div>
           </div>
@@ -178,28 +193,28 @@ export function Subscription() {
               </p>
               <Input
                 type="date"
-                name="startDate"
+                name="csa.startDate"
                 rounded="full"
                 border="none"
                 bgcolor="secondary"
                 placeholder="--/--/----"
-                value={subscription.startDate}
+                value={subscription.csa?.startDate}
                 updateValue={onSubscInputChange}
-                disabled={deliveryTypes.includes('Shipping')}
+                disabled={!isCsa}
               />
             </div>
             <div className={styles.control}>
               <p>End Date</p>
               <Input
                 type="date"
-                name="endDate"
+                name="csa.endDate"
                 rounded="full"
                 border="none"
                 bgcolor="secondary"
                 placeholder="--/--/----"
-                value={subscription.endDate}
+                value={subscription.csa?.endDate}
                 updateValue={onSubscInputChange}
-                disabled={deliveryTypes.includes('Shipping')}
+                disabled={!isCsa}
               />
             </div>
           </div>
@@ -213,7 +228,7 @@ export function Subscription() {
           className={clsx(styles.button, styles.updateBtn)}
           onClick={onUpdateClick}
         >
-          Update
+          {productId === 'create' ? 'Save' : 'Update'}
         </button>
       </div>
     </div>

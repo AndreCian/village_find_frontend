@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { useRoutes } from 'react-router-dom';
 
 import {
@@ -10,6 +11,7 @@ import { superAdminRoutes } from '@/routes/super-admin';
 import { customerRoutes } from '@/routes/customer';
 import { vendorRoutes } from '@/routes/vendor';
 import { communityRoutes } from '@/routes/community';
+import { LoadingSpinner } from '@/components';
 
 const routes = [
   {
@@ -35,7 +37,15 @@ const routes = [
 ];
 
 function Routes() {
-  return useRoutes(routes);
+  const [isRouteLoading, setIsRouteLoading] = useState(false);
+
+  useEffect(() => {
+    if (customerRoutes.length && vendorRoutes.length && communityRoutes.length && customerRoutes.length) {
+      setIsRouteLoading(true);
+    }
+  }, [superAdminRoutes, customerRoutes, vendorRoutes, communityRoutes]);
+
+  return !isRouteLoading ? <LoadingSpinner isPageLoading={true} /> : useRoutes(routes);
 }
 
 export { superAdminRoutes, customerRoutes, vendorRoutes, routes };

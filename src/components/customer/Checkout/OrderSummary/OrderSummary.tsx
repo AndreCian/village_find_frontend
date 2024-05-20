@@ -1,8 +1,7 @@
-import { useMemo, useState } from 'react';
 import clsx from 'clsx';
 
 import { Button, Input } from '@/components/forms';
-import { ICartItem, ISummary } from '@/pages/customer';
+import { ISummary } from '@/pages/customer';
 
 import styles from './OrderSummary.module.scss';
 
@@ -21,15 +20,15 @@ interface IOrderSummaryProps {
 }
 
 export function OrderSummary({ summary }: IOrderSummaryProps) {
-  const onCouponApply = () => {};
+  const onCouponApply = () => { };
 
   const formatText = (price: number | string) => {
     if (typeof price === 'string') return price;
     return price === 0
-      ? 'Free'
+      ? 0
       : price < 0
-      ? `-$${(-price).toFixed(2)}`
-      : `$${price.toFixed(2)}`;
+        ? `-$${(-price).toFixed(2)}`
+        : `$${price.toFixed(2)}`;
   };
 
   return (

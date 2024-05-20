@@ -10,12 +10,6 @@ import { HttpService } from '@/services';
 
 import styles from './Home.module.scss';
 
-interface ICategory {
-  _id?: string;
-  name: string;
-  value: string;
-}
-
 interface ICommunity {
   vcomId: string;
   backImage: string;
@@ -128,7 +122,7 @@ export function Home() {
             </div>
             <div className={styles.header}>
               <div className={styles.title}>
-                <p>{}</p>
+                <p>{ }</p>
                 <span>{communities.length} Communities</span>
               </div>
               <Input

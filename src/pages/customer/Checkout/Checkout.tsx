@@ -6,7 +6,6 @@ import clsx from 'clsx';
 
 import { Container } from '@/components/layout/customer';
 
-import { STRIPE_PUBLISH_KEY } from '@/config/global';
 import {
   AuthPanel,
   MyCart,
@@ -14,9 +13,13 @@ import {
   Payment,
   ShippingMode,
   Complete,
+  IDelivery,
+  IRecipient
 } from '@/components/customer/Checkout';
+import { useAppSelector } from '@/redux/store';
 import { HttpService } from '@/services';
 import { AuthContext } from '@/providers';
+import { STRIPE_PUBLISH_KEY } from '@/config/global';
 
 import styles from './Checkout.module.scss';
 
@@ -27,7 +30,6 @@ export interface ICartItem {
   orderId: number;
   vendorId: {
     stripeAccountID: string;
-    shopName: string;
     images: {
       logoUrl: string;
     };
@@ -60,6 +62,20 @@ export interface ICartItem {
         charge: number;
       }[];
     };
+    business: {
+      name: string;
+    }
+  };
+  productId: {
+    name: string;
+    image: string;
+    soldByUnit: string;
+    subscription?: any;
+    personalization?: {
+      message: string;
+    };
+    attrs: object;
+    deliveryTypes: string[];
   };
   inventoryId: {
     attrs: any;
@@ -70,35 +86,29 @@ export interface ICartItem {
         name: string;
       }[];
     };
-    productId: {
-      name: string;
-      soldByUnit: string;
-      subscription?: any;
-      personalization?: {
-        message: string;
-      };
-      attrs: object;
-      deliveryTypes: string[];
-    };
   };
-  quantity: number;
   price: number;
+  quantity: number;
+  image: string;
   deliveryType?: string;
+  delivery: IDelivery;
+  recipient: IRecipient;
   personalization: {
     fee: number;
     message: string;
   };
+  buymode: string;
   subscription: {
-    issubscribed: boolean;
     iscsa: boolean;
-    frequency: {
-      unit: string;
-      interval: number;
-    };
-    duration: number;
+    subscribe?: string;
+    frequencies: string[];
     discount: number;
-    startDate: string;
-    endDate: string;
+    csa: {
+      frequency: string;
+      duration: number;
+      startDate?: string;
+      endDate?: string;
+    }
   };
   pickuplocation: {
     name: string;
@@ -133,19 +143,38 @@ const initialSummary: ISummary = {
   giftShippingFee: 'Calculated on next page',
 };
 
+const getCsaCycle = (csa: { frequency: string; duration: number; }) => {
+  const values = csa.frequency.split('-');
+  const period = Number(values[0]) || 1;
+  return Math.floor(csa.duration / period);
+}
+
 export function Checkout() {
   const [searchParams] = useSearchParams();
-  const context = useContext(AuthContext);
+
+  const { isLogin, account } = useContext(AuthContext);
+  const guestID = useAppSelector(state => state.guest.guestID);
+
   const [step, setStep] = useState(0);
-  const [cartItems, setCartItems] = useState<ICartItem[]>([]);
+  const [donation, setDonation] = useState(0);
+  const [shipping, setShipping] = useState('');
   const [summary, setSummary] = useState<ISummary>(initialSummary);
+  const [cartItems, setCartItems] = useState<ICartItem[]>([]);
 
   const onNextStep = () => {
     setStep(step + 1);
   };
 
   useEffect(() => {
-    HttpService.get('/cart').then(response => {
+    const params: any = {};
+    if (isLogin) {
+      params.mode = 'customer';
+      params.buyerID = account?.profile._id;
+    } else {
+      params.mode = 'guest';
+      params.buyerID = guestID;
+    }
+    HttpService.get('/cart', params).then(response => {
       const { status } = response;
       if (!status) {
         setCartItems(response || []);
@@ -164,15 +193,12 @@ export function Checkout() {
 
   useEffect(() => {
     const subTotal = cartItems.reduce((tot: number, item: ICartItem) => {
-      if (
-        item.inventoryId.productId.deliveryTypes.includes('Local Subscriptions')
-      ) {
+      if (item.subscription.iscsa) {
         return (
           tot +
           (item.price *
             item.quantity *
-            item.inventoryId.productId.subscription.duration) /
-            100
+            getCsaCycle(item.productId.subscription.csa))
         );
       }
       return tot + item.price * item.quantity;
@@ -202,22 +228,26 @@ export function Checkout() {
       className={clsx(styles.root, { [styles.fullWidth]: step === 3 })}
     >
       <div className={styles.contentPanel}>
-        {step !== 3 && <AuthPanel isLogin={context.isLogin} />}
+        {step !== 3 && <AuthPanel isLogin={isLogin} />}
         {step === 0 ? (
           <MyCart
-            isLogin={context.isLogin}
+            isLogin={isLogin}
             onNextStep={onNextStep}
             cartItems={cartItems}
             setCartItems={setCartItems}
+            donation={donation}
+            setDonation={setDonation}
           />
         ) : step === 1 ? (
-          <ShippingMode onNextStep={onNextStep} />
+          <ShippingMode onNextStep={onNextStep} shipping={shipping} setShipping={setShipping} />
         ) : step === 2 ? (
           <Elements stripe={stripePromise}>
             <Payment
               onNextStep={onNextStep}
               summary={summary}
               cartItems={cartItems}
+              donation={donation}
+              shipping={shipping}
             />
           </Elements>
         ) : (

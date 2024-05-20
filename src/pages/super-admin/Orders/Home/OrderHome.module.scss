@@ -36,7 +36,7 @@
       }
     }
     > div:nth-child(2) {
-      @apply max-w-[250px];
+      @apply left-1/2 min-w-[250px] -translate-x-1/2 transform;
     }
   }
 

@@ -8,8 +8,10 @@ import { TrashIcon } from '@/components/icons';
 
 import { HttpService } from '@/services';
 import { ChangeInputEvent, ITableColumn } from '@/interfaces';
-import { SERVER_URL } from '@/config/global';
+import { useAppDispatch } from '@/redux/store';
+import { resetProduct } from '@/redux/reducers';
 import { capitalizeFirstLetter } from '@/utils';
+import { SERVER_URL } from '@/config/global';
 
 import styles from './Products.module.scss';
 
@@ -25,6 +27,7 @@ const statusList = ['Active', 'Inactive', 'Delete'];
 const sortOptions = ['Newest', 'Oldest', 'Active', 'Inactive'];
 
 export function Products() {
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const [products, setProducts] = useState<IProductItem[]>([]);
   const [nameFilter, setNameFilter] = useState('');
@@ -53,10 +56,16 @@ export function Products() {
     );
   };
 
+  const onNewBtnClick = () => {
+    dispatch(resetProduct());
+    navigate('create');
+  }
+
   const onProductDeleteClick = (id: string) => () => {
     HttpService.delete(`/products/${id}`).then(response => {
       const { status } = response;
       if (status === 200) {
+        setProducts(products.filter(item => item._id !== id));
         enqueueSnackbar('Product deleted.', { variant: 'success' });
       }
     });
@@ -188,7 +197,7 @@ export function Products() {
           <div className={styles.buttonBar}>
             <button
               className={styles.button}
-              onClick={() => navigate('create')}
+              onClick={onNewBtnClick}
             >
               New
             </button>

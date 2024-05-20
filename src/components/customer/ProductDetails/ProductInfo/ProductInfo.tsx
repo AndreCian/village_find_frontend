@@ -1,17 +1,19 @@
-import { useMemo, useState } from 'react';
+import { useContext, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaChevronDown, FaChevronUp, FaMinus, FaPlus } from 'react-icons/fa6';
 import { enqueueSnackbar } from 'notistack';
+import clsx from 'clsx';
 
 import { ImageUpload, Select, TextField, Button } from '@/components/forms';
 
 import { HttpService } from '@/services';
-import { IOrderDetail } from '@/pages/customer/ProductDetails';
+import { IOrderDetail } from '@/pages/customer';
+import { AuthContext } from '@/providers';
+import { useAppSelector } from '@/redux/store';
+import { ChangeInputEvent } from '@/interfaces';
 import { SERVER_URL } from '@/config/global';
 
 import styles from './ProductInfo.module.scss';
-import clsx from 'clsx';
-import { ChangeInputEvent } from '@/interfaces';
 
 interface ICartProduct {
   styleID: string;
@@ -19,11 +21,38 @@ interface ICartProduct {
   image: File | null;
 }
 
+const frequencyOpts = [
+  { name: 'Weekly', value: '1-week' },
+  { name: 'Every month', value: '1-month' },
+  { name: 'Every 2 months', value: '2-month' },
+  { name: 'Every 3 months', value: '3-month' },
+  { name: 'Every 6 months', value: '6-month' },
+];
+
+const durationOpts = [
+  { name: 'Week', value: 'week' },
+  { name: 'Month', value: 'month' }
+];
+
+const getFrequencyName = (frequency: string) => {
+  const option = frequencyOpts.find(item => item.value === frequency);
+  return option?.name || '';
+}
+
+const getFrequencyUnit = (frequency: string) => {
+  const values = frequency.split('-');
+  const option = durationOpts.find(item => item.value === values[1]);
+  return option?.name || '';
+}
+
 export function ProductInfo({
+  _id: productId,
   name,
+  price,
+  image,
   vendor,
   community,
-  styles: types,
+  styles: variants,
   inventories,
   customization = { fee: 0, customText: '' },
   subscription,
@@ -32,64 +61,49 @@ export function ProductInfo({
 }: IOrderDetail) {
   const navigate = useNavigate();
 
+  const { isLogin, account } = useContext(AuthContext);
+  const guestID = useAppSelector(state => state.guest.guestID);
+
   const [cartProduct, setCartProduct] = useState<ICartProduct>({
     styleID: '',
     quantity: 0,
     image: null,
   });
-  const [attributes, setAttributes] = useState<
-    {
-      _id: string;
-      value: string;
-    }[]
-  >([]);
+  const [attributes, setAttributes] = useState<string[]>([]);
   const [isPersonalized, setIsPersonalized] = useState<Boolean>(false);
   const [customMessage, setCustomMessage] = useState('');
 
-  const defaultPrice = useMemo(
-    () => (inventories.length && inventories[0].price) || 0,
-    [inventories],
-  );
-  const defaultDiscount = useMemo(
-    () => (types.length && types[0].discount) || 0,
-    [styles],
-  );
-  const defaultOffPrice = useMemo(
-    () => (defaultPrice * (100 - defaultDiscount)) / 100.0,
-    [defaultPrice, defaultDiscount],
-  );
-  const defaultImage = useMemo(() => {
-    return inventories.find((invent: any) => invent.image)?.image || '';
-  }, [inventories]);
-
   const selectedStyle = useMemo(() => {
-    return types.find((type: any) => type._id === cartProduct.styleID);
+    const variant = variants.find((type: any) => type._id === cartProduct.styleID);
+    return variant;
   }, [cartProduct.styleID]);
   const selectedInvent = useMemo(() => {
     return inventories.find((item: any) =>
-      attributes.every(
-        (attribute: { _id: string; value: string }) =>
-          item.attrs[attribute._id] === attribute.value,
-      ),
+      attributes.every((attribute: string, index: number) => item.attrs[index] === attribute)
     );
   }, [attributes, inventories]);
 
   const productPrice = useMemo(() => {
-    return (selectedInvent && selectedInvent.price) || defaultPrice;
-  }, [selectedInvent, defaultPrice]);
+    return (selectedInvent && selectedInvent.price) || price;
+  }, [selectedInvent, price]);
   const productDiscount = useMemo(() => {
-    return (
-      (subscription && subscription.discount) ||
-      (selectedStyle && selectedStyle.discount) ||
-      defaultDiscount
-    );
-  }, [selectedStyle, defaultDiscount, subscription]);
+    return (subscription?.iscsa)
+      ? (subscription.discount + (selectedStyle?.discount || 0))
+      : (selectedStyle?.discount || 0)
+  }, [selectedStyle, subscription]);
   const productOffPrice = useMemo(() => {
-    return (productPrice * (100 - productDiscount)) / 100.0 || defaultOffPrice;
-  }, [productPrice, productDiscount, defaultOffPrice]);
+    return (productPrice * (100 - productDiscount)) / 100.0;
+  }, [productPrice, productDiscount]);
   const productImage = useMemo(() => {
-    return (selectedInvent && selectedInvent.image) || defaultImage;
-  }, [selectedInvent]);
+    return (selectedInvent && selectedInvent.image) || image;
+  }, [image, selectedInvent]);
+  const csaCycle = useMemo(() => {
+    if (subscription?.iscsa) {
+      const values = subscription.csa?.frequency.split('-') || '';
+      return Number((subscription.csa?.duration || 0) / Number(values[0] || 1));
+    }
+    return 0;
+  }, [subscription]);
 
   const onMinusClick = () => {
     if (cartProduct.quantity === 0) return;
@@ -101,7 +115,9 @@ export function ProductInfo({
   };
 
   const onStyleChange = (id: string) => {
+    const style = variants.find(item => item._id === id);
     setCartProduct({ ...cartProduct, styleID: id });
+    setAttributes(Array(style?.attributes.length).fill(''));
   };
 
   const onImageChange = (imageSrc: File) => {
@@ -109,102 +125,51 @@ export function ProductInfo({
   };
 
   const onAddCartClick = () => {
-    if (!selectedStyle) {
-      enqueueSnackbar('Please select one of product styles.', {
-        variant: 'warning',
-      });
-      return;
-    }
-    if (selectedStyle.attributes.length !== Object.keys(attributes).length) {
-      enqueueSnackbar('Please select product attributes.', {
-        variant: 'warning',
-      });
-      return;
-    }
-    if (!selectedInvent) {
-      enqueueSnackbar('Invalid product attribute selection.', {
-        variant: 'warning',
-      });
-      return;
-    }
     if (!cartProduct.quantity) {
-      enqueueSnackbar('Please select at least a product.', {
-        variant: 'warning',
-      });
-      return;
+      return enqueueSnackbar('Select product quantity.', { variant: 'warning' });
     }
 
     const reqJson: any = {
-      inventoryId: selectedInvent._id,
       vendorId: vendor._id,
-      price: productOffPrice + (isPersonalized ? customization.fee : 0),
+      productId,
+      name,
+      price: productOffPrice,
       quantity: cartProduct.quantity,
-      discount: productDiscount,
+      image: productImage,
+      discount: productDiscount
     };
-    if (isPersonalized) {
-      reqJson.personalization = {
-        fee: customization.fee,
-        message: customMessage,
-      };
-    }
-    if (subscription) {
-      reqJson.subscription = {
-        duration: subscription.duration,
-        discount: subscription.discount,
-        startDate: subscription.startDate,
-        endDate: subscription.endDate,
-      };
-      if (deliveryTypes.includes('Local Subscriptions')) {
-        reqJson.subscription.issubscribed = true;
-        reqJson.subscription.iscsa = true;
-        reqJson.subscription.frequency = {
-          unit:
-            subscription.frequency.toLowerCase() === 'weekly'
-              ? 'week'
-              : subscription.frequency === 'monthly'
-                ? 'month'
-                : '',
-          interval: subscription.duration,
-        };
-      }
+    if (subscription) reqJson.subscription = subscription;
+
+    const params: any = {};
+    if (isLogin) {
+      params.mode = 'customer';
+      params.buyerID = account?.profile._id;
+    } else {
+      params.mode = 'guest';
+      params.buyerID = guestID;
     }
 
-    HttpService.post('/cart', reqJson).then(response => {
+    HttpService.post('/cart', reqJson, params).then(response => {
       const { status } = response;
       if (status === 200) {
-        enqueueSnackbar(`Product: ${name} added to cart.`, {
-          variant: 'success',
-        });
+        enqueueSnackbar('Product added to cart.', { variant: 'success' });
         navigate('/checkout');
-      } else if (status === 400) {
-        enqueueSnackbar('Already purchased same product type.', {
-          variant: 'warning',
-        });
-      } else {
-        enqueueSnackbar('Something went wrong.', { variant: 'error' });
       }
+    })
+  };
+
+  const onAttributeChange = (index: number) => (value: string) => {
+    setAttributes(attributes.map((item: string, id: number) => id === index ? value : item));
+  };
+
+  const onImageClick = (attribute: string[]) => () => {
+    const style = variants.find(variant => {
+      return variant.attributes.every((attr, index) => attr.values.includes(attribute[index]));
     });
-  };
-
-  const onAttributeChange = (attrId: string) => (value: string) => {
-    if (attributes.find(item => item._id === attrId)) {
-      setAttributes(
-        attributes.map(item =>
-          item._id === attrId ? { _id: item._id, value } : item,
-        ),
-      );
-    } else {
-      setAttributes([...attributes, { _id: attrId, value }]);
+    if (style) {
+      setAttributes(attribute);
+      setCartProduct({ ...cartProduct, styleID: style._id });
     }
-  };
-
-  const onImageClick = (attribute: any) => () => {
-    setAttributes(
-      Object.keys(attribute).map((key: string) => ({
-        _id: key,
-        value: attribute[key],
-      })),
-    );
   };
 
   const onMessageChange = (e: ChangeInputEvent) => {
@@ -253,10 +218,11 @@ export function ProductInfo({
               />
             ))}
         </div>
-        <img
-          src={`${SERVER_URL}/${productImage}`}
-          className={styles.topicImage}
-        />
+        <div className={styles.topicImage}>
+          <img
+            src={`${SERVER_URL}/${productImage}`}
+          />
+        </div>
         <img />
       </div>
       <div className={styles.info}>
@@ -280,10 +246,10 @@ export function ProductInfo({
           <p className={styles.centPrice}>
             Minimum {1} {soldByUnit} at ${productPrice}/{soldByUnit}
           </p>
-          <div className={styles.style}>
+          {variants.length !== 0 && <div className={styles.style}>
             <Select
               placeholder="Style"
-              options={types.map((style: { _id: string; name: string }) => ({
+              options={variants.map((style: { _id: string; name: string }) => ({
                 ...style,
                 value: style._id,
               }))}
@@ -292,19 +258,16 @@ export function ProductInfo({
               className={styles.styleSelect}
             />
             {selectedStyle &&
-              selectedStyle.attributes.map((attribute: any) => (
+              selectedStyle.attributes.map((attribute: any, index: number) => (
                 <Select
                   className={styles.styleSelect}
                   placeholder={attribute.name}
                   options={attribute.values}
-                  value={
-                    attributes.find(item => item._id === attribute._id)
-                      ?.value || ''
-                  }
-                  updateValue={onAttributeChange(attribute._id)}
+                  value={attributes[index]}
+                  updateValue={onAttributeChange(index)}
                 />
               ))}
-          </div>
+          </div>}
         </div>
         {
           customization && customization.customText && <>
@@ -378,25 +341,25 @@ export function ProductInfo({
         <Button className={styles.addToCartBtn} onClick={onAddCartClick}>
           Add to Cart
         </Button>
-        {deliveryTypes.includes('Local Subscriptions') && (
+        {subscription?.iscsa && (
           <div className={styles.local}>
             <p className={styles.header}>Subscription Information</p>
             <p className={styles.factor}>
               Fulfillment Day: <span>Determined at checkout</span>
             </p>
             <p className={clsx(styles.factor, styles.concern)}>
-              Subscription Duration: <span>{subscription?.duration} weeks</span>
+              Subscription Duration: <span>{`${subscription.csa?.duration} ${getFrequencyUnit(subscription.csa?.frequency || '')}${subscription.csa?.duration === 1 ? '' : 's'}`}</span>
             </p>
             <p className={clsx(styles.factor, styles.concern)}>
-              Subscription Frequency: <span>{subscription?.frequency}</span>
+              Subscription Frequency: <span>{getFrequencyName(subscription.csa?.frequency || '')}</span>
             </p>
             <p className={styles.hint}>
               <span>Your card will be charged </span>$
               {productOffPrice *
                 cartProduct.quantity *
-                (subscription?.duration || 1)}{' '}
-              {subscription?.duration
-                ? `every ${subscription.duration} weeks`
+                csaCycle}{' '}
+              {subscription?.csa?.duration
+                ? `every ${subscription.csa.duration} weeks`
                 : 'every week'}{' '}
               <span>or until cancelation</span>
             </p>

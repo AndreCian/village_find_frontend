@@ -11,6 +11,9 @@ import {
 } from '@/components';
 
 // Super Admin Main and Settings Pages
+const Login = lazy(() =>
+  import('@/pages/super-admin').then(module => ({ default: module.Login }))
+);
 const Dashboard = lazy(() =>
   import('@/pages/super-admin').then(module => ({ default: module.Dashboard })),
 );
@@ -183,7 +186,12 @@ const Logout = lazy(() =>
 export const superAdminRoutes = [
   {
     index: true,
-    element: <Navigate to="dashboard" />,
+    element: <Navigate to="login" />,
+    hide: true,
+  },
+  {
+    path: 'login',
+    element: <Login />,
     hide: true,
   },
   {
@@ -386,18 +394,18 @@ export const superAdminRoutes = [
     children: [
       {
         title: 'All Orders',
-        path: 'home',
+        path: '',
         element: <Outlet />,
         leaf: true,
         children: [
           {
-            title: 'Home',
+            title: '',
             path: '',
             element: <OrderHome />,
           },
           {
             title: 'Detail',
-            path: 'detail',
+            path: ':id',
             element: <OrderDetail />,
           },
         ],

@@ -1,51 +1,56 @@
-import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import clsx from 'clsx';
 
 import { Card } from '@/components/common';
 import { CustomerChart } from '@/components/super-admin';
-
 import { formatNumber } from '@/utils';
 
 import styles from './Dashboard.module.scss';
 
 const summary = {
-  year: 150258,
-  month: 9025,
-  week: 3058,
+  year: 0,
+  month: 0,
+  week: 0,
 };
 
 const total = {
-  transaction: 410,
-  averageOrder: 158,
+  transaction: 0,
+  averageOrder: 0,
 };
 
 const weekVisitInfo = {
-  brandCount: 45,
-  data: [10, 20, 22, 34, 21, 28, 11],
+  brandCount: 0,
+  data: [0, 0, 0, 0, 0, 0, 0],
 };
 
 const statistics = {
-  vendor: 102033,
-  customer: 1340566,
-  product: 904456,
+  vendor: 0,
+  customer: 0,
+  product: 0,
 };
 
+const VENDOR_PATH = '/admin/vendors';
+const CUSTOMER_PATH = '/admin/customers/home';
+const SUPPORT_PATH = '/admin/support-center';
+
 export function Dashboard() {
+  const navigate = useNavigate();
+
   return (
     <div className={styles.root}>
       <div className={styles.navCards}>
-        <Card className={styles.textCenter}>
+        <Card className={styles.textCenter} onClick={() => navigate(VENDOR_PATH)}>
           <p>All Vendors</p>
         </Card>
-        <Card className={styles.textCenter}>
+        <Card className={styles.textCenter} onClick={() => navigate(CUSTOMER_PATH)}>
           <p>Customer Management</p>
         </Card>
-        <Card className={styles.textCenter}>
+        <Card className={styles.textCenter} onClick={() => navigate('')}>
           <p>Support Center</p>
         </Card>
-        <Card className={styles.textCenter}>
+        {/* <Card className={styles.textCenter}>
           <p>Support Center</p>
-        </Card>
+        </Card> */}
       </div>
       <div className={styles.summaryPanel}>
         <Card title="Sales" className={styles.sales}>

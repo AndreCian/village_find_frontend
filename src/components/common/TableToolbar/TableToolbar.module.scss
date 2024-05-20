@@ -1,6 +1,10 @@
 .root {
   @apply flex flex-wrap gap-x-4;
 
+  .input span {
+    @apply cursor-pointer;
+  }
+
   .control {
     @apply mb-5;
 
@@ -9,7 +13,8 @@
     }
   }
 
-  .download {
+  .print,
+  .export {
     @apply flex w-24 items-center justify-between gap-x-2 self-end rounded-full bg-primary px-1.5 py-2;
     p {
       @apply mb-0 ml-2 self-center text-xs text-dark;
@@ -21,10 +26,5 @@
         @apply h-4 w-4;
       }
     }
-
-    // .printButton,
-    // .downloadButton {
-    //   @apply w-24 select-none;
-    // }
   }
 }

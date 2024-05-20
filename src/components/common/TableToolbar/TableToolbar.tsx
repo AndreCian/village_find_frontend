@@ -85,6 +85,7 @@ export function TableToolbar({
               position: 'right',
               content: <MagnifierIcon />,
             }}
+            className={styles.input}
             {...commonProps}
           />
         </div>
@@ -98,8 +99,9 @@ export function TableToolbar({
             updateValue={updateRange('from')}
             adornment={{
               position: 'right',
-              content: <CloseIcon />,
+              content: <CloseIcon onClick={() => console.log('Hello world!')} />,
             }}
+            className={styles.input}
             {...commonProps}
           />
         </div>
@@ -115,19 +117,20 @@ export function TableToolbar({
               position: 'right',
               content: <CloseIcon />,
             }}
+            className={styles.input}
             {...commonProps}
           />
         </div>
       )}
       {downloadable && (
         <>
-          <div className={clsx(styles.control, styles.download)}>
+          <div className={clsx(styles.control, styles.print)}>
             <p>Print</p>
             <span>
               <PrintIcon />
             </span>
           </div>
-          <div className={clsx(styles.control, styles.download)}>
+          <div className={clsx(styles.control, styles.export)}>
             <p>Export</p>
             <span>
               <ExportIcon />

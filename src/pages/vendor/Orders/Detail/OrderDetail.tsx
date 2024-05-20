@@ -1,32 +1,29 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { enqueueSnackbar } from 'notistack';
 import clsx from 'clsx';
 
 import { Card, TableBody } from '@/components/common';
 import { Input } from '@/components/forms';
 import { ClipboardIcon, PrintIcon } from '@/components/icons';
-
-import { ITableColumn } from '@/interfaces';
+import { HttpService } from '@/services';
+import { SERVER_URL } from '@/config/global';
 
 import { formatDate } from '@/utils';
 
-import OrderImg from '/assets/admin/backs/order.png';
 import styles from './OrderDetail.module.scss';
-import { HttpService } from '@/services';
-import { SERVER_URL } from '@/config/global';
-import { enqueueSnackbar } from 'notistack';
 
 interface IOrderDetail {
   orderID: number;
-  customer: {
-    name: string;
+  customerID: {
+    firstName: string;
+    lastName: string;
     email: string;
     phone: string;
     address: string;
   };
   deliveryType: string;
   deliveryInfo: {
-    orderDate: Date;
     classification: string;
     address: string;
     instruction: string;
@@ -61,19 +58,20 @@ interface IOrderDetail {
     discount: number;
   };
   personalization: string;
+  orderDate: string | Date;
 }
 
 const initialOrderDet: IOrderDetail = {
   orderID: 0,
-  customer: {
-    name: '',
+  customerID: {
+    firstName: '',
+    lastName: '',
     email: '',
     phone: '',
     address: '',
   },
   deliveryType: '',
   deliveryInfo: {
-    orderDate: new Date(),
     classification: '',
     address: '',
     instruction: '',
@@ -94,9 +92,10 @@ const initialOrderDet: IOrderDetail = {
     discount: 0,
   },
   personalization: '',
+  orderDate: new Date(),
 };
 
-const BACK_PATH = '/vendor/order';
+const BACK_PATH = '/vendor/orders';
 
 export function OrderDetail() {
   const navigate = useNavigate();
@@ -126,38 +125,57 @@ export function OrderDetail() {
       {
         name: 'image',
         title: 'Image',
-        cell: (row: any) => <img src={`${SERVER_URL}/${row.image}`} />,
+        cell: (row: any) => <img src={`${SERVER_URL}/${row.image}`} className={styles.productImage} />,
       },
       {
         name: 'name',
         title: 'Product Name',
         width: 200,
+        cell: (row: any) => <p className={styles.productName}>{row.name}</p>,
       },
       ...[
-        orderDetail.deliveryInfo.classification === 'Shipping'
+        orderDetail.deliveryType === 'Shipping'
           ? {
-              name: 'shipping',
-              title: 'Shipping Rate Selected',
-              cell: (row: any) => (
-                <p>
-                  {row.shipping.service} ${row.shipping.rate}
-                </p>
-              ),
-              width: 200,
-            }
+            name: 'shipping',
+            title: 'Shipping Rate Selected',
+            cell: (row: any) => (
+              <p>
+                {row.shipping?.service} ${row.shipping?.rate}
+              </p>
+            ),
+            width: 200,
+          }
           : {
-              name: 'delivery',
-              title: `${orderDetail.deliveryInfo.classification} Fee`,
-              cell: (row: any) => <p>${row.delivery.fee}</p>,
-            },
+            name: 'delivery',
+            title: `${orderDetail.deliveryType} Fee`,
+            cell: (row: any) => <p>${row.delivery?.fee}</p>,
+          },
       ],
       {
         name: 'price',
         title: 'Product Price',
+        cell: (row: any) => <Input
+          value={row.price.toFixed(3)}
+          rounded='full'
+          bgcolor='secondary'
+          disabled={true}
+          className={styles.input}
+          adornment={{
+            position: 'left',
+            content: '$'
+          }}
+        />
       },
       {
-        name: 'qantity',
+        name: 'quantity',
         title: 'Order Quantity',
+        cell: (row: any) => <Input
+          value={row.quantity.toFixed(3)}
+          rounded='full'
+          bgcolor='secondary'
+          disabled={true}
+          className={styles.input}
+        />
       },
       {
         name: 'total price',
@@ -174,17 +192,17 @@ export function OrderDetail() {
       {
         name: 'discount',
         title: 'Discount',
-        cell: (row: any) => <p>%{row.discount}</p>,
+        cell: (row: any) => <p>{row.discount}%</p>,
       },
       {
-        name: 'net price',
+        name: 'netprice',
         title: 'Net Price',
         cell: (row: any) => (
-          <p>
+          <p className={styles.netPrice}>
             $
             {(
               (row.price * row.quantity * (100 - row.discount)) / 100 +
-              (row.shipping?.rate || row.delivery.fee)
+              (row.shipping?.rate || row.delivery?.fee || 0)
             ).toFixed(2)}
           </p>
         ),
@@ -209,17 +227,17 @@ export function OrderDetail() {
           <span>Order Id:</span> {orderDetail.orderID}
         </p>
         <p>
-          <span>Customer:</span> {orderDetail.customer.name}
+          <span>Customer:</span> {`${orderDetail.customerID.firstName} ${orderDetail.customerID.lastName}`}
         </p>
       </Card>
       <Card className={styles.infoSection}>
         <div className={styles.subInfo}>
           <h2>
-            {`${orderDetail.deliveryInfo.classification} Order Information`}
+            {`${orderDetail.deliveryType} Order Information`}
           </h2>
           <div className={styles.horizon}>
             <p className={styles.label}>Order date</p>
-            <p>{formatDate(orderDetail.deliveryInfo.orderDate)}</p>
+            <p>{formatDate(orderDetail.orderDate)}</p>
           </div>
           <div className={styles.horizon}>
             <p className={styles.label}>Order Classification</p>
@@ -227,7 +245,7 @@ export function OrderDetail() {
           </div>
           <div className={styles.horizon}>
             <p className={styles.label}>
-              {`${orderDetail.deliveryInfo.classification} Address`}
+              {`${orderDetail.deliveryType} Address`}
             </p>
             <Input
               rounded="full"
@@ -273,19 +291,19 @@ export function OrderDetail() {
           </div>
         )}
       </Card>
-      {orderDetail.deliveryInfo.classification !== 'Shipping' && (
+      {orderDetail.deliveryType !== 'Shipping' && (
         <Card title="Customer Information" className={styles.customInfo}>
           <div className={styles.horizon}>
             <p className={styles.label}>Email</p>
-            <p>{orderDetail.customer.email}</p>
+            <p>{orderDetail.customerID.email}</p>
           </div>
           <div className={styles.horizon}>
             <p className={styles.label}>Phone Number</p>
-            <p>{orderDetail.customer.phone}</p>
+            <p>{orderDetail.customerID.phone}</p>
           </div>
           <div className={styles.horizon}>
             <p className={styles.label}>Address</p>
-            <p>{orderDetail.customer.address}</p>
+            <p>{orderDetail.customerID.address}</p>
           </div>
         </Card>
       )}

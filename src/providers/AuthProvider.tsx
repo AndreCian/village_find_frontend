@@ -2,30 +2,6 @@ import React, { useState } from 'react';
 
 export type RoleType = 'admin' | 'vendor' | 'customer' | 'community-organizer';
 
-interface ICustomerProfile {
-  _id?: string;
-  firstName: string;
-  lastName: string;
-  zipcode: string;
-}
-
-interface ICommunityProfile {
-  _id?: string;
-  code: string;
-  name: string;
-  slug?: string;
-  images?: {
-    logoUrl?: string;
-    backgroundUrl?: string;
-  };
-  shortDesc?: string;
-  longDesc?: string;
-  announcement?: {
-    text?: string;
-    updated_at?: string;
-  };
-}
-
 interface IAccount {
   role: RoleType;
   profile: any;
@@ -40,8 +16,8 @@ interface IAuthContext {
 
 export const AuthContext = React.createContext<IAuthContext>({
   isLogin: false,
-  setIsLogin: () => {},
-  setAccount: () => {},
+  setIsLogin: () => { },
+  setAccount: () => { },
 });
 
 interface IAuthProviderProps {

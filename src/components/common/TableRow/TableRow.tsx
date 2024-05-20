@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { FaChevronDown, FaChevronUp } from 'react-icons/fa6';
 import { useDrag, useDrop } from 'react-dnd';
 

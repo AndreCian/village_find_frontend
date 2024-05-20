@@ -81,6 +81,11 @@ const General = lazy(() =>
     default: module.General,
   })),
 );
+const ProductProvider = lazy(() =>
+  import('@/pages/vendor/Products').then(module => ({
+    default: module.ProductProvider
+  })),
+);
 const ProductLayout = lazy(() =>
   import('@/pages/vendor/Products').then(module => ({
     default: module.ProductLayout,
@@ -307,7 +312,9 @@ export const vendorRoutes = [
       {
         title: 'Create & Edit',
         path: ':productId',
-        element: <ProductLayout />,
+        element: <ProductProvider>
+          <ProductLayout />
+        </ProductProvider>,
         leaf: true,
         children: [
           {
@@ -383,7 +390,7 @@ export const vendorRoutes = [
   },
   {
     title: 'Orders',
-    path: 'order',
+    path: 'orders',
     icon: <UserIcon />,
     element: <Outlet />,
     leaf: true,

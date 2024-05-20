@@ -1,24 +1,46 @@
 import { ChangeEvent, useContext, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useAppDispatch, useAppSelector } from '@/redux/store';
 import { enqueueSnackbar } from 'notistack';
 
 import { StyleCreateContext } from '../Layout';
-import { IAttribute } from '../Home';
-
 import { Button, Input, Select, TableBody } from '@/components';
 import { ChangeInputEvent } from '@/interfaces';
 import { HttpService } from '@/services';
-
-import DimenImage from '/assets/vendor/backs/dimension.png';
-import styles from './Attributes.module.scss';
+import { IAttribute, updateStyle } from '@/redux/reducers';
 import { SERVER_URL } from '@/config/global';
 
+import styles from './Attributes.module.scss';
+
 const statusOpts = ['Active', 'Inactive', 'Delete'];
-const subPath = '/vendor/products';
+const PRODUCT_PATH = '/vendor/products';
+
+const getSubRows = (
+  attrs: IAttribute[],
+  index: number,
+  current: { attrs: String[] },
+): any[] => {
+  if (attrs.length === 0) return [current];
+  return attrs[0].values
+    .map((value: string) =>
+      getSubRows(attrs.slice(1), index + 1, {
+        attrs: [
+          ...current.attrs,
+          value
+        ],
+      }),
+    )
+    .flat(1);
+};
 
 export function Attributes() {
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { styleId, productId } = useParams();
+
+  const storeStyles = useAppSelector(state => state.product.styles);
+  const currentStyleID = useAppSelector(state => state.product.currentStyleID);
+
   const { styleName, setStyleName, attributes, setAttributes } =
     useContext(StyleCreateContext);
 
@@ -26,38 +48,20 @@ export function Attributes() {
   const [images, setImages] = useState<(File | null)[]>([]);
   const [imageSrcs, setImageSrcs] = useState<string[]>([]);
 
-  const getSubRows = (
-    attrs: IAttribute[],
-    index: number,
-    current: { attrs: object },
-  ): any[] => {
-    if (attrs.length === 0) return [current];
-    return attrs[0].values
-      .map((value: string) =>
-        getSubRows(attrs.slice(1), index + 1, {
-          attrs: {
-            ...current.attrs,
-            [attrs[0]._id || `attribute-${index}`]: value,
-          },
-        }),
-      )
-      .flat(1);
-  };
-
   const onRowChange = (id: number) => (e: ChangeInputEvent) => {
-    setRows(rows =>
-      rows.map((row: any, rIndex: number) =>
-        rIndex === id ? { ...row, [e.target.name]: e.target.value } : row,
-      ),
-    );
+    setRows(rows => rows.map((row: any) =>
+      id === row.index
+        ? { ...row, [e.target.name]: e.target.value }
+        : row
+    ));
   };
 
   const onStatusChange = (id: number) => (value: string) => {
-    setRows(rows =>
-      rows.map((row: any, rIndex: number) =>
-        rIndex === id ? { ...row, status: value } : row,
-      ),
-    );
+    setRows(rows => rows.map((row: any) =>
+      id === row.index
+        ? { ...row, status: value }
+        : row
+    ));
   };
 
   const onImageChange = (id: number) => (e: ChangeEvent<HTMLInputElement>) => {
@@ -66,30 +70,28 @@ export function Attributes() {
     reader.onload = function (e) {
       const result = e.target?.result;
       if (result) {
-        setImageSrcs(
-          imageSrcs.map((item: string, index: number) =>
-            index === id ? (result as string) : item,
-          ),
+        const results = imageSrcs.map((item: string, index: number) =>
+          index === id ? (result as string) : item,
         );
+        setImageSrcs(results);
       }
     };
     reader.readAsDataURL(e.target.files[0]);
-    setImages(
-      images.map((image: File | null, index: number) =>
-        index === id ? e.target.files && e.target.files[0] : image,
-      ),
+    const results = images.map((image: File | null, index: number) =>
+      index === id ? e.target.files && e.target.files[0] : image,
     );
+    setImages(results);
   };
 
   const columns = useMemo(
     () => [
       ...attributes.map((attribute: IAttribute, index: number) => ({
         title: attribute.name,
-        name: attribute._id || '',
+        name: attribute.name.toLowerCase(),
         width: 100,
         cell: (row: any) => (
           <div className={styles.cell}>
-            {row.attrs[attribute._id || `attribute-${index}`]}
+            {row.attrs[index]}
           </div>
         ),
       })),
@@ -101,13 +103,13 @@ export function Attributes() {
           <Input
             name="price"
             rounded="full"
+            className={styles.priceInput}
+            value={row.price ?? 0}
+            updateValue={onRowChange(row.index)}
             adornment={{
               position: 'left',
               content: '$',
             }}
-            className={styles.priceInput}
-            value={row.price ?? 0}
-            updateValue={onRowChange(row.id)}
           />
         ),
       },
@@ -122,7 +124,7 @@ export function Attributes() {
             rounded="full"
             className={styles.inventoryInput}
             value={row.quantity || ''}
-            updateValue={onRowChange(row.id)}
+            updateValue={onRowChange(row.index)}
           />
         ),
       },
@@ -139,7 +141,7 @@ export function Attributes() {
             }))}
             className={styles.statusSelect}
             value={row.status}
-            updateValue={onStatusChange(row.id)}
+            updateValue={onStatusChange(row.index)}
           />
         ),
       },
@@ -154,8 +156,7 @@ export function Attributes() {
             border="none"
             bgcolor="secondary"
             className={styles.imageInput}
-            // value={images[row.id]}
-            updateValue={onImageChange(row.id)}
+            updateValue={onImageChange(row.index)}
           />
         ),
       },
@@ -166,7 +167,8 @@ export function Attributes() {
         cell: (row: any) => (
           <div className={styles.dimensions}>
             <img
-              src={imageSrcs[row.id] || `${SERVER_URL}/${row.image}`}
+              src={imageSrcs[row.index]
+                || `${SERVER_URL}/${row.image}`}
               alt="inventory"
             />
             <span>+</span>
@@ -178,71 +180,85 @@ export function Attributes() {
   );
 
   const onUpdateClick = () => {
-    HttpService.put(`/styles/${styleId}/inventory`, rows).then(response => {
-      const { status, ids } = response;
-      if (status === 200) {
-        const imageWithIDs = new FormData();
-        const liveIDs: string[] = [];
-        images.forEach((image: File | null, index: number) => {
-          if (image) {
-            liveIDs.push(ids[index]);
-            imageWithIDs.append('images', image);
-          }
-        });
-        imageWithIDs.append('inventIDs', JSON.stringify(liveIDs));
+    if (productId === 'create') {
+      dispatch(updateStyle({
+        id: styleId === 'create' ? currentStyleID : Number(styleId),
+        style: {
+          inventories: rows,
+          imageSrcs
+        }
+      }));
+      enqueueSnackbar(`Style ${styleId === 'create' ? 'created' : 'updated'}.`, { variant: 'success' });
+      navigate(`${PRODUCT_PATH}/${productId}/style`);
+    } else {
+      HttpService.put(`/styles/${styleId}/inventory`, rows).then(response => {
+        const { status, ids } = response;
+        if (status === 200) {
+          const imageWithIDs = new FormData();
+          const liveIDs: string[] = [];
+          images.forEach((image: File | null, index: number) => {
+            if (image) {
+              liveIDs.push(ids[index]);
+              imageWithIDs.append('images', image);
+            }
+          });
+          imageWithIDs.append('inventIDs', JSON.stringify(liveIDs));
 
-        HttpService.put(`/inventories/image`, imageWithIDs, {
-          styleId,
-        }).then(response => {
-          const { status } = response;
-          if (status === 200) {
-            enqueueSnackbar('Inventories saved.', {
-              variant: 'success',
-            });
-            navigate(`${subPath}/${productId}/style`);
-          } else if (status === 404) {
-            navigate(`${subPath}`);
-            enqueueSnackbar('Product is not valid!', { variant: 'warning' });
-          }
-        });
-      }
-    });
+          HttpService.put(`/inventories/image`, imageWithIDs, {
+            styleId,
+          }).then(response => {
+            const { status } = response;
+            if (status === 200) {
+              enqueueSnackbar('Inventories saved.', {
+                variant: 'success',
+              });
+              navigate(`${PRODUCT_PATH}/${productId}/style`);
+            } else if (status === 404) {
+              navigate(`${PRODUCT_PATH}`);
+              enqueueSnackbar('Product is not valid!', { variant: 'warning' });
+            }
+          });
+        }
+      });
+    }
   };
 
   useEffect(() => {
-    HttpService.get(`/styles/${styleId}`).then(response => {
-      const { status, style } = response;
-      if (status === 200) {
-        const { name, attributes, inventories } = style;
-        setStyleName(name);
-        setAttributes(attributes);
-        if (inventories.length === 0) {
-          const subRows = getSubRows(attributes, 0, { attrs: {} }).map(
-            (row: any, index: number) => ({
-              ...row,
-              id: index,
-              inventory: 0,
-              price: 0,
-              status: 'active',
-            }),
-          );
-          setRows(subRows);
-          setImages(Array(subRows.length).fill(null));
-          setImageSrcs(Array(subRows.length).fill(''));
-        } else {
-          setRows(
-            inventories.map((inventory: any, index: number) => ({
-              ...inventory,
-              id: index,
-              status: inventory.status || 'active',
-            })),
-          );
-          setImages(Array(inventories.length).fill(null));
-          setImageSrcs(Array(inventories.length).fill(''));
-        }
+    if (productId === 'create') {
+      const style = styleId === 'create' ? storeStyles[currentStyleID] : storeStyles[Number(styleId)];
+      if (style) {
+        setRows(style.inventories);
+        // setImages(style.images);
+        setImageSrcs(style.imageSrcs);
       }
-    });
-  }, []);
+    } else {
+      HttpService.get(`/styles/${styleId}`).then(response => {
+        const { status, style } = response;
+        if (status === 200) {
+          const { name, attributes, inventories } = style;
+          setStyleName(name);
+          setAttributes(attributes);
+          if (inventories.length === 0) {
+            const resultRows = getSubRows(attributes, 0, { attrs: [] })
+              .map((item, index) => ({ ...item, index, status: 'active' }))
+            setRows(resultRows);
+            setImages(Array(resultRows.length).fill(null));
+            setImageSrcs(Array(resultRows.length).fill(null));
+          } else {
+            setRows(
+              inventories.map((inventory: any, index: number) => ({
+                ...inventory,
+                index,
+                status: inventory.status || 'active',
+              })),
+            );
+            setImages(Array(inventories.length).fill(null));
+            setImageSrcs(Array(inventories.length).fill(''));
+          }
+        }
+      });
+    }
+  }, [productId, styleId, currentStyleID, storeStyles]);
 
   return (
     <div className={styles.container}>
@@ -253,7 +269,7 @@ export function Attributes() {
       <TableBody columns={columns} rows={rows} />
       <div className={styles.buttons}>
         <Button className={styles.updateBtn} onClick={onUpdateClick}>
-          Update
+          {productId === 'create' ? 'Save' : 'Update'}
         </Button>
       </div>
     </div>

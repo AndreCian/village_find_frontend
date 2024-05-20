@@ -6,12 +6,9 @@ import {
   CommunityAbout,
   CommunityVendors,
 } from '@/pages/customer/VendorCommunities';
-
 import { Container } from '@/components/layout/customer';
 import { Button, Select } from '@/components/forms';
-
 import { HttpService } from '@/services';
-
 import { SERVER_URL } from '@/config/global';
 
 import styles from './Layout.module.scss';
@@ -24,6 +21,10 @@ const initialNavItems = [
 
 const initialCommunity = {
   _id: '',
+  images: {
+    logoUrl: '',
+    backgroundUrl: ''
+  },
   vendors: [],
 };
 
@@ -88,9 +89,8 @@ export function Layout() {
             <div className={styles.image}>
               <img
                 alt="Community logo image"
-                src={`${SERVER_URL}/${
-                  community.images && community.images.logoUrl
-                }`}
+                src={`${SERVER_URL}/${community.images && community.images.logoUrl
+                  }`}
               />
             </div>
             <div className={styles.text}>

@@ -9,13 +9,19 @@ import { PrintIcon } from '@/components/icons';
 import { IRange, ITableColumn } from '@/interfaces';
 import { HttpService } from '@/services';
 
-import { formatDate, formatNumber } from '@/utils';
+import { formatNumber } from '@/utils';
 
 import styles from './OrderHome.module.scss';
 
-const sortOpts = ['Alphabetical Order', 'Most Recent', 'Oldest'];
-
-const statusOpts = ['Under Process', 'Canceled', 'Pause'];
+const sortOpts = [
+  { name: 'Home Delivery Only', value: 'home-delivery' },
+  { name: 'Shipping Only', value: 'shipping' },
+  { name: 'Pickup Only', value: 'pickup' },
+  { name: 'Safe Pickup Only', value: 'safe-pickup' },
+  { name: 'Subscriptions Only', value: 'subscription' },
+  { name: 'Alphabetical', value: 'alphabeta' },
+]
+const statusOpts = ['Pending', 'Under Process', 'Dispatched', 'Shipped', 'Delivered', 'Canceled', 'Pause'];
 
 const initialRange = {
   from: '',
@@ -24,23 +30,25 @@ const initialRange = {
 
 export interface IVendorOrder {
   _id: string;
-  customerID: {
-    firstName: string;
-    lastName: string;
+  customer: {
+    name: string;
   };
-  vendorID: {
-    shopName: string;
+  vendor: {
+    business: {
+      name: string;
+    }
   };
-  orderInfo: {
-    deliveryType: string;
+  deliveryType: string;
+  deliveryInfo: {
+    classification: string;
   };
   product: {
     price: number;
     quantity: number;
     discount: number;
   };
-  createdAt: string;
   status: string;
+  orderDate: string;
 }
 
 const statusList = [
@@ -79,11 +87,17 @@ export function OrderHome() {
   const [range, setRange] = useState<IRange>(initialRange);
   const [tableData, setTableData] = useState<IVendorOrder[]>([]);
 
-  useEffect(() => {
-    HttpService.get('/order/vendor').then(response => {
+  const loadOrders = ({ filter = '', sort = '', category = '', range = { from: '', to: '' } }: any = {}) => {
+    const params: any = {};
+    if (filter) params.name = filter;
+    if (sort) params.sort = sort;
+    if (category) params.status = category;
+    if (range.from) params.from = range.from;
+    if (range.to) params.to = range.to;
+    HttpService.get('/order/admin', params).then(response => {
       setTableData(response);
     });
-  }, []);
+  }
 
   const columns: ITableColumn[] = [
     {
@@ -92,7 +106,7 @@ export function OrderHome() {
       width: 200,
       cell: (row: IVendorOrder) => (
         <span className={styles.cell}>
-          {row.customerID.firstName} {row.customerID.lastName}
+          {row.customer.name}
         </span>
       ),
     },
@@ -101,7 +115,7 @@ export function OrderHome() {
       name: 'vendor',
       width: 150,
       cell: (row: IVendorOrder) => (
-        <span className={styles.cell}>{row.vendorID.shopName}</span>
+        <span className={styles.cell}>{row.vendor.business.name}</span>
       ),
     },
     {
@@ -109,17 +123,17 @@ export function OrderHome() {
       name: 'fulfillment',
       width: 200,
       cell: (row: IVendorOrder) => (
-        <span className={styles.cell}>{row.orderInfo.deliveryType}</span>
+        <span className={styles.cell}>{row.deliveryType}</span>
       ),
     },
     {
       title: 'Order Date',
       name: 'date',
-      width: 150,
+      width: 200,
       cell: (row: IVendorOrder) => (
         <Input
           type="date"
-          value={formatDate(row.createdAt)}
+          value={row.orderDate.split('T')[0]}
           rounded="full"
           bgcolor="secondary"
         />
@@ -136,7 +150,7 @@ export function OrderHome() {
             (row.product.price *
               row.product.quantity *
               (100 - row.product.discount)) /
-              100,
+            100,
           )}
         </span>
       ),
@@ -153,10 +167,10 @@ export function OrderHome() {
             row.status === 'under process'
               ? 'blue'
               : row.status === 'canceled'
-              ? 'red'
-              : row.status === 'pause'
-              ? 'primary'
-              : 'white'
+                ? 'red'
+                : row.status === 'pause'
+                  ? 'primary'
+                  : 'white'
           }
           value={row.status}
           updateValue={onStatusChange(row._id)}
@@ -193,11 +207,11 @@ export function OrderHome() {
 
   const onRangeChange =
     (which: string) => (e: ChangeEvent<HTMLInputElement>) => {
-      setRange({ ...range, [which]: new Date(e.target.value) });
+      setRange({ ...range, [which]: e.target.value });
     };
 
   const onStatusChange = (id: string) => (value: string) => {
-    HttpService.put(`/order/vendor/${id}`, { status: value }).then(response => {
+    HttpService.put(`/order/admin/${id}`, { status: value }).then(response => {
       const { status } = response;
       if (status === 200) {
         setTableData(
@@ -209,6 +223,22 @@ export function OrderHome() {
       }
     });
   };
+
+  const onSubmitClick = () => {
+    loadOrders({ filter, category, sort, range });
+  }
+
+  const onResetClick = () => {
+    setFilter('');
+    setCategory('');
+    setSort('');
+    setRange({ from: '', to: '' });
+    loadOrders({});
+  }
+
+  useEffect(() => {
+    loadOrders();
+  }, []);
 
   return (
     <Card title="All Orders" className={styles.root}>
@@ -225,7 +255,7 @@ export function OrderHome() {
         sort={sort}
         updateSort={(_sort: string) => setSort(_sort)}
         selectTitle="Status"
-        selectOpts={statusOpts}
+        selectOpts={statusOpts.map(item => ({ name: item, value: item.toLowerCase() }))}
         category={category}
         updateCategory={(_cat: string) => setCategory(_cat)}
         className={styles.tableToolbar}
@@ -233,13 +263,13 @@ export function OrderHome() {
           <div className={styles.actions}>
             <div>
               <p>Submit</p>
-              <button className={clsx(styles.button, styles.submit)}>
+              <button className={clsx(styles.button, styles.submit)} onClick={onSubmitClick}>
                 Submit
               </button>
             </div>
             <div>
               <p>Reset</p>
-              <button className={clsx(styles.button, styles.reset)}>
+              <button className={clsx(styles.button, styles.reset)} onClick={onResetClick}>
                 Reset
               </button>
             </div>

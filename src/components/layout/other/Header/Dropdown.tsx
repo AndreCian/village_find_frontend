@@ -13,8 +13,8 @@ export function Dropdown() {
   const navigate = useNavigate();
   const pathname = location.pathname;
 
-  const { account } = useContext(AuthContext);
-  const username = account?.profile?.fullName || '';
+  const { account, setIsLogin } = useContext(AuthContext);
+  const username = account?.profile?.owner || '';
 
   const [anchor, setAnchor] = useState(false);
   const dropRef = useRef(null);
@@ -26,6 +26,7 @@ export function Dropdown() {
     } else {
       setupToken(null, 'admin');
     }
+    setIsLogin(false);
   };
 
   useOnClickOutside(dropRef, () => setAnchor(false));
@@ -40,7 +41,7 @@ export function Dropdown() {
       </div>
       {anchor && (
         <Card className={styles.dropbox}>
-          <Link to={'/admin/my-store'}>My Store</Link>
+          <Link to={''}>My Store</Link>
           <span onClick={onLogoutClick}>Logout</span>
         </Card>
       )}

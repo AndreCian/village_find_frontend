@@ -25,6 +25,9 @@ const ProductDetails = lazy(() =>
 const Checkout = lazy(() =>
   import('@/pages/customer').then(module => ({ default: module.Checkout })),
 );
+const Profile = lazy(() =>
+  import('@/pages/customer').then(module => ({ default: module.Profile })),
+);
 const About = lazy(() =>
   import('@/pages/customer').then(module => ({ default: module.About })),
 );
@@ -140,6 +143,10 @@ export const customerRoutes = [
   {
     path: 'checkout',
     element: <Checkout />,
+  },
+  {
+    path: 'profile',
+    element: <Profile />
   },
   {
     path: 'about',

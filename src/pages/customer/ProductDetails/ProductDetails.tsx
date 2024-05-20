@@ -26,7 +26,10 @@ export interface IMoreDetail {
 }
 
 export interface IOrderDetail {
+  _id?: string;
   name: string;
+  price: number;
+  image: string;
   vendor: {
     _id: string;
     shopName: string;
@@ -55,16 +58,21 @@ export interface IOrderDetail {
     image: string;
     price: number;
   }[];
+  iscustomizable: boolean;
   customization?: {
     customText: string;
     fee: number;
   };
   subscription?: {
-    frequency: string;
+    iscsa: boolean;
+    frequencies: string[];
     discount: number;
-    duration?: number;
-    startDate?: string;
-    endDate?: string;
+    csa?: {
+      frequency: string;
+      duration: number;
+      startDate?: string;
+      endDate?: string;
+    }
   };
   soldByUnit: string;
   deliveryTypes: string[];
@@ -79,6 +87,8 @@ const initialMoreDetail: IMoreDetail = {
 
 const initialOrderDetail: IOrderDetail = {
   name: '',
+  price: 0,
+  image: '',
   vendor: {
     _id: '',
     shopName: '',
@@ -91,6 +101,7 @@ const initialOrderDetail: IOrderDetail = {
       logoUrl: '',
     },
   },
+  iscustomizable: false,
   styles: [],
   inventories: [],
   soldByUnit: '',
@@ -99,6 +110,7 @@ const initialOrderDetail: IOrderDetail = {
 
 export function ProductDetails() {
   const { id: productId } = useParams();
+
   const [moreDetail, setMoreDetail] = useState<IMoreDetail>(initialMoreDetail);
   const [orderDetail, setOrderDetail] =
     useState<IOrderDetail>(initialOrderDetail);

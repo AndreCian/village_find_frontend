@@ -1,1 +1,1 @@
-export {Vendors as CommunityVendors} from './Vendors';
+export { Vendors as CommunityVendors } from './Vendors';

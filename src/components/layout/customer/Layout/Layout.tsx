@@ -1,5 +1,5 @@
 import { useState, useContext, useEffect } from 'react';
-import { Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { enqueueSnackbar } from 'notistack';
 import clsx from 'clsx';
 
@@ -11,13 +11,14 @@ import {
   Container,
 } from '@/components/layout/customer';
 import { Categories } from '@/components/customer/Market';
-
 import { AuthContext, CategoryContext, SearchbarContext } from '@/providers';
-
-import { setupToken, useWindowWidth } from '@/utils';
+import { useAppDispatch } from '@/redux/store';
+import { setGuestID } from '@/redux/reducers';
 import { HttpService } from '@/services';
+import { setupToken, useWindowWidth } from '@/utils';
 
 export function Layout() {
+  const dispatch = useAppDispatch();
   const location = useLocation();
   const pathname = location.pathname;
 
@@ -67,6 +68,7 @@ export function Layout() {
               profile,
             });
           } else {
+            dispatch(setGuestID());
             setupToken(null, 'customer');
           }
         })
@@ -79,6 +81,7 @@ export function Layout() {
           setIsLoading(false);
         });
     } else {
+      dispatch(setGuestID());
       setIsLoading(false);
     }
   }, []);

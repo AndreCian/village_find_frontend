@@ -1,22 +1,23 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useContext, useEffect, useMemo, useState } from 'react';
 import { Outlet, useLocation, useNavigate, useParams } from 'react-router-dom';
+import { FaChevronRight } from 'react-icons/fa6';
 import { enqueueSnackbar } from 'notistack';
 import clsx from 'clsx';
 
 import { Card } from '@/components/common';
 import { MagicIcon } from '@/components/icons';
+import { useAppDispatch, useAppSelector } from '@/redux/store';
+import { resetProduct } from '@/redux/reducers';
+import { ProductContext } from '../Provider/Provider';
+import { HttpService } from '@/services';
 
 import styles from './ProductLayout.module.scss';
-import { FaChevronRight } from 'react-icons/fa6';
-import { HttpService } from '@/services';
 
 interface INavItem {
   title: string;
   path: string;
   actions?: any;
 }
-
-const PRODUCT_PATH = '/vendor/products';
 
 const navItems: INavItem[] = [
   {
@@ -45,14 +46,19 @@ const navItems: INavItem[] = [
   {
     title: 'Subscription',
     path: 'subscription',
-  },
+  }
 ];
+const PRODUCT_PATH = '/vendor/products';
 
 export function ProductLayout() {
+  const dispatch = useAppDispatch();
   const { productId } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
   const pathname = location.pathname;
+
+  const product = useAppSelector(state => state.product);
+  const { nutrition, image } = useContext(ProductContext);
 
   const [subPath, subActionPath] = useMemo(() => {
     const trimPath = pathname.slice(PRODUCT_PATH.length);
@@ -68,6 +74,9 @@ export function ProductLayout() {
       (pathItem?.actions && pathItem.actions[subActionPath]) ?? '',
     ];
   }, [subPath, subActionPath]);
+  const createRoutes = useMemo(() =>
+    [...navItems, ...(productId === 'create' ? [{ title: 'Submit', path: 'submit' }] : [])]
+    , [productId]);
   const routeStep = useMemo(() => {
     return subActionPathTitle ? 'ACTION_ROUTE' : 'MAIN_ROUTE';
   }, [subPathTitle, subActionPathTitle]);
@@ -78,15 +87,37 @@ export function ProductLayout() {
     return `${PRODUCT_PATH}/${productId}/${childPath}`;
   };
 
+  const submitProduct = () => {
+    console.log(product);
+    const reqJson: any = {
+      ...product, ...product.general
+    };
+    delete reqJson.currentStyleID;
+    delete reqJson.general;
+    HttpService.post('/products', reqJson).then(response => {
+      const { status, product } = response;
+      if (status === 200) {
+        const formData = new FormData();
+        if (nutrition) formData.append('nutrition', nutrition);
+        if (image) formData.append('image', image);
+        HttpService.put(`/products/${product}`, formData).then(response => {
+          const { status } = response;
+          if (status === 200) {
+            dispatch(resetProduct());
+            enqueueSnackbar('Product uploaded.', { variant: 'success' });
+            navigate(PRODUCT_PATH);
+          }
+        })
+      }
+    })
+  }
+
   const onNavItemClick = (item: INavItem) => {
-    if (productId === 'create' && item.path !== 'general') {
-      enqueueSnackbar('You should create product first.', {
-        variant: 'warning',
-      });
-      navigate(buildPath('general'));
-      return;
+    if (item.path === 'submit') {
+      submitProduct();
+    } else {
+      navigate(buildPath(item.path));
     }
-    navigate(buildPath(item.path));
   };
 
   useEffect(() => {
@@ -160,7 +191,7 @@ export function ProductLayout() {
         </Card>
       </div>
       <ul className={styles.rightBar}>
-        {navItems.map((navItem: INavItem) => (
+        {createRoutes.map((navItem: INavItem) => (
           <li
             key={navItem.title}
             className={clsx(

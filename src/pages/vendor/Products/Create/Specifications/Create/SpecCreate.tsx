@@ -1,15 +1,17 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { enqueueSnackbar } from 'notistack';
 import clsx from 'clsx';
 
 import { Select, TextField } from '@/components';
 import { ChangeInputEvent } from '@/interfaces';
 import { HttpService } from '@/services';
+import { useAppSelector, useAppDispatch } from '@/redux/store';
+import { ISpecification, createSpec, updateSpec } from '@/redux/reducers';
 
 import styles from './SpecCreate.module.scss';
-import { enqueueSnackbar } from 'notistack';
 
-const specs = [
+const SPEC_KEYS = [
   'SKU',
   'UPC',
   'Weight',
@@ -17,14 +19,16 @@ const specs = [
   'Width',
   'Length',
   'Package Quantity',
-].map((spec: string) => ({ name: spec, value: spec.toLowerCase() }));
+];
 
-const subPath = '/vendor/products';
+const PRODUCT_PATH = '/vendor/products';
 
 export function SpecCreate() {
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { productId, specId } = useParams();
 
+  const storeSpecs = useAppSelector(state => state.product.specifications);
   const [specName, setSpecName] = useState('');
   const [specValue, setSpecValue] = useState('');
 
@@ -36,40 +40,74 @@ export function SpecCreate() {
     setSpecValue(e.target.value);
   };
 
+  const onCancelClick = () => {
+    navigate(`${PRODUCT_PATH}/${productId}/specifications`);
+  }
+
   const onUpdateClick = () => {
-    HttpService.post(
-      `/products/${productId}/specification`,
-      {
-        name: specName,
-        value: specValue,
-      },
-      { specId },
-    ).then(response => {
-      const { status } = response;
-      if (status === 200) {
-        navigate(`${subPath}/${productId}/specifications`);
-        enqueueSnackbar('Specification added successfully!', {
-          variant: 'success',
-        });
-      } else if (status === 404) {
+    if (productId === 'create') {
+      if (specId === 'create') {
+        dispatch(createSpec({
+          index: -1,
+          name: specName,
+          value: specValue
+        }));
+      } else {
+        dispatch(updateSpec({
+          id: Number(specId),
+          spec: {
+            name: specName,
+            value: specValue
+          }
+        }));
       }
-    });
+      navigate(`${PRODUCT_PATH}/${productId}/specifications`);
+    } else {
+      HttpService.post(
+        `/products/${productId}/specification`,
+        {
+          name: specName,
+          value: specValue,
+        },
+        { specId },
+      ).then(response => {
+        const { status } = response;
+        if (status === 200) {
+          navigate(`${PRODUCT_PATH}/${productId}/specifications`);
+          enqueueSnackbar('Specification added successfully!', {
+            variant: 'success',
+          });
+        }
+      });
+    }
   };
 
+
   useEffect(() => {
-    if (!productId) return;
-    HttpService.get(`/products/${productId}/specification`).then(response => {
-      const { status, specifications } = response;
-      console.log('specifications', specifications);
-      if (status === 200) {
-        const specification = specifications.find(
-          (item: any) => item._id === specId,
-        );
-        setSpecName(specification.name);
-        setSpecValue(specification.value);
+    if (productId === 'create') {
+      if (specId === 'create') {
+        setSpecName('');
+        setSpecValue('');
+      } else {
+        const spec = storeSpecs.find((item: ISpecification) => item.index === Number(specId));
+        if (spec) {
+          setSpecName(spec.name);
+          setSpecValue(spec.value);
+        }
       }
-    });
-  }, [productId, specId]);
+    } else {
+      HttpService.get(`/products/${productId}/specification`).then(response => {
+        const { status, specifications } = response;
+        if (status === 200) {
+          const specification = specifications.find(
+            (item: any) => item._id === specId,
+          );
+          setSpecName(specification.name);
+          setSpecValue(specification.value);
+        }
+      });
+    }
+  }, [productId, specId, storeSpecs]);
 
   return (
     <div className={styles.container}>
@@ -81,7 +119,7 @@ export function SpecCreate() {
             border="none"
             bgcolor="primary"
             placeholder="Select here"
-            options={specs}
+            options={SPEC_KEYS.map(item => ({ name: item, value: item.toLowerCase() }))}
             value={specName}
             updateValue={onSpecNameChange}
           />
@@ -103,7 +141,7 @@ export function SpecCreate() {
       <div className={styles.buttonBar}>
         <button
           className={styles.button}
-          onClick={() => navigate(`${subPath}/${productId}/specifications`)}
+          onClick={onCancelClick}
         >
           Cancel
         </button>
