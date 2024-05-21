@@ -1,8 +1,10 @@
+import { useNavigate } from 'react-router-dom';
+
 import { Button } from '@/components/forms';
-import { IOrderItem } from '../Orders';
+import { IOrderItem } from '@/components/customer/Profile';
+import { SERVER_URL } from '@/config/global';
 
 import styles from './OrderItem.module.scss';
-import { SERVER_URL } from '@/config/global';
 
 export function OrderItem({
     _id,
@@ -12,7 +14,9 @@ export function OrderItem({
     orderID,
     status
 }: IOrderItem) {
+    const navigate = useNavigate();
     const vendorLogoUrl = `${SERVER_URL}/${vendor?.images?.logoUrl || ''}`;
+
     return <div className={styles.root}>
         <div className={styles.vendor}>
             <img src={vendorLogoUrl} alt="Vendor logo" />
@@ -29,6 +33,6 @@ export function OrderItem({
             <p className={styles.title}>Subtotal</p>
             <p className={styles.content}>${product.subtotal}</p>
         </div>
-        <Button className={styles.detailBtn}>Order Details</Button>
+        <Button className={styles.detailBtn} onClick={() => navigate(`orders/${_id}`)}>Order Details</Button>
     </div>
 }

@@ -80,7 +80,7 @@ export function Orders() {
 	const [orders, setOrders] = useState<IOrder[]>(initialOrders);
 
 	useEffect(() => {
-		HttpService.get('/order').then(response => {
+		HttpService.get('/order/customer').then(response => {
 			setOrders(response || []);
 		});
 	}, []);

@@ -10,12 +10,13 @@ import styles from './PickupLocationDialog.module.scss';
 interface ILocation {
   name: string;
   address: string;
-  eventDate: string;
-  pickup?: {
-    weekday: number;
+  eventDate?: string;
+  pickupWeekday?: number;
+  pickupTime: {
     from: string;
     to: string;
   };
+  instruction: string;
   charge: number;
 }
 
@@ -26,10 +27,18 @@ interface IPickupLocationDialogProps {
   onUpdate?: (pickup: any) => void;
 }
 
+function convertTime24to12(time24: string) {
+  if (!time24) return '';
+  const [hours, minutes] = time24.split(':');
+  const period = Number(hours) >= 12 ? 'PM' : 'AM';
+  const hours12 = (Number(hours) % 12 || 12);
+  return `${hours12}:${minutes} ${period}`;
+}
+
 export function PickupLocationDialog({
   open,
-  onClose = () => {},
-  onUpdate = () => {},
+  onClose = () => { },
+  onUpdate = () => { },
   locations: pickupLocations,
 }: IPickupLocationDialogProps) {
   const [isLocPanel, setIsLocPanel] = useState(true);
@@ -47,10 +56,11 @@ export function PickupLocationDialog({
         charge: location.charge,
       },
       fulfillday: {
-        day: pickupLocations[Number(locIndex)].eventDate,
-        from: '',
-        to: '',
+        day: location.eventDate,
+        from: location.pickupTime.from,
+        to: location.pickupTime.to,
       },
+      instruction: location.instruction
     });
   };
 
@@ -126,7 +136,7 @@ export function PickupLocationDialog({
                       // [styles.active]: dateIndex === index.toString(),
                       [styles.active]: true,
                     })}
-                    // onClick={() => setDateIndex(index.toString())}
+                  // onClick={() => setDateIndex(index.toString())}
                   >
                     <div className={styles.pickupdate}>
                       <div className={styles.element}>
@@ -135,16 +145,16 @@ export function PickupLocationDialog({
                           {/* {formatDate(dateTime.weekday)} */}
                           {pickupLocations[Number(locIndex)].eventDate
                             ? formatUsDate(
-                                pickupLocations[Number(locIndex)].eventDate,
-                              )
+                              pickupLocations[Number(locIndex)].eventDate || '',
+                            )
                             : ''}
                         </p>
                       </div>
                       <div className={styles.element}>
                         <p className={styles.title}>Pickup Between</p>
                         <p className={styles.text}>
-                          {pickupLocations[Number(locIndex)].pickup?.from}{' '}
-                          {pickupLocations[Number(locIndex)].pickup?.to}
+                          {convertTime24to12(pickupLocations[Number(locIndex)].pickupTime.from)}{' '}
+                          {convertTime24to12(pickupLocations[Number(locIndex)].pickupTime.to)}
                         </p>
                       </div>
                     </div>

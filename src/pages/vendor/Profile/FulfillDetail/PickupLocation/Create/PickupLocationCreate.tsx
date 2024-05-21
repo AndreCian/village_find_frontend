@@ -20,13 +20,13 @@ import styles from './PickupLocationCreate.module.scss';
 interface ILocation {
   name: string;
   address: string;
-  pickup: {
-    weekday: number;
+  pickupTime: {
     from: string;
     to: string;
   };
-  specialEvent: string;
-  instr: string;
+  pickupWeekday?: number;
+  eventDate?: string;
+  instruction: string;
   charge: number;
   status: string;
 }
@@ -34,13 +34,13 @@ interface ILocation {
 const initialLocation: ILocation = {
   name: '',
   address: '',
-  pickup: {
-    weekday: 0,
+  pickupTime: {
     from: '',
     to: '',
   },
-  specialEvent: '',
-  instr: '',
+  pickupWeekday: -1,
+  eventDate: '',
+  instruction: '',
   charge: 0,
   status: 'inactive',
 };
@@ -55,13 +55,14 @@ const weekdays = [
   'Sunday',
 ];
 
-const BACKPATH = '/vendor/profile/fulfillment/location';
+const PICKUP_LOCATION_PATH = '/vendor/profile/fulfillment/location';
 
 export function PickupLocationCreate() {
   const navigate = useNavigate();
   const { id: actionID } = useParams();
 
   const [location, setLocation] = useState<ILocation>(initialLocation);
+  const [isSpecialEvent, setIsSpecialEvent] = useState(false);
   const [eventDate, setEventDate] = useState('');
 
   const onLocationChange = (e: ChangeInputEvent) => {
@@ -69,35 +70,26 @@ export function PickupLocationCreate() {
   };
 
   const onEventToggleClick = () => {
-    if (!location.specialEvent) {
-      setLocation({ ...location, specialEvent: eventDate });
-    } else {
-      setLocation({ ...location, specialEvent: '' });
-    }
+    if (isSpecialEvent) setEventDate('');
+    setIsSpecialEvent(!isSpecialEvent);
   };
 
   const onCreateOrUpdateClick = () => {
-    if (actionID === 'create') {
-      const reqJson = {
-        ..._.omit(location, ['specialEvent', 'pickup', 'instr']),
-        eventDate: location.specialEvent
-          ? new Date(location.specialEvent)
-          : null,
-        pickup: location.specialEvent ? null : location.pickup,
-      };
-      HttpService.put(
-        '/user/vendor/profile/fulfillment/location',
-        reqJson,
-      ).then(response => {
-        const { status } = response;
-        if (status === 200) {
-          enqueueSnackbar('Partnered pickup location created.', {
-            variant: 'success',
-          });
-          navigate(BACKPATH);
-        }
-      });
-    }
+    const reqJson: any = { ...location };
+    const reqParams: any = {};
+    if (isSpecialEvent) {
+      reqJson.eventDate = eventDate;
+      delete reqJson.pickupWeekday;
+    } else delete reqJson.eventDate;
+
+    if (actionID && actionID !== 'create') reqParams.id = actionID;
+    HttpService.put('/user/vendor/profile/fulfillment/location', reqJson, reqParams).then(response => {
+      const { status } = response;
+      if (status === 200) {
+        enqueueSnackbar(`Partnered pickup location ${actionID === 'create' ? 'created' : 'updated'}.`, { variant: 'success' });
+        navigate(PICKUP_LOCATION_PATH);
+      }
+    })
   };
 
   useEffect(() => {
@@ -105,17 +97,7 @@ export function PickupLocationCreate() {
     HttpService.get('/user/vendor/profile/fulfillment/location', {
       id: actionID,
     }).then(response => {
-      const { name, address, eventDate, pickup, charge, instruction, status } =
-        response;
-      setLocation({
-        name,
-        address,
-        specialEvent: eventDate,
-        pickup: eventDate ? { weekday: 0, from: '', to: '' } : pickup,
-        charge,
-        instr: instruction,
-        status,
-      });
+      setLocation(response);
     });
   }, [actionID]);
 
@@ -169,7 +151,7 @@ export function PickupLocationCreate() {
                 onClick={onEventToggleClick}
                 disabled={!eventDate}
               >
-                {location.specialEvent ? 'Remove' : 'Add'}
+                {isSpecialEvent ? 'Remove' : 'Add'}
               </Button>
             }
           </div>
@@ -187,14 +169,14 @@ export function PickupLocationCreate() {
                 name: item,
                 value: index.toString(),
               }))}
-              value={location.pickup.weekday.toString()}
+              value={location.pickupWeekday?.toString()}
               updateValue={value =>
                 setLocation({
                   ...location,
-                  pickup: { ...location.pickup, weekday: Number(value) },
+                  pickupWeekday: Number(value)
                 })
               }
-              disabled={!!location.specialEvent}
+              disabled={!!location.eventDate}
             />
           </div>
           <div className={styles.control}>
@@ -203,16 +185,15 @@ export function PickupLocationCreate() {
               <Input
                 type="time"
                 className={styles.pickInput}
-                value={location.pickup.from}
+                value={location.pickupTime.from}
                 border="none"
                 bgcolor="secondary"
                 updateValue={(e: ChangeInputEvent) =>
                   setLocation({
                     ...location,
-                    pickup: { ...location.pickup, from: e.target.value },
+                    pickupTime: { ...location.pickupTime, from: e.target.value },
                   })
                 }
-                disabled={!!location.specialEvent}
               />
             </div>
           </div>
@@ -222,16 +203,15 @@ export function PickupLocationCreate() {
               <Input
                 type="time"
                 className={styles.pickInput}
-                value={location.pickup.to}
+                value={location.pickupTime.to}
                 border="none"
                 bgcolor="secondary"
                 updateValue={(e: ChangeInputEvent) =>
                   setLocation({
                     ...location,
-                    pickup: { ...location.pickup, to: e.target.value },
+                    pickupTime: { ...location.pickupTime, to: e.target.value },
                   })
                 }
-                disabled={!!location.specialEvent}
               />
             </div>
           </div>
@@ -244,9 +224,9 @@ export function PickupLocationCreate() {
             bgcolor="secondary"
             placeholder="Special instructions (Sent in email to customer)"
             className={styles.input}
-            value={location.instr}
+            value={location.instruction}
             updateValue={(e: ChangeInputEvent) =>
-              setLocation({ ...location, instr: e.target.value })
+              setLocation({ ...location, instruction: e.target.value })
             }
           />
         </div>
@@ -293,7 +273,7 @@ export function PickupLocationCreate() {
       <div className={styles.buttonBar}>
         <button
           className={clsx(styles.button, styles.cancelButton)}
-          onClick={() => navigate(BACKPATH)}
+          onClick={() => navigate(PICKUP_LOCATION_PATH)}
         >
           Cancel
         </button>

@@ -17,8 +17,8 @@ export function Profile() {
     const navigate = useNavigate();
 
     return <Container className={styles.root}>
-        <div className={styles.back} onClick={() => navigate(MARKET_PATH)}>
-            <span><FaChevronLeft /></span>
+        <div className={styles.back}>
+            <span onClick={() => navigate(MARKET_PATH)}><FaChevronLeft /></span>
             <p>Back to Market</p>
         </div>
         <Information />

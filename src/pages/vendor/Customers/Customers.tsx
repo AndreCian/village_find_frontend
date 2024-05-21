@@ -1,13 +1,15 @@
-import { Card, TableBody, TableToolbar } from '@/components/common';
+import { useEffect, useState } from 'react';
+import { Card, TableBody } from '@/components/common';
 
-import { ITableColumn } from '@/interfaces';
-
+import { Input } from '@/components/forms';
+import { MagnifierIcon } from '@/components/icons';
+import { ChangeInputEvent, ITableColumn } from '@/interfaces';
 import { formatDate, formatNumber } from '@/utils';
 
 import styles from './Customers.module.scss';
 
 export function Customers() {
-  const customers = 278;
+  const customers = 0;
   const customerTableColumns: ITableColumn[] = [
     {
       title: 'Customer Name',
@@ -42,16 +44,17 @@ export function Customers() {
       cell: (row: any) => <span>${formatNumber(row.spend)}</span>,
     },
   ];
-  const customerTableRows = [
-    {
-      name: 'Brandon Monti',
-      phone: '203-228-8814',
-      email: 'brandon@fresherchoice.com',
-      date: new Date('02/28/2024'),
-      address: '122 Park St. Bristol Ct, 06705',
-      spend: 2007.95,
-    },
-  ];
+  const [filter, setFilter] = useState('');
+  // const customerTableRows = [
+  //   {
+  //     name: 'Brandon Monti',
+  //     phone: '203-228-8814',
+  //     email: 'brandon@fresherchoice.com',
+  //     date: new Date('02/28/2024'),
+  //     address: '122 Park St. Bristol Ct, 06705',
+  //     spend: 2007.95,
+  //   },
+  // ];
 
   return (
     <div className={styles.root}>
@@ -60,9 +63,24 @@ export function Customers() {
         <span>{customers}</span>
       </Card>
       <div className={styles.customerTable}>
-        <TableToolbar selectable={false} className={styles.tableToolbar} />
+        <div className={styles.toolbar}>
+          <Input
+            name='search'
+            placeholder='Search'
+            bgcolor='primary'
+            border='none'
+            rounded='full'
+            value={filter}
+            updateValue={(e: ChangeInputEvent) => setFilter(e.target.value)}
+            className={styles.input}
+            adornment={{
+              position: 'right',
+              content: <MagnifierIcon />
+            }}
+          />
+        </div>
         <Card>
-          <TableBody columns={customerTableColumns} rows={customerTableRows} />
+          <TableBody columns={customerTableColumns} rows={[]} />
         </Card>
       </div>
     </div>

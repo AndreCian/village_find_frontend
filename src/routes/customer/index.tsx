@@ -28,6 +28,9 @@ const Checkout = lazy(() =>
 const Profile = lazy(() =>
   import('@/pages/customer').then(module => ({ default: module.Profile })),
 );
+const OrderDetail = lazy(() =>
+  import('@/pages/customer').then(module => ({ default: module.OrderDetail })),
+)
 const About = lazy(() =>
   import('@/pages/customer').then(module => ({ default: module.About })),
 );
@@ -146,7 +149,17 @@ export const customerRoutes = [
   },
   {
     path: 'profile',
-    element: <Profile />
+    element: <Outlet />,
+    children: [
+      {
+        index: true,
+        element: <Profile />
+      },
+      {
+        path: 'orders/:id',
+        element: <OrderDetail />
+      }
+    ]
   },
   {
     path: 'about',

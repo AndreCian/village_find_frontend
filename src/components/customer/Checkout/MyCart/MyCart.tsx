@@ -35,7 +35,7 @@ interface IMyCartProps {
 export interface IOrder {
   _id?: string;
   cartId: string;
-  orderId: number;
+  orderID: number;
   vendor: {
     images: {
       logoUrl: string;
@@ -60,17 +60,19 @@ export interface IOrder {
       locations: {
         name: string;
         address: string;
-        eventDate: string;
-        pickup?: {
-          weekday: number;
+        eventDate?: string;
+        pickupWeekday?: number;
+        pickupTime: {
           from: string;
           to: string;
         };
+        instruction: string;
         charge: number;
       }[];
     };
     business: {
       name: string;
+      phone: string;
     }
   };
   inventory: {
@@ -124,6 +126,12 @@ export interface IOrder {
     name: string;
     address: string;
     charge: number;
+    instruction: string;
+    pickupDate: string;
+    pickupTime: {
+      from: string;
+      to: string;
+    }
   };
   fulfillday?: {
     day: string;
@@ -191,14 +199,21 @@ export function MyCart({
     );
   };
 
-  const onPickupLocationChange = (id: string) => (data: any) => {
+  const onPickupLocationChange = (id: string) => ({ location, fulfillday, instruction }: any) => {
     setCartItems(
       cartItems.map(item =>
         item._id === id
           ? {
             ...item,
-            pickuplocation: data.location,
-            fulfillday: data.fulfillday,
+            pickuplocation: {
+              ...location,
+              pickupDate: fulfillday.day,
+              pickupTime: {
+                from: fulfillday.from,
+                to: fulfillday.to
+              },
+              instruction
+            },
             deliveryType: 'Pickup Location',
           }
           : item,
@@ -267,7 +282,7 @@ export function MyCart({
             <CartItem
               key={cartItem.orderId}
               cartId={cartItem._id}
-              orderId={cartItem.orderId}
+              orderID={cartItem.orderId}
               vendor={cartItem.vendorId}
               inventory={cartItem.inventoryId}
               product={cartItem.productId}

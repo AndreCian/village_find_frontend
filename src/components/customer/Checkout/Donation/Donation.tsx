@@ -47,16 +47,16 @@ export function Donation({ donation, setDonation }: IDonationProps) {
     }
   }, [donText]);
 
-  useEffect(() => {
-    const donations = [1, 3, 5];
-    const index = donations.findIndex(item => item === donation);
-    if (index !== -1) {
-      setDonIndex(index);
-    } else {
-      setDonIndex(3);
-      setDonText(donation.toString());
-    }
-  }, [donation]);
+  // useEffect(() => {
+  //   const donations = [1, 3, 5];
+  //   const index = donations.findIndex(item => item === donation);
+  //   if (index !== -1) {
+  //     setDonIndex(index);
+  //   } else {
+  //     setDonIndex(3);
+  //     setDonText(donation.toString());
+  //   }
+  // }, [donation]);
 
   return (
     <div className={styles.root}>

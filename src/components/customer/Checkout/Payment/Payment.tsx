@@ -103,19 +103,19 @@ export function Payment({
         return;
       }
 
-      const { paymentMethod, error } =
-        await stripe.createPaymentMethod({ type: 'card', card: cardNumberElement });
-      if (error) {
-        console.error(error);
-      } else {
-        fetch('/create-payment-intent', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ paymentMethodId: paymentMethod.id })
-        }).then(response => response.json()).then(data => {
-          stripe.confirmCardPayment(data.clientSecret);
-        });
-      }
+      // const { paymentMethod, error } =
+      //   await stripe.createPaymentMethod({ type: 'card', card: cardNumberElement });
+      // if (error) {
+      //   console.error(error);
+      // } else {
+      //   fetch('/create-payment-intent', {
+      //     method: 'POST',
+      //     headers: { 'Content-Type': 'application/json' },
+      //     body: JSON.stringify({ paymentMethodId: paymentMethod.id })
+      //   }).then(response => response.json()).then(data => {
+      //     stripe.confirmCardPayment(data.clientSecret);
+      //   });
+      // }
 
       // const { error, token } = await stripe.createToken(cardNumberElement);
       // if (error) {
@@ -123,15 +123,15 @@ export function Payment({
       //   return;
       // }
 
-      // HttpService.post('/cart/checkout', {
-      //   cartItems,
-      //   donation,
-      // }).then(response => {
-      //   const { status } = response;
-      //   if (status === 200) {
-      //     onNextStep();
-      //   }
-      // })
+      HttpService.post('/cart/checkout', {
+        cartItems,
+        donation,
+      }).then(response => {
+        const { status } = response;
+        if (status === 200) {
+          onNextStep();
+        }
+      });
 
       // HttpService.post('/stripe/create-payment-method', {
       //   detail: payment,

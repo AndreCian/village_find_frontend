@@ -59,8 +59,18 @@
   }
 
   .currentOrder {
-    .toolBar {
-      @apply grid grid-cols-4;
+    @apply flex flex-col gap-y-4;
+    .toolbar {
+      @apply flex gap-x-6;
+      > .control {
+        @apply flex flex-col gap-y-1;
+        > p {
+          @apply font-medium;
+        }
+        > .input {
+          @apply min-w-[250px];
+        }
+      }
     }
   }
 }

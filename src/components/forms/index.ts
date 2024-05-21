@@ -6,3 +6,4 @@ export * from './RadioGroup';
 export * from './TagInput';
 export * from './Button';
 export * from './Dropdown';
+export * from './Switch';

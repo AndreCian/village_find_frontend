@@ -53,17 +53,19 @@ export interface ICartItem {
       locations: {
         name: string;
         address: string;
-        eventDate: string;
-        pickup?: {
-          weekday: number;
+        eventDate?: string;
+        pickupWeekday?: number;
+        pickupTime: {
           from: string;
           to: string;
         };
+        instruction: string;
         charge: number;
       }[];
     };
     business: {
       name: string;
+      phone: string;
     }
   };
   productId: {
@@ -114,6 +116,12 @@ export interface ICartItem {
     name: string;
     address: string;
     charge: number;
+    instruction: string;
+    pickupDate: string;
+    pickupTime: {
+      from: string;
+      to: string;
+    };
   };
   fulfillday: {
     day: string;
@@ -156,7 +164,7 @@ export function Checkout() {
   const guestID = useAppSelector(state => state.guest.guestID);
 
   const [step, setStep] = useState(0);
-  const [donation, setDonation] = useState(0);
+  const [donation, setDonation] = useState(1);
   const [shipping, setShipping] = useState('');
   const [summary, setSummary] = useState<ISummary>(initialSummary);
   const [cartItems, setCartItems] = useState<ICartItem[]>([]);
