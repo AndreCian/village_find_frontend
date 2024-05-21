@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { enqueueSnackbar } from 'notistack';
 
 import { Button, Input } from '@/components/forms';
 import { Logo } from '@/components/layout/customer';
 import { HttpService } from '@/services';
+import { AuthContext } from '@/providers';
 import { ChangeInputEvent } from '@/interfaces';
 import { setupToken } from '@/utils';
 
@@ -24,6 +25,8 @@ const ADMIN_PATH = '/admin/dashboard';
 
 export function Login() {
     const navigate = useNavigate();
+
+    const { setIsLogin } = useContext(AuthContext);
     const [account, setAccount] = useState<IAccount>(initialAccount);
 
     const onAccountChange = (e: ChangeInputEvent) => {
@@ -34,6 +37,7 @@ export function Login() {
         HttpService.post('/admin/login', account).then(response => {
             const { status, token } = response;
             if (status === 200) {
+                setIsLogin(true);
                 setupToken(token, 'admin');
                 navigate(ADMIN_PATH);
                 enqueueSnackbar('Admin login success.', { variant: 'success' });
