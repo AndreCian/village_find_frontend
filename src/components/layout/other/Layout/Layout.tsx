@@ -25,6 +25,7 @@ export function Layout() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    if (blackList.includes(pathname)) return;
     if (isLogin) {
       setIsLoading(false);
       return;
@@ -71,7 +72,7 @@ export function Layout() {
     } else {
       navigate(isVendor ? '/login/vendor' : '/admin/login');
     }
-  }, []);
+  }, [pathname]);
 
   useEffect(() => {
     HttpService.get('/subscriptions').then(response => {
