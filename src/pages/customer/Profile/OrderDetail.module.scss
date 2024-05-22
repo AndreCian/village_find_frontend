@@ -28,7 +28,7 @@
           > .item {
             @apply flex flex-col items-center gap-y-8;
             > span {
-              @apply z-50 flex aspect-square w-10 items-center justify-center rounded-full border-1 border-primary bg-white font-avenir text-[25px] leading-[39px];
+              @apply z-10 flex aspect-square w-10 items-center justify-center rounded-full border-1 border-primary bg-white font-avenir text-[25px] leading-[39px];
             }
             > span.active {
               @apply bg-success text-white;
@@ -101,23 +101,56 @@
           }
         }
         > .subtotal {
-          @apply flex flex-col;
+          @apply flex flex-col gap-y-4;
           > .title {
             @apply text-[20px] font-bold leading-[30px];
           }
-          > .summary {
-            @apply flex w-full max-w-[300px] flex-col gap-y-4 self-end;
-            > .row {
-              @apply flex items-center justify-between;
-              > p {
-                @apply font-medium;
+          > .divider {
+            @apply h-0.5 bg-primary;
+          }
+          > .detail {
+            @apply flex justify-between;
+            > .pickuplocation {
+              @apply rounded-lg bg-primary px-8 pb-9 pt-1.5;
+              > .title {
+                @apply mb-6 text-[16px] font-medium leading-[25px];
+              }
+              > .instruction {
+                @apply mb-2 max-w-[320px] text-[13px] leading-[18px];
+                > span {
+                  @apply font-medium;
+                }
+              }
+              > .control {
+                @apply mb-2 flex gap-x-2;
+                > p {
+                  @apply text-[13px] leading-[18px];
+                }
+                > .location {
+                  @apply flex flex-col gap-y-2;
+                  > p {
+                    @apply text-[13px] leading-[18px];
+                  }
+                  > p.address {
+                    @apply text-success;
+                  }
+                }
               }
             }
-            > .row.total > .spent {
-              @apply font-bold;
-            }
-            > .divider {
-              @apply h-[1px] bg-primary;
+            > .summary {
+              @apply flex w-full max-w-[300px] flex-col gap-y-4 justify-self-end;
+              > .row {
+                @apply flex items-center justify-between;
+                > p {
+                  @apply font-medium;
+                }
+              }
+              > .row.total > .spent {
+                @apply font-bold;
+              }
+              > .divider {
+                @apply h-[1px] bg-primary;
+              }
             }
           }
         }

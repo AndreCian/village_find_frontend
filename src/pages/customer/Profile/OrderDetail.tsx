@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { FaMapMarkerAlt, FaRegCalendarAlt } from "react-icons/fa";
 import { FaChevronLeft } from 'react-icons/fa6';
+import { ImAlarm } from "react-icons/im";
 import clsx from 'clsx';
 
 import { Container } from '@/components/layout/customer';
@@ -39,6 +41,13 @@ interface IOrder {
 	deliveryType: string;
 	deliveryInfo: {
 		address: string;
+	};
+	locationInfo?: {
+		instruction: string;
+		name: string;
+		address: string;
+		pickDate: string;
+		pickTime: string;
 	};
 	orderDate: string;
 }
@@ -167,31 +176,61 @@ export function OrderDetail() {
 						</div>
 					</div>
 					<div className={styles.subtotal}>
-						<p className={styles.title}>Subtotal</p>
-						<div className={styles.summary}>
-							<div className={styles.row}>
-								<p className={styles.name}>Subtotal</p>
-								<p className={styles.spent}>${order.product.subtotal}</p>
-							</div>
-							<div className={styles.divider}></div>
-							<div className={styles.row}>
-								<p className={styles.name}>Tax</p>
-								<p className={styles.spent}>${order.product.subtotal}</p>
-							</div>
-							<div className={styles.row}>
-								<p className={styles.name}>{order.deliveryType === 'Shipping' ? 'Shipping' : 'Delivery'} Fee</p>
-								<p className={styles.spent}>${order.deliveryType === 'Shipping'
-									? order.shipping?.fee || 0 : order.delivery?.fee || 0}</p>
-							</div>
-							<div className={styles.divider}></div>
-							<div className={clsx(styles.row, styles.total)}>
-								<p className={styles.name}>Total</p>
-								<p className={styles.spent}>
-									${order.product.subtotal +
-										(order.deliveryType === 'Shipping'
-											? order.shipping?.fee || 0
-											: order.delivery?.fee || 0)}
+						<p className={styles.title}>
+							{
+								order.deliveryType === 'Pickup Location'
+									? 'Vendors Near Me Order Details'
+									: 'Subtotal'
+							}
+						</p>
+						<div className={styles.divider}></div>
+						<div className={styles.detail}>
+							{order.deliveryType === 'Pickup Location' && <div className={styles.pickuplocation}>
+								<p className={styles.title}>Pickup Location</p>
+								<p className={styles.instruction}>
+									<span>Instructions:</span> {order.locationInfo?.instruction}
 								</p>
+								<div className={styles.control}>
+									<FaMapMarkerAlt />
+									<div className={styles.location}>
+										<p>{order.locationInfo?.name}</p>
+										<p className={styles.address}>{order.locationInfo?.address}</p>
+									</div>
+								</div>
+								<div className={styles.control}>
+									<FaRegCalendarAlt />
+									<p>Pickup Date: {formatLocalDate(order.locationInfo?.pickDate || '')}</p>
+								</div>
+								<div className={styles.control}>
+									<ImAlarm />
+									<p>Pickup between: {order.locationInfo?.pickTime}</p>
+								</div>
+							</div>}
+							<div className={styles.summary}>
+								<div className={styles.row}>
+									<p className={styles.name}>Subtotal</p>
+									<p className={styles.spent}>${order.product.subtotal}</p>
+								</div>
+								<div className={styles.divider}></div>
+								<div className={styles.row}>
+									<p className={styles.name}>Tax</p>
+									<p className={styles.spent}>${order.product.subtotal}</p>
+								</div>
+								<div className={styles.row}>
+									<p className={styles.name}>{order.deliveryType === 'Shipping' ? 'Shipping' : 'Delivery'} Fee</p>
+									<p className={styles.spent}>${order.deliveryType === 'Shipping'
+										? order.shipping?.fee || 0 : order.delivery?.fee || 0}</p>
+								</div>
+								<div className={styles.divider}></div>
+								<div className={clsx(styles.row, styles.total)}>
+									<p className={styles.name}>Total</p>
+									<p className={styles.spent}>
+										${order.product.subtotal +
+											(order.deliveryType === 'Shipping'
+												? order.shipping?.fee || 0
+												: order.delivery?.fee || 0)}
+									</p>
+								</div>
 							</div>
 						</div>
 					</div>

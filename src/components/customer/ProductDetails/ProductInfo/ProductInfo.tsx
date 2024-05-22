@@ -78,9 +78,9 @@ export function ProductInfo({
     return variant;
   }, [cartProduct.styleID]);
   const selectedInvent = useMemo(() => {
-    return inventories.find((item: any) =>
+    return attributes.length > 0 ? inventories.find((item: any) =>
       attributes.every((attribute: string, index: number) => item.attrs[index] === attribute)
-    );
+    ) : null;
   }, [attributes, inventories]);
 
   const productPrice = useMemo(() => {

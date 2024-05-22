@@ -129,8 +129,8 @@ export function StyleCreate() {
           (row: any, index: number) => ({
             ...row,
             index,
-            inventory: 0,
             price: 0,
+            quantity: 0,
             status: 'active',
           }));
         dispatch(createStyle({
