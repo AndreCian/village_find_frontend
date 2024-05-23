@@ -175,8 +175,13 @@ export function ProductInfo({
       return variant.attributes.every((attr, index) => attr.values.includes(attribute[index]));
     });
     if (style) {
-      setAttributes(attribute);
-      setCartProduct({ ...cartProduct, styleID: style._id });
+      if (style._id === cartProduct.styleID) {
+        setAttributes(Array(attribute.length).fill(''));
+        setCartProduct({ ...cartProduct, styleID: '' });
+      } else {
+        setAttributes(attribute);
+        setCartProduct({ ...cartProduct, styleID: style._id });
+      }
     }
   };
 

@@ -59,6 +59,7 @@ export function ProductLayout() {
 
   const product = useAppSelector(state => state.product);
   const { nutrition, image } = useContext(ProductContext);
+  const { styleImages } = useContext(ProductContext);
 
   const [subPath, subActionPath] = useMemo(() => {
     const trimPath = pathname.slice(PRODUCT_PATH.length);
@@ -88,26 +89,44 @@ export function ProductLayout() {
   };
 
   const submitProduct = () => {
-    console.log(product);
+    console.log('Style Images', styleImages);
     const reqJson: any = {
       ...product, ...product.general
     };
     delete reqJson.currentStyleID;
     delete reqJson.general;
     HttpService.post('/products', reqJson).then(response => {
-      const { status, product } = response;
+      const { status, product, styleInvents } = response;
       if (status === 200) {
         const formData = new FormData();
         if (nutrition) formData.append('nutrition', nutrition);
         if (image) formData.append('image', image);
         HttpService.put(`/products/${product}`, formData).then(response => {
           const { status } = response;
-          if (status === 200) {
-            dispatch(resetProduct());
-            enqueueSnackbar('Product uploaded.', { variant: 'success' });
-            navigate(PRODUCT_PATH);
-          }
-        })
+        });
+
+        Promise.all(styleInvents.map((style: { styleID: string; inventories: string[]; }, styleID: number) => {
+          const images = styleImages[styleID].images;
+          const formData = new FormData();
+          const inventIDs: string[] = [];
+          images.forEach((image: File | null, imageID: number) => {
+            if (image) {
+              formData.append('images', image);
+              inventIDs.push(styleInvents[styleID].inventories[imageID]);
+            }
+          });
+          formData.append('inventIDs', JSON.stringify(inventIDs));
+          HttpService.put('/inventories/image', formData, { styleId: style.styleID }).then(response => {
+            const { status } = response;
+            if (status === 200) {
+              return Promise.resolve(null);
+            }
+          });
+        })).then(response => {
+          enqueueSnackbar('Product uploaded.', { variant: 'success' });
+          dispatch(resetProduct());
+          navigate(PRODUCT_PATH);
+        });
       }
     })
   }

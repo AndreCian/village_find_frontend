@@ -4,6 +4,7 @@ import { useAppDispatch, useAppSelector } from '@/redux/store';
 import { enqueueSnackbar } from 'notistack';
 
 import { StyleCreateContext } from '../Layout';
+import { ProductContext } from '../../../Provider';
 import { Button, Input, Select, TableBody } from '@/components';
 import { ChangeInputEvent } from '@/interfaces';
 import { HttpService } from '@/services';
@@ -43,6 +44,7 @@ export function Attributes() {
 
   const { styleName, setStyleName, attributes, setAttributes } =
     useContext(StyleCreateContext);
+  const { styleImages, setStyleImages } = useContext(ProductContext);
 
   const [rows, setRows] = useState<any[]>([]);
   const [images, setImages] = useState<(File | null)[]>([]);
@@ -78,8 +80,7 @@ export function Attributes() {
     };
     reader.readAsDataURL(e.target.files[0]);
     const results = images.map((image: File | null, index: number) =>
-      index === id ? e.target.files && e.target.files[0] : image,
-    );
+      index === id ? e.target.files && e.target.files[0] : image);
     setImages(results);
   };
 
@@ -181,15 +182,19 @@ export function Attributes() {
 
   const onUpdateClick = () => {
     if (productId === 'create') {
+      const updateStyleID = styleId === 'create' ? currentStyleID : Number(styleId);
       dispatch(updateStyle({
-        id: styleId === 'create' ? currentStyleID : Number(styleId),
+        id: updateStyleID,
         style: {
           inventories: rows,
           imageSrcs
         }
       }));
-      enqueueSnackbar(`Style ${styleId === 'create' ? 'created' : 'updated'}.`, { variant: 'success' });
+      setStyleImages(styleImages.map((style: { images: (File | null)[] }, index: number) =>
+        index === updateStyleID ? { ...style, images } : style
+      ));
       navigate(`${PRODUCT_PATH}/${productId}/style`);
+      enqueueSnackbar(`Style ${styleId === 'create' ? 'created' : 'updated'}.`, { variant: 'success' });
     } else {
       HttpService.put(`/styles/${styleId}/inventory`, rows).then(response => {
         const { status, ids } = response;
@@ -225,10 +230,11 @@ export function Attributes() {
 
   useEffect(() => {
     if (productId === 'create') {
-      const style = styleId === 'create' ? storeStyles[currentStyleID] : storeStyles[Number(styleId)];
+      const updateStyleID = styleId === 'create' ? currentStyleID : Number(styleId);
+      const style = storeStyles[updateStyleID];
       if (style) {
         setRows(style.inventories);
-        // setImages(style.images);
+        setImages(styleImages[updateStyleID].images);
         setImageSrcs(style.imageSrcs);
       }
     } else {

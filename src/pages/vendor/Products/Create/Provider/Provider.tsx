@@ -1,5 +1,9 @@
 import { createContext, useState } from "react";
 
+interface IStyleImage {
+    images: (File | null)[];
+}
+
 interface IProductContext {
     deliveryTypes: string[];
     setDeliveryTypes: (_: string[]) => void;
@@ -7,6 +11,8 @@ interface IProductContext {
     setNutrition: (_: File | null) => void;
     image: File | null;
     setImage: (_: File | null) => void;
+    styleImages: IStyleImage[];
+    setStyleImages: (_: IStyleImage[]) => void;
 }
 
 export const ProductContext = createContext<IProductContext>({
@@ -15,7 +21,9 @@ export const ProductContext = createContext<IProductContext>({
     nutrition: null,
     setNutrition: () => { },
     image: null,
-    setImage: () => { }
+    setImage: () => { },
+    styleImages: [],
+    setStyleImages: () => { }
 });
 
 interface IProductProviderProps {
@@ -26,8 +34,9 @@ function ProductProvider({ children }: IProductProviderProps) {
     const [deliveryTypes, setDeliveryTypes] = useState<string[]>([]);
     const [nutrition, setNutrition] = useState<File | null>(null);
     const [image, setImage] = useState<File | null>(null);
+    const [styleImages, setStyleImages] = useState<IStyleImage[]>([]);
 
-    return <ProductContext.Provider value={{ deliveryTypes, setDeliveryTypes, nutrition, setNutrition, image, setImage }}>
+    return <ProductContext.Provider value={{ deliveryTypes, setDeliveryTypes, nutrition, setNutrition, image, setImage, styleImages, setStyleImages }}>
         {children}
     </ProductContext.Provider>
 }

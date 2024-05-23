@@ -53,12 +53,12 @@ export function Login() {
       .then(response => {
         const { status, token, profile } = response;
         if (status === 200) {
+          setIsLogin(true);
           setAccount({
             role: role as RoleType,
             profile,
           });
           setupToken(token, role);
-          setIsLogin(true);
           enqueueSnackbar('Login successfully!', { variant: 'success' });
           navigate(role === 'vendor' ? '/vendor' : '/');
         } else if (status === 400) {

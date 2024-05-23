@@ -12,6 +12,7 @@ import { createStyle, updateStyle } from '@/redux/reducers';
 import { IAttribute } from '@/redux/reducers';
 
 import styles from './StyleCreate.module.scss';
+import { ProductContext } from '../../../Provider';
 
 const getSubRows = (
   attrs: IAttribute[],
@@ -39,6 +40,7 @@ export function StyleCreate() {
   const { productId, styleId } = useParams();
   const storeStyles = useAppSelector(state => state.product.styles);
 
+  const { styleImages, setStyleImages } = useContext(ProductContext);
   const { attributes, setAttributes, styleName, setStyleName } =
     useContext(StyleCreateContext);
   const [currentAttrIndex, setCurrentAttrIndex] = useState(-1);
@@ -142,6 +144,7 @@ export function StyleCreate() {
           imageSrcs: Array(inventRows.length).fill(''),
           status: 'active'
         }));
+        setStyleImages([...styleImages, { images: Array(inventRows.length).fill(null) }]);
       } else {
         dispatch(updateStyle({
           id: Number(styleId),
