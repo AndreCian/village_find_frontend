@@ -1,6 +1,6 @@
 import { useContext, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaChevronDown, FaChevronUp, FaMinus, FaPlus } from 'react-icons/fa6';
+import { FaChevronDown, FaChevronUp, FaMinus, FaPlus, FaStaylinked } from 'react-icons/fa6';
 import { enqueueSnackbar } from 'notistack';
 import clsx from 'clsx';
 
@@ -78,10 +78,12 @@ export function ProductInfo({
     return variant;
   }, [cartProduct.styleID]);
   const selectedInvent = useMemo(() => {
-    return attributes.length > 0 ? inventories.find((item: any) =>
+    if (!cartProduct.styleID) return null;
+    return inventories.find((item: any) =>
+      attributes.length === item.attrs.length &&
       attributes.every((attribute: string, index: number) => item.attrs[index] === attribute)
-    ) : null;
-  }, [attributes, inventories]);
+    );
+  }, [attributes, inventories, cartProduct.styleID]);
 
   const productPrice = useMemo(() => {
     return (selectedInvent && selectedInvent.price) || price;
@@ -170,18 +172,17 @@ export function ProductInfo({
     setAttributes(attributes.map((item: string, id: number) => id === index ? value : item));
   };
 
-  const onImageClick = (attribute: string[]) => () => {
-    const style = variants.find(variant => {
-      return variant.attributes.every((attr, index) => attr.values.includes(attribute[index]));
-    });
-    if (style) {
-      if (style._id === cartProduct.styleID) {
-        setAttributes(Array(attribute.length).fill(''));
-        setCartProduct({ ...cartProduct, styleID: '' });
-      } else {
-        setAttributes(attribute);
-        setCartProduct({ ...cartProduct, styleID: style._id });
-      }
+  const onImageClick = (inventory: { styleId: string; attrs: string[]; }) => () => {
+    if (!inventory) return;
+
+    if (inventory.styleId === cartProduct.styleID && attributes.length === inventory.attrs.length && inventory.attrs.every(
+      (item: string, index: number) => item === attributes[index]
+    )) {
+      setAttributes(Array(inventory.attrs.length).fill(''));
+      setCartProduct({ ...cartProduct, styleID: '' });
+    } else {
+      setAttributes(inventory.attrs);
+      setCartProduct({ ...cartProduct, styleID: inventory.styleId });
     }
   };
 
@@ -227,7 +228,7 @@ export function ProductInfo({
                   [styles.active]:
                     selectedInvent && selectedInvent._id === inventory._id,
                 })}
-                onClick={onImageClick(inventory.attrs)}
+                onClick={onImageClick(inventory)}
               />
             ))}
         </div>

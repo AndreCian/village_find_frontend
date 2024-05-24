@@ -57,6 +57,7 @@ export interface IOrderDetail {
     attrs: string[];
     image: string;
     price: number;
+    styleId: string;
   }[];
   iscustomizable: boolean;
   customization?: {
