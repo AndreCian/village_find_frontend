@@ -178,7 +178,7 @@ export function ProductInfo({
     if (inventory.styleId === cartProduct.styleID && attributes.length === inventory.attrs.length && inventory.attrs.every(
       (item: string, index: number) => item === attributes[index]
     )) {
-      setAttributes(Array(inventory.attrs.length).fill(''));
+      setAttributes([]);
       setCartProduct({ ...cartProduct, styleID: '' });
     } else {
       setAttributes(inventory.attrs);
