@@ -69,6 +69,7 @@ export function ProductInfo({
     quantity: 0,
     image: null,
   });
+  const [selectedInventID, setSelectedInventID] = useState<string>('');
   const [attributes, setAttributes] = useState<string[]>([]);
   const [isPersonalized, setIsPersonalized] = useState<Boolean>(false);
   const [customMessage, setCustomMessage] = useState('');
@@ -79,11 +80,8 @@ export function ProductInfo({
   }, [cartProduct.styleID]);
   const selectedInvent = useMemo(() => {
     if (!cartProduct.styleID) return null;
-    return inventories.find((item: any) =>
-      attributes.length === item.attrs.length &&
-      attributes.every((attribute: string, index: number) => item.attrs[index] === attribute)
-    );
-  }, [attributes, inventories, cartProduct.styleID]);
+    return inventories.find((item: any) => item._id === selectedInventID);
+  }, [selectedInventID]);
 
   const productPrice = useMemo(() => {
     return (selectedInvent && selectedInvent.price) || price;
@@ -169,10 +167,18 @@ export function ProductInfo({
   };
 
   const onAttributeChange = (index: number) => (value: string) => {
-    setAttributes(attributes.map((item: string, id: number) => id === index ? value : item));
+    const attrResults = attributes.map((item: string, id: number) => id === index ? value : item);
+    if (attrResults.every(item => !!item)) {
+      const inventory = inventories.find((item: any) =>
+        attrResults.length === item.attrs.length &&
+        item.attrs.every((attribute: string, index: number) => attrResults[index] === attribute)
+      );
+      if (inventory) setSelectedInventID(inventory._id);
+    }
+    setAttributes(attrResults);
   };
 
-  const onImageClick = (inventory: { styleId: string; attrs: string[]; }) => () => {
+  const onImageClick = (inventory: { _id: string; styleId: string; attrs: string[]; }) => () => {
     if (!inventory) return;
 
     if (inventory.styleId === cartProduct.styleID && attributes.length === inventory.attrs.length && inventory.attrs.every(
@@ -180,9 +186,11 @@ export function ProductInfo({
     )) {
       setAttributes([]);
       setCartProduct({ ...cartProduct, styleID: '' });
+      setSelectedInventID('');
     } else {
       setAttributes(inventory.attrs);
       setCartProduct({ ...cartProduct, styleID: inventory.styleId });
+      setSelectedInventID(inventory._id);
     }
   };
 
