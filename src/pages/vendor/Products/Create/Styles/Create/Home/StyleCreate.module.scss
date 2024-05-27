@@ -63,6 +63,14 @@
       @apply font-medium;
     }
 
+    > .heading {
+      @apply flex items-center justify-between;
+
+      > span {
+        @apply flex aspect-square w-10 cursor-pointer items-center justify-center rounded-full border border-primary bg-warning;
+      }
+    }
+
     input {
       @apply text-base;
     }

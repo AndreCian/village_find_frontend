@@ -3,13 +3,14 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { FaTimes } from 'react-icons/fa';
 import { enqueueSnackbar } from 'notistack';
 
-import { Input } from '@/components/forms';
-import { ChangeInputEvent } from '@/interfaces';
-import { HttpService } from '@/services';
 import { StyleCreateContext } from '../Layout';
+import { Input } from '@/components/forms';
+import { TrashIcon } from '@/components/icons';
 import { useAppDispatch, useAppSelector } from '@/redux/store';
 import { createStyle, updateStyle } from '@/redux/reducers';
 import { IAttribute } from '@/redux/reducers';
+import { HttpService } from '@/services';
+import { ChangeInputEvent } from '@/interfaces';
 
 import styles from './StyleCreate.module.scss';
 import { ProductContext } from '../../../Provider';
@@ -124,6 +125,11 @@ export function StyleCreate() {
     setCurrentValueIndex(-1);
   };
 
+  const onAttrRemoveClick = (attrIndex: number) => () => {
+    setAttributes(attributes.filter((_, index) => index !== attrIndex));
+    setIsDirty(true);
+  }
+
   const onNextClick = () => {
     if (productId === 'create') {
       if (styleId === 'create') {
@@ -235,7 +241,10 @@ export function StyleCreate() {
         {attributes.map((attribute: IAttribute, attrIndex: number) => (
           <div className={styles.attribute} key={attrIndex}>
             <div className={styles.control}>
-              <p>Attribute Name</p>
+              <div className={styles.heading}>
+                <p>Attribute Name</p>
+                <span onClick={onAttrRemoveClick(attrIndex)}><TrashIcon /></span>
+              </div>
               <Input
                 rounded="full"
                 border="none"
