@@ -118,6 +118,10 @@ export function ProductInfo({
     const style = variants.find(item => item._id === id);
     setCartProduct({ ...cartProduct, styleID: id });
     setAttributes(Array(style?.attributes.length).fill(''));
+    if (!style?.attributes.length) {
+      const inventory = inventories.find(item => item.styleId === id);
+      if (inventory) setSelectedInventID(inventory._id);
+    }
   };
 
   const onImageChange = (imageSrc: File) => {
