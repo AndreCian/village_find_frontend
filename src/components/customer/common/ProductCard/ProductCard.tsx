@@ -16,8 +16,15 @@ interface IProduct {
   tags?: string[];
 }
 
+const initialProduct: IProduct = {
+  _id: '',
+  image: '',
+  shopName: '',
+  name: ''
+}
+
 export interface IProductCardProps {
-  product: IProduct;
+  product?: IProduct;
   isLoadMore?: boolean;
   isActive?: boolean;
   className?: string;
@@ -32,12 +39,20 @@ export function ProductCard({
   isLoadMore = false,
   isActive = false,
   className = '',
-  product,
+  product = initialProduct,
 }: IProductCardProps) {
   const navigate = useNavigate();
   const { _id, image, name, shopName, price, totprice, tags } = product;
 
-  return (
+  return isLoadMore ? <div className={clsx(styles.root, styles.active)} onClick={() => navigate('/market')}>
+    <p className={styles.moreContext}>
+      Load More
+      <span>
+        <FaChevronRight fill="white" />
+      </span>
+    </p>
+    <div className={styles.grayLayer} />
+  </div> : (
     <div
       className={clsx(
         styles.root,
@@ -45,19 +60,11 @@ export function ProductCard({
         className,
       )}
       onClick={() =>
-        navigate(isLoadMore ? '/market' : `/product-detail/${_id}`)
+        navigate(`/product-detail/${_id}`)
       }
     >
       <div className={styles.image}>
         <img src={`${SERVER_URL}/${image}`} alt="Product image" />
-        {isLoadMore && (
-          <p className={styles.moreContext}>
-            Load More
-            <span>
-              <FaChevronRight fill="white" />
-            </span>
-          </p>
-        )}
       </div>
       <h1>{name}</h1>
       <p>{shopName}</p>
@@ -79,7 +86,7 @@ export function ProductCard({
             className={clsx(
               styles.tag,
               tagClass[
-                tag.toLowerCase().split(' ')[0] as 'near' | 'subscription'
+              tag.toLowerCase().split(' ')[0] as 'near' | 'subscription'
               ],
             )}
           >
@@ -87,7 +94,6 @@ export function ProductCard({
           </span>
         ))}
       </div>
-      {isLoadMore && <div className={styles.grayLayer} />}
     </div>
   );
 }

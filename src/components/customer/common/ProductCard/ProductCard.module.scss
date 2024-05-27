@@ -7,13 +7,13 @@
     img {
       @apply aspect-[4/3] w-full scale-125;
     }
+  }
 
-    .moreContext {
-      @apply absolute left-1/2 top-1/2 z-10 flex w-full -translate-x-1/2 -translate-y-1/2 transform items-center justify-center gap-x-2 text-xl font-bold text-success;
+  .moreContext {
+    @apply absolute left-1/2 top-1/2 z-10 flex w-full -translate-x-1/2 -translate-y-1/2 transform items-center justify-center gap-x-2 text-xl font-bold text-success;
 
-      span {
-        @apply flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-full bg-success;
-      }
+    span {
+      @apply flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-full bg-success;
     }
   }
 

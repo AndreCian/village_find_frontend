@@ -32,19 +32,17 @@ export function FeaturedItems({ items }: { items: IFeaturedItem[] }) {
       <Container className={styles.container}>
         <h1>Featured Items</h1>
         <div className={styles.featuredItems}>
-          {items.length > 1 &&
-            items
-              .slice(0, items.length - 1)
-              .map((product: any, index: number) => (
-                <ProductCard
-                  key={`${product.name}-${index}`}
-                  product={product}
-                  isActive={isMobile}
-                  className={styles.featuredItem}
-                />
-              ))}
+          {items.length > 0 &&
+            items.map((product: any, index: number) => (
+              <ProductCard
+                key={`${product.name}-${index}`}
+                product={product}
+                isActive={isMobile}
+                className={styles.featuredItem}
+              />
+            ))}
           {!isMobile && items.length > 0 && (
-            <ProductCard isLoadMore={true} product={items.reverse()[0]} />
+            <ProductCard isLoadMore={true} />
           )}
         </div>
         {isMobile && (
