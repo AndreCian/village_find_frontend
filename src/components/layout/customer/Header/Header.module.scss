@@ -40,6 +40,10 @@
 
     .buttonBar {
       @apply my-2.5 hidden sm:flex;
+
+      > .navToCart {
+        @apply self-center;
+      }
     }
 
     .account {
