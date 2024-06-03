@@ -27,7 +27,7 @@ interface IMyCartProps {
   isLogin: boolean;
   onNextStep: () => void;
   cartItems: ICartItem[];
-  setCartItems: (items: ICartItem[]) => void;
+  setCartItems: (items: any) => void;
   donation: number;
   setDonation: (value: number) => void;
 }
@@ -158,15 +158,16 @@ export function MyCart({
   };
 
   const onSubscribeChange = (id: string) => (subscription: any) => {
-    setCartItems(
-      cartItems.map(item =>
+    setCartItems((cartItems: ICartItem[]) => {
+      return cartItems.map((item: ICartItem) =>
         item._id === id
           ? {
             ...item,
             subscription
           }
           : item,
-      ),
+      )
+    }
     );
   };
 

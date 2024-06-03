@@ -222,9 +222,9 @@ export function Header({
                 <span>{cartItemCount}</span>
               </div>
             </div>
-            {isLogin && <div onClick={onLogoutClick} className={styles.logout}>
+            <div onClick={onLogoutClick} className={styles.logout}>
               <MdLogout />
-            </div>}
+            </div>
           </>
         ) : (
           <div className={styles.buttonBar}>
@@ -232,6 +232,15 @@ export function Header({
               Login
             </Button>
             <Button onClick={onSignupClick}>Sign up</Button>
+            <div
+              className={styles.navToCart}
+              onClick={() => navigate('/checkout')}
+            >
+              <CartIcon className={styles.icon} />
+              <div className={styles.badge}>
+                <span>{cartItemCount}</span>
+              </div>
+            </div>
           </div>
         )}
         <div className={styles.collapseIcon} onClick={onCollapseClick}>
