@@ -12,10 +12,10 @@ import { MdLogout } from "react-icons/md";
 import clsx from 'clsx';
 
 import { Button, Input } from '@/components/forms';
-import { MagnifierIcon, CartIcon, UserIcon, LogoutIcon } from '@/components/icons';
+import { MagnifierIcon, CartIcon, UserIcon } from '@/components/icons';
 import { Logo } from '@/components/layout/customer';
 
-import { AuthContext, SearchbarContext, ZipcodeContext } from '@/providers';
+import { AuthContext, CartContext, SearchbarContext, ZipcodeContext } from '@/providers';
 
 import { useWindowWidth } from '@/utils/hook/useWindowWidth';
 
@@ -46,9 +46,9 @@ export function Header({
   const { isSearchbar } = useContext(SearchbarContext);
   const { zipcode, cityName, changeZipcode, changeCityName } =
     useContext(ZipcodeContext);
+  const { cartItemCount } = useContext(CartContext);
 
-  const [shopLocAnchor, setShopLocAnchor] = useState(-1);
-  const [cartItemCount, setCartItemCount] = useState(0);
+  const [shopLocAnchor, setShopLocAnchor] = useState(false);
   const [collapseAnchor, setCollapseAnchor] = useState(false);
   const [categoryAnchor, setCategoryAnchor] = useState(true);
   const [confirmAnchor, setConfirmAnchor] = useState(false);
@@ -60,16 +60,12 @@ export function Header({
   const [zipcodeInput, setZipcodeInput] = useState('');
   const [_, breakpoint] = useWindowWidth();
 
-  const onShopSelect = (e: MouseEvent) => {
-    if (shopLocAnchor === -1) {
-      setShopLocAnchor(e.clientX);
-    } else {
-      setShopLocAnchor(-1);
-    }
+  const onShopSelect = () => {
+    setShopLocAnchor(!shopLocAnchor);
   };
 
   const onShopClose = () => {
-    setShopLocAnchor(-1);
+    setShopLocAnchor(false);
   };
 
   const onCollapseClick = () => {
@@ -116,7 +112,7 @@ export function Header({
         changeCityName(normalizedCity);
         localStorage.setItem('zipcode', zipcodeInput);
         localStorage.setItem('cityname', normalizedCity);
-        setShopLocAnchor(-1);
+        setShopLocAnchor(false);
         setZipcodeInput('');
       }
     })();
@@ -154,12 +150,6 @@ export function Header({
     } else {
       setConfirmAnchor(true);
     }
-    HttpService.get('/cart/count').then(response => {
-      const { status, count } = response;
-      if (status === 200) {
-        setCartItemCount(count);
-      }
-    });
     HttpService.get('/settings/general/category').then(response => {
       setCategories(response);
     });
@@ -180,8 +170,42 @@ export function Header({
           {cityName && (
             <p className={styles.locSelect}>
               <span>{cityName}</span>
-              {shopLocAnchor !== -1 ? <FaChevronUp /> : <FaChevronDown />}
+              {shopLocAnchor ? <FaChevronUp /> : <FaChevronDown />}
             </p>
+          )}
+          {shopLocAnchor && (
+            <div className={styles.shopCollapse}>
+              <span className={styles.closeIcon} onClick={onShopClose}>
+                <AiOutlineClose />
+              </span>
+              {cityName && (
+                <div className={styles.shopInfo}>
+                  <span>{cityName}</span>
+                  {zipcode}
+                </div>
+              )}
+              <p>
+                Enter your zipcode to see items from vendors in your area. There's
+                more to explore!
+              </p>
+              <Input
+                rounded="full"
+                adornment={{
+                  position: 'right',
+                  content: <FaMagnifyingGlass fill="white" />,
+                  onClick: onUpdateLocation,
+                }}
+                placeholder="Enter Zip Code"
+                size="large"
+                borderColor="primary"
+                className={styles.searchInput}
+                value={zipcodeInput}
+                updateValue={(e: ChangeInputEvent) =>
+                  setZipcodeInput(e.target.value)
+                }
+                onKeyDown={onZipcodeInputKeydown}
+              />
+            </div>
           )}
         </div>
         <div
@@ -218,9 +242,7 @@ export function Header({
               onClick={() => navigate('/checkout')}
             >
               <CartIcon className={styles.icon} />
-              <div className={styles.badge}>
-                <span>{cartItemCount}</span>
-              </div>
+              <span className={styles.badge}>{cartItemCount}</span>
             </div>
             <div onClick={onLogoutClick} className={styles.logout}>
               <MdLogout />
@@ -228,19 +250,17 @@ export function Header({
           </>
         ) : (
           <div className={styles.buttonBar}>
-            <Button variant="none" onClick={onLoginClick}>
-              Login
-            </Button>
-            <Button onClick={onSignupClick}>Sign up</Button>
             <div
               className={styles.navToCart}
               onClick={() => navigate('/checkout')}
             >
               <CartIcon className={styles.icon} />
-              <div className={styles.badge}>
-                <span>{cartItemCount}</span>
-              </div>
+              <span className={styles.badge}>{cartItemCount}</span>
             </div>
+            <Button variant="none" onClick={onLoginClick}>
+              Login
+            </Button>
+            <Button onClick={onSignupClick}>Sign up</Button>
           </div>
         )}
         <div className={styles.collapseIcon} onClick={onCollapseClick}>
@@ -257,7 +277,7 @@ export function Header({
             onConfirm={() => setConfirmAnchor(false)}
             onOtherClick={() => {
               setConfirmAnchor(false);
-              setShopLocAnchor(200);
+              // setShopLocAnchor(200);
             }}
           />
         )}
@@ -321,50 +341,6 @@ export function Header({
             <Button color="light" className={styles.sellButton}>
               Sell
             </Button>
-          </div>
-        )}
-        {shopLocAnchor !== -1 && (
-          <div
-            className={styles.shopCollapse}
-            style={
-              shopLocAnchor !== -1 &&
-                ['sm', 'md', 'lg', 'xl', '2xl', '3xl'].includes(
-                  breakpoint as string,
-                )
-                ? { left: `${shopLocAnchor}px` }
-                : {}
-            }
-          >
-            <span className={styles.closeIcon} onClick={onShopClose}>
-              <AiOutlineClose />
-            </span>
-            {cityName && (
-              <div className={styles.shopInfo}>
-                <span>{cityName}</span>
-                {zipcode}
-              </div>
-            )}
-            <p>
-              Enter your zipcode to see items from vendors in your area. There's
-              more to explore!
-            </p>
-            <Input
-              rounded="full"
-              adornment={{
-                position: 'right',
-                content: <FaMagnifyingGlass fill="white" />,
-                onClick: onUpdateLocation,
-              }}
-              placeholder="Enter Zip Code"
-              size="large"
-              borderColor="primary"
-              className={styles.searchInput}
-              value={zipcodeInput}
-              updateValue={(e: ChangeInputEvent) =>
-                setZipcodeInput(e.target.value)
-              }
-              onKeyDown={onZipcodeInputKeydown}
-            />
           </div>
         )}
       </div>

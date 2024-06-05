@@ -1,14 +1,14 @@
 import { useContext, useEffect, useState } from 'react';
 import { FaTimes } from 'react-icons/fa';
+import { enqueueSnackbar } from 'notistack';
 
 import { Button } from '@/components/forms';
 import { ZipcodeContext } from '@/providers';
-
-import styles from './LocationConfirmDialog.module.scss';
 import { GEOLOCATION_API_KEY } from '@/config/global';
-import { enqueueSnackbar } from 'notistack';
-import { capitalizeFirstLetter } from '@/utils';
+
 import { getLocationFromCoords } from '@/utils/third-api/zipcode';
+import { capitalizeFirstLetter } from '@/utils';
+import styles from './LocationConfirmDialog.module.scss';
 
 interface ILocationConfirmDialogProps {
   onConfirm: () => void;

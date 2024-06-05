@@ -1,8 +1,7 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import clsx from 'clsx';
 
 import { Button } from '@/components/forms';
-
 import {
   CartItem,
   AddressPanel,
@@ -10,7 +9,7 @@ import {
   IRecipient,
   IDelivery,
 } from '@/components/customer/Checkout';
-import { ICartItem } from '@/pages/customer';
+import { CartContext, ICartItem } from '@/providers';
 import { HttpService } from '@/services';
 
 import styles from './MyCart.module.scss';
@@ -26,7 +25,6 @@ export interface IAddress {
 interface IMyCartProps {
   isLogin: boolean;
   onNextStep: () => void;
-  cartItems: ICartItem[];
   setCartItems: (items: any) => void;
   donation: number;
   setDonation: (value: number) => void;
@@ -144,11 +142,12 @@ export interface IOrder {
 export function MyCart({
   isLogin,
   onNextStep,
-  cartItems,
   setCartItems,
   donation,
   setDonation,
 }: IMyCartProps) {
+  const { cartItems } = useContext(CartContext);
+
   const [isShippingForm, setIsShippingForm] = useState(false);
   const [currentCartID, setCurrentCartID] = useState('');
   const [addressList, setAddressList] = useState<IAddress[]>([]);

@@ -66,10 +66,10 @@ export function ProductInfo({
 
   const [cartProduct, setCartProduct] = useState<ICartProduct>({
     styleID: '',
-    quantity: 0,
+    quantity: 1,
     image: null,
   });
-  const [selectedInventID, setSelectedInventID] = useState<string>('');
+  const [selectedInventID, setSelectedInventID] = useState<string>('main');
   const [attributes, setAttributes] = useState<string[]>([]);
   const [isPersonalized, setIsPersonalized] = useState<Boolean>(false);
   const [customMessage, setCustomMessage] = useState('');
@@ -185,17 +185,9 @@ export function ProductInfo({
   const onImageClick = (inventory: { _id: string; styleId: string; attrs: string[]; }) => () => {
     if (!inventory) return;
 
-    if (inventory.styleId === cartProduct.styleID && attributes.length === inventory.attrs.length && inventory.attrs.every(
-      (item: string, index: number) => item === attributes[index]
-    )) {
-      setAttributes([]);
-      setCartProduct({ ...cartProduct, styleID: '' });
-      setSelectedInventID('');
-    } else {
-      setAttributes(inventory.attrs);
-      setCartProduct({ ...cartProduct, styleID: inventory.styleId });
-      setSelectedInventID(inventory._id);
-    }
+    setAttributes(inventory.attrs);
+    setCartProduct({ ...cartProduct, styleID: inventory.styleId });
+    setSelectedInventID(inventory._id);
   };
 
   const onMessageChange = (e: ChangeInputEvent) => {
@@ -230,7 +222,7 @@ export function ProductInfo({
       <div className={styles.blank}></div>
       <div className={styles.images}>
         <div className={styles.smallImages}>
-          {inventories
+          {[{ _id: 'main', styleId: '', image, attrs: [] }, ...inventories]
             .filter((inventory: any) => inventory.image)
             .map((inventory: any) => (
               <img
@@ -238,7 +230,7 @@ export function ProductInfo({
                 src={`${SERVER_URL}/${inventory.image}`}
                 className={clsx({
                   [styles.active]:
-                    selectedInvent && selectedInvent._id === inventory._id,
+                    selectedInventID === inventory._id
                 })}
                 onClick={onImageClick(inventory)}
               />

@@ -13,7 +13,6 @@ import {
   PickDateDialog,
   PickupLocationDialog,
 } from '@/components/customer/common';
-import { HttpService } from '@/services';
 import { IAddress, IOrder } from './MyCart';
 
 import GiftIcon from '/assets/customer/svgs/gift.svg';
@@ -238,13 +237,13 @@ export function CartItem({
   };
 
   const onRemoveCartClick = () => {
-    HttpService.delete(`/cart/${cartId}`).then(response => {
-      const { status } = response;
-      if (status === 200) {
-        onDeleteCart();
-        enqueueSnackbar('Cart item deleted.', { variant: 'success' });
-      }
-    });
+    // HttpService.delete(`/cart/${cartId}`).then(response => {
+    //   const { status } = response;
+    //   if (status === 200) {
+    onDeleteCart();
+    //     enqueueSnackbar('Cart item deleted.', { variant: 'success' });
+    //   }
+    // });
   };
 
   const onFrequencyChange = (value: string) => {

@@ -11,7 +11,7 @@ import {
   Container,
 } from '@/components/layout/customer';
 import { Categories } from '@/components/customer/Market';
-import { AuthContext, CategoryContext, SearchbarContext } from '@/providers';
+import { AuthContext, CartProvider, CategoryContext, SearchbarContext } from '@/providers';
 import { useAppDispatch } from '@/redux/store';
 import { setGuestID } from '@/redux/reducers';
 import { HttpService } from '@/services';
@@ -87,35 +87,37 @@ export function Layout() {
   }, []);
 
   return (
-    <div
-      className={
-        isScreen || screenBlackLists.includes(pathname) ? 'h-screen' : ''
-      }
-    >
+    <CartProvider>
       <div
-        className={clsx(
-          'h-full',
-          smallBPLists.includes(breakpoint as string) ? 'pt-[120px]' : 'pt-40',
-        )}
+        className={
+          isScreen || screenBlackLists.includes(pathname) ? 'h-screen' : ''
+        }
       >
         <div
           className={clsx(
-            'fixed top-0 z-50 w-full',
-            isScreen ? 'flex h-full flex-col' : '',
+            'h-full',
+            smallBPLists.includes(breakpoint as string) ? 'pt-[120px]' : 'pt-40',
           )}
         >
-          <Topbar />
-          <Header switchToScreen={setIsScreen} />
-          <Navbar />
+          <div
+            className={clsx(
+              'fixed top-0 z-50 w-full',
+              isScreen ? 'flex h-full flex-col' : '',
+            )}
+          >
+            <Topbar />
+            <Header switchToScreen={setIsScreen} />
+            <Navbar />
+          </div>
+          {isCategoryBar && (
+            <Container className="top-40">
+              <Categories />
+            </Container>
+          )}
+          {!isLoading && <Outlet />}
+          <Footer />
         </div>
-        {isCategoryBar && (
-          <Container className="top-40">
-            <Categories />
-          </Container>
-        )}
-        {!isLoading && <Outlet />}
-        <Footer />
       </div>
-    </div>
+    </CartProvider>
   );
 }
