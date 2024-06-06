@@ -8,7 +8,7 @@ import { ImageUpload, Select, TextField, Button } from '@/components/forms';
 
 import { HttpService } from '@/services';
 import { IOrderDetail } from '@/pages/customer';
-import { AuthContext } from '@/providers';
+import { AuthContext, CartContext } from '@/providers';
 import { useAppSelector } from '@/redux/store';
 import { ChangeInputEvent } from '@/interfaces';
 import { SERVER_URL } from '@/config/global';
@@ -62,6 +62,7 @@ export function ProductInfo({
   const navigate = useNavigate();
 
   const { isLogin, account } = useContext(AuthContext);
+  const { cartItems, setCartItems } = useContext(CartContext);
   const guestID = useAppSelector(state => state.guest.guestID);
 
   const [cartProduct, setCartProduct] = useState<ICartProduct>({
@@ -162,8 +163,9 @@ export function ProductInfo({
     }
 
     HttpService.post('/cart', reqJson, params).then(response => {
-      const { status } = response;
+      const { status, cartItem } = response;
       if (status === 200) {
+        setCartItems([...cartItems, cartItem]);
         enqueueSnackbar('Product added to cart.', { variant: 'success' });
         navigate('/checkout');
       }
