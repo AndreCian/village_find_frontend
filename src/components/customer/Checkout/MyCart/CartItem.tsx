@@ -362,7 +362,7 @@ export function CartItem({
     <div className={styles.root}>
       <div className={styles.header}>
         <div className={styles.vendor}>
-          <img src={`${SERVER_URL}/${vendor.images.logoUrl}`} />
+          <img src={`${SERVER_URL}/${vendor.images?.logoUrl}`} />
           <div className={styles.order}>
             <p className={styles.name}>{vendor.business.name}</p>
             <p className={styles.orderId}>
