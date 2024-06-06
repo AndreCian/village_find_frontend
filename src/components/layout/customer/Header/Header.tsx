@@ -165,10 +165,10 @@ export function Header({
     >
       <div className={styles.header}>
         <Logo className={styles.logo} />
-        <div className={styles.shopLoc} onClick={onShopSelect}>
-          <p>You're shopping</p>
+        <div className={styles.shopLoc}>
+          <p onClick={onShopSelect}>You're shopping</p>
           {cityName && (
-            <p className={styles.locSelect}>
+            <p className={styles.locSelect} onClick={onShopSelect}>
               <span>{cityName}</span>
               {shopLocAnchor ? <FaChevronUp /> : <FaChevronDown />}
             </p>
