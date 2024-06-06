@@ -181,7 +181,7 @@ export function CartProvider({ children }: ICartProviderProps) {
         setCartItems(response || []);
       }
     });
-  }, [isLogin, account?.profile._id, guestID]);
+  }, [isLogin, account, guestID]);
 
   useEffect(() => {
     setCartItemCount(cartItems.reduce(
