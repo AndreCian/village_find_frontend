@@ -161,6 +161,7 @@ export function CartItem({
 
   const getAvailableDates = useCallback(
     (method: 'delivery' | 'pickup') => {
+      if (!vendor.fulfillment?.[method]?.days) return [];
       const deliveryDates = vendor.fulfillment[method].days;
 
       const firstDayOfMonth = new Date(
@@ -208,7 +209,7 @@ export function CartItem({
 
       return dayList;
     },
-    [deliveryDate, vendor.fulfillment.delivery.days],
+    [deliveryDate, vendor.fulfillment],
   );
 
   const onMinusClick = (quantity: number) => () => {
