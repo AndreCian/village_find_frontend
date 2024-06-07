@@ -1,11 +1,11 @@
 .root {
-  @apply flex flex-col items-center py-16;
+  @apply flex flex-col items-center px-4 py-16;
 
   .dashboard {
     @apply space-y-14;
 
     .roleList {
-      @apply grid grid-cols-2 gap-x-6 md:grid-cols-1;
+      @apply grid grid-cols-2 gap-x-6 gap-y-4 lg:grid-cols-4;
 
       .role {
         @apply flex cursor-pointer items-center gap-x-4 rounded-md border-1 border-primary bg-white p-4;
