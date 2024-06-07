@@ -34,11 +34,13 @@ export function Payment() {
     return <div className={styles.root}>
         <div className={styles.header}>
             <p>Payment Options</p>
-            <div>
-                <FaRegEdit />
-                <p>Edit</p>
+            <div className={styles.icons}>
+                <div className={styles.edit}>
+                    <FaRegEdit />
+                    <p>Edit</p>
+                </div>
+                <FaRegTrashCan />
             </div>
-            <FaRegTrashCan />
         </div>
         <div className={styles.card}>
             <div className={clsx(styles.control, styles.number)}>

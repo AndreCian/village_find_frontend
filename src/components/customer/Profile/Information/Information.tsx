@@ -21,7 +21,7 @@ const initialInfo: IInformation = {
 };
 
 export function Information() {
-    const { isLogin, account } = useContext(AuthContext);
+    const { account } = useContext(AuthContext);
     const [information, setInformation] = useState<IInformation>(initialInfo);
 
     const onInfoChange = (e: ChangeInputEvent) => {
@@ -38,36 +38,40 @@ export function Information() {
     return <div className={styles.root}>
         <div className={styles.header}>
             <p>My Information</p>
-            <div>
-                <FaRegEdit />
-                <p>Edit</p>
+            <div className={styles.icons}>
+                <div className={styles.edit}>
+                    <FaRegEdit />
+                    <p>Edit</p>
+                </div>
+                <FaRegTrashCan />
             </div>
-            <FaRegTrashCan />
         </div>
-        <div className={styles.control}>
-            <Input
-                name='name'
-                placeholder='Full Name'
-                className={styles.input}
-                value={information.name}
-                updateValue={onInfoChange}
-            />
-        </div>
-        <div className={styles.control}>
-            <Input
-                name='phone'
-                placeholder='Phone Number'
-                className={styles.input}
-                value={information.phone}
-                updateValue={onInfoChange}
-            />
-            <Input
-                name='email'
-                placeholder='Email'
-                className={styles.input}
-                value={information.email}
-                updateValue={onInfoChange}
-            />
+        <div className={styles.controls}>
+            <div className={styles.control}>
+                <Input
+                    name='name'
+                    placeholder='Full Name'
+                    className={styles.input}
+                    value={information.name}
+                    updateValue={onInfoChange}
+                />
+            </div>
+            <div className={styles.control}>
+                <Input
+                    name='phone'
+                    placeholder='Phone Number'
+                    className={styles.input}
+                    value={information.phone}
+                    updateValue={onInfoChange}
+                />
+                <Input
+                    name='email'
+                    placeholder='Email'
+                    className={styles.input}
+                    value={information.email}
+                    updateValue={onInfoChange}
+                />
+            </div>
         </div>
     </div>
 }
