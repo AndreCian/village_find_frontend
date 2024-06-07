@@ -32,6 +32,11 @@ export interface IHeaderProps {
 }
 
 const screenBlackList = ['/login/vendor'];
+const navItems = [
+  { name: 'Vendor Communities', path: '/communities' },
+  { name: 'Subscriptions', path: '/market?type=subscription' },
+  { name: 'about', path: '/about' }
+];
 
 export function Header({
   className = '',
@@ -326,16 +331,23 @@ export function Header({
                 {categoryAnchor && (
                   <ul>
                     {categories.map((category: any, index: number) => (
-                      <li key={`${category}-${index}`}>{category.name}</li>
+                      <li
+                        key={`${category}-${index}`}
+                        onClick={() => navigate(`/market?category=${category.name.toLowerCase()}`)}
+                      >
+                        {category.name}
+                      </li>
                     ))}
                   </ul>
                 )}
               </div>
               <div className={styles.divider} />
               <ul>
-                <li>Vendor Communities</li>
-                <li>Subscriptions</li>
-                <li>About</li>
+                {navItems.map((item, index) =>
+                  <li key={index} onClick={() => navigate(item.path)}>
+                    {item.name}
+                  </li>
+                )}
               </ul>
             </div>
             <Button color="light" className={styles.sellButton}>
