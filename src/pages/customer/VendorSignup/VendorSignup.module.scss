@@ -5,17 +5,17 @@
     @apply space-y-14;
 
     .roleList {
-      @apply flex gap-x-6;
+      @apply grid grid-cols-2 gap-x-6 md:grid-cols-1;
 
       .role {
-        @apply flex cursor-pointer items-center gap-x-4 rounded-md p-4 border-1 border-primary bg-white;
+        @apply flex cursor-pointer items-center gap-x-4 rounded-md border-1 border-primary bg-white p-4;
 
         .radio p {
           @apply text-primary;
         }
 
         .radio span {
-          @apply bg-white ring-1 ring-secondary;
+          @apply shrink-0 bg-white ring-1 ring-secondary;
         }
       }
 

@@ -66,7 +66,6 @@ export function VendorSignup() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const { setIsLogin, setAccount: setAuthAccount } = useContext(AuthContext);
   const [step, setStep] = useState(0);
   const [collapseId, setCollapseId] = useState(0);
   const [maxCollapseId, setMaxCollapseId] = useState(0);
