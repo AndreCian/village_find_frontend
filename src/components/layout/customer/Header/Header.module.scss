@@ -79,7 +79,7 @@
     }
 
     .navToCart {
-      @apply relative flex items-center justify-center self-center;
+      @apply relative flex cursor-pointer items-center justify-center self-center;
 
       .icon {
         @apply h-8 w-8;
