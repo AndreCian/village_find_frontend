@@ -61,6 +61,8 @@ export function ProductInfo({
 }: IOrderDetail) {
   const navigate = useNavigate();
 
+  console.log(inventories);
+
   const { isLogin, account } = useContext(AuthContext);
   const { cartItems, setCartItems } = useContext(CartContext);
   const guestID = useAppSelector(state => state.guest.guestID);
@@ -148,9 +150,11 @@ export function ProductInfo({
     };
     if (subscription) reqJson.subscription = subscription;
     if (selectedStyle && selectedInvent) {
+      console.log(selectedInvent);
       reqJson.attributes =
         selectedStyle.attributes
           .map((item, index) => ({ name: item.name, value: attributes[index] }))
+      if (selectedInvent.parcel) reqJson.parcel = selectedInvent.parcel;
     }
 
     const params: any = {};
@@ -161,6 +165,8 @@ export function ProductInfo({
       params.mode = 'guest';
       params.buyerID = guestID;
     }
+
+    console.log('Request Json', reqJson);
 
     HttpService.post('/cart', reqJson, params).then(response => {
       const { status, cartItem } = response;

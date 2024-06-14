@@ -290,14 +290,20 @@
     > .title {
       @apply text-[13px] font-bold leading-[18px];
     }
-    > .buttons {
-      @apply flex gap-x-4;
+    > .options {
+      @apply flex justify-between;
+      > .buttons {
+        @apply flex gap-x-4;
 
-      > button {
-        @apply w-[110px] rounded-md border-1 border-primary bg-white px-0 py-5 text-[11px] font-medium font-normal leading-[16px] tracking-normal text-black;
+        > button {
+          @apply w-[110px] rounded-md border-1 border-primary bg-white px-0 py-5 text-[11px] font-normal leading-[16px] tracking-normal text-black;
+        }
+        > button.active {
+          @apply bg-success text-white;
+        }
       }
-      > button.active {
-        @apply bg-success text-white;
+      > .shipment {
+        @apply w-[250px];
       }
     }
     > .detail {

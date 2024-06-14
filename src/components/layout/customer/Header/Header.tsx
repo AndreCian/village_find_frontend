@@ -282,7 +282,6 @@ export function Header({
             onConfirm={() => setConfirmAnchor(false)}
             onOtherClick={() => {
               setConfirmAnchor(false);
-              // setShopLocAnchor(200);
             }}
           />
         )}

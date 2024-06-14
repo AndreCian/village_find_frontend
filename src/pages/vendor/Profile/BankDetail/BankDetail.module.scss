@@ -38,7 +38,7 @@
       }
 
       button {
-        @apply rounded-full bg-dark px-16 py-3 text-xs text-white;
+        @apply rounded-full bg-dark px-16 py-3 text-xs text-white disabled:opacity-50;
       }
     }
   }

@@ -10,7 +10,7 @@ import { StripeCardNumberElement } from '@stripe/stripe-js';
 import { enqueueSnackbar } from 'notistack';
 import { FaCheck } from 'react-icons/fa6';
 
-import { ICartItem, ISummary } from '@/pages/customer';
+import { ICartItem, ISummary } from '@/providers';
 import { Button, Input } from '@/components/forms';
 import { HttpService } from '@/services';
 

@@ -9,61 +9,50 @@ import { HttpService } from '@/services';
 import styles from './ShippingService.module.scss';
 
 const BACKPATH = '/vendor/profile';
-
 const uspsServices = [
-  'SPS - First Class Mail/Package',
-  'USPS - First Class Package International',
-  'USPS - Media Mail, only for existing Shippo customers with grandfathered Media Mail option.',
-  'USPS - Parcel Select',
-  'USPS - Priority Mail',
-  'USPS - Priority Mail Express',
-  'USPS - Priority Mail Express International',
-  'USPS - Priority Mail International',
-];
+  { "name": "First Class Package Service", "value": "usps_first" },
+  { "name": "Priority Mail", "value": "usps_priority" },
+  { "name": "Priority Mail Express", "value": "usps_priority_express" },
+  { "name": "Parcel Select", "value": "usps_parcel_select" },
+  { "name": "Media Mail", "value": "usps_media_mail" },
+  { "name": "Library Mail", "value": "usps_library_mail" },
+  { "name": "First Class Package International Service", "value": "usps_first_class_international" },
+  { "name": "Priority Mail International", "value": "usps_priority_international" },
+  { "name": "Priority Mail Express International", "value": "usps_express_international" },
+  { "name": "Ground Advantage", "value": "usps_ground_advantage" }
+]
 
 const upsServices = [
-  'UPS - 2nd Day Air®',
-  'UPS - 2nd Day Air® A.M.',
-  'UPS - 3 Day Select®',
-  'UPS - Access Point™ Economy',
-  'UPS - Access Point™ Economy',
-  'UPS - Expedited®',
-  'UPS - Express 12:00',
-  'UPS - Express Plus®',
-  'UPS - Express®',
-  'UPS - Express® Early',
-  'UPS - Ground',
-  'UPS - Mail Innovations (domestic)',
-  'UPS - Next Day Air Saver®',
-  'UPS - Next Day Air®',
-  'UPS - Next Day Air® Early',
-  'UPS - Saver®',
-  'UPS - Standard℠',
-  'UPS - Surepost',
-  'UPS - Surepost Lightweight',
-  'UPS - SurePost® Bound Printed Matte',
-  'UPS - SurePost® Media',
-];
+  { "name": "Ground", "value": "ups_ground" },
+  { "name": "Ground Saver", "value": "ups_ground_saver" },
+  { "name": "3 Day Select", "value": "ups_3_day_select" },
+  { "name": "2nd Day Air", "value": "ups_2nd_day_air" },
+  { "name": "2nd Day Air AM", "value": "ups_2nd_day_air_am" },
+  { "name": "Next Day Air Saver", "value": "ups_next_day_air_saver" },
+  { "name": "Next Day Air", "value": "ups_next_day_air" },
+  { "name": "Next Day Air Early AM", "value": "ups_next_day_air_early_am" },
+  { "name": "Worldwide Expedited", "value": "ups_worldwide_expedited" },
+  { "name": "Worldwide Saver", "value": "ups_worldwide_saver" },
+  { "name": "Worldwide Express", "value": "ups_worldwide_express" },
+  { "name": "Worldwide Express Plus", "value": "ups_worldwide_express_plus" },
+  { "name": "Mail Innovations", "value": "ups_mail_innovations" }
+]
 
 const fedExServices = [
-  'FedEx - FedEx 2Day®',
-  'FedEx - FedEx 2Day® A.M.',
-  'FedEx - FedEx Express Saver®',
-  'FedEx - FedEx First Freight',
-  'FedEx - FedEx First Overnight®',
-  'FedEx - FedEx Freight® Economy',
-  'FedEx - FedEx Freight® Priority',
-  'FedEx - FedEx Ground®',
-  'FedEx - FedEx Home Delivery®',
-  'FedEx - FedEx International Economy®',
-  'FedEx - FedEx International Economy® Freight',
-  'FedEx - FedEx International First®',
-  'FedEx - FedEx International Priority®',
-  'FedEx - FedEx International Priority® Freight',
-  'FedEx - FedEx Next Day Freight',
-  'FedEx - FedEx Priority Overnight®',
-  'FedEx - FedEx SmartPost®',
-  'FedEx - FedEx Standard Overnight®',
+  { "name": "Ground Economy", "value": "fedex_ground_economy" },
+  { "name": "International Connect Plus (FICP)", "value": "fedex_international_connect_plus" },
+  { "name": "Express Saver", "value": "fedex_express_saver" },
+  { "name": "2 Day", "value": "fedex_2_day" },
+  { "name": "2 Day AM", "value": "fedex_2_day_am" },
+  { "name": "Standard Overnight", "value": "fedex_standard_overnight" },
+  { "name": "First Overnight", "value": "fedex_first_overnight" },
+  { "name": "Priority Overnight", "value": "fedex_priority_overnight" },
+  { "name": "Home Delivery", "value": "fedex_home_delivery" },
+  { "name": "Ground", "value": "fedex_ground" },
+  { "name": "International Economy", "value": "fedex_international_economy" },
+  { "name": "International Priority", "value": "fedex_international_priority" },
+  { "name": "International First", "value": "fedex_international_first" },
+  { "name": "SmartPost", "value": "fedex_smartpost" }
 ];
 
 export function ShippingService() {
@@ -115,11 +104,11 @@ export function ShippingService() {
                 multiple={true}
                 updateValue={onServiceChange}
               >
-                {uspsServices.map((service: string, index: number) => (
+                {uspsServices.map((service: { name: string, value: string }, index: number) => (
                   <Radio
                     key={index}
-                    label={service}
-                    value={service.toLowerCase()}
+                    label={service.name}
+                    value={service.value}
                     size="small"
                   />
                 ))}
@@ -133,11 +122,11 @@ export function ShippingService() {
                 multiple={true}
                 updateValue={onServiceChange}
               >
-                {upsServices.map((service: string, index: number) => (
+                {upsServices.map((service: { name: string, value: string }, index: number) => (
                   <Radio
                     key={index}
-                    label={service}
-                    value={service.toLowerCase()}
+                    label={service.name}
+                    value={service.value}
                     size="small"
                   />
                 ))}
@@ -152,11 +141,11 @@ export function ShippingService() {
               value={services}
               updateValue={onServiceChange}
             >
-              {fedExServices.map((service: string, index: number) => (
+              {fedExServices.map((service: { name: string, value: string }, index: number) => (
                 <Radio
                   key={index}
-                  label={service}
-                  value={service.toLowerCase()}
+                  label={service.name}
+                  value={service.value}
                   size="small"
                 />
               ))}

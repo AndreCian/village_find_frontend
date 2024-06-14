@@ -14,9 +14,7 @@ import {
   ShippingMode,
   Complete,
 } from '@/components/customer/Checkout';
-import { useAppSelector } from '@/redux/store';
 import { AuthContext, CartContext } from '@/providers';
-import { HttpService } from '@/services';
 import { STRIPE_PUBLISH_KEY } from '@/config/global';
 
 import styles from './Checkout.module.scss';
@@ -27,18 +25,16 @@ export function Checkout() {
   const [searchParams] = useSearchParams();
 
   const { isLogin } = useContext(AuthContext);
-  const { cartItems, setCartItems, summary } = useContext(CartContext);
+  const { cartItems, summary } = useContext(CartContext);
 
   const [step, setStep] = useState(0);
   const [donation, setDonation] = useState(1);
   const [shipping, setShipping] = useState('');
 
   const onNextStep = () => {
-    setStep(step + 1);
+    if (step === 0) setStep(2);
+    else setStep(step + 1);
   };
-
-  useEffect(() => {
-  }, []);
 
   useEffect(() => {
     const step = searchParams.get('step');
@@ -59,7 +55,6 @@ export function Checkout() {
           <MyCart
             isLogin={isLogin}
             onNextStep={onNextStep}
-            setCartItems={setCartItems}
             donation={donation}
             setDonation={setDonation}
           />

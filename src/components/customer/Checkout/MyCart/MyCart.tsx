@@ -4,15 +4,14 @@ import clsx from 'clsx';
 import { Button } from '@/components/forms';
 import {
   CartItem,
-  AddressPanel,
   Donation,
   IRecipient,
-  IDelivery,
+  IDelivery
 } from '@/components/customer/Checkout';
 import { CartContext, ICartItem } from '@/providers';
-import { HttpService } from '@/services';
 
 import styles from './MyCart.module.scss';
+import { HttpService } from '@/services';
 
 export interface IAddress {
   _id?: string;
@@ -25,149 +24,26 @@ export interface IAddress {
 interface IMyCartProps {
   isLogin: boolean;
   onNextStep: () => void;
-  setCartItems: (items: any) => void;
   donation: number;
   setDonation: (value: number) => void;
-}
-
-export interface IOrder {
-  _id?: string;
-  cartId: string;
-  orderID: number;
-  vendor: {
-    images: {
-      logoUrl: string;
-    };
-    fulfillment: {
-      delivery: {
-        leadTime: number;
-        days: {
-          weekday: number;
-          from: string;
-          to: string;
-        }[];
-      };
-      pickup: {
-        leadTime: number;
-        days: {
-          weekday: number;
-          from: string;
-          to: string;
-        }[];
-      };
-      locations: {
-        name: string;
-        address: string;
-        eventDate?: string;
-        pickupWeekday?: number;
-        pickupTime: {
-          from: string;
-          to: string;
-        };
-        instruction: string;
-        charge: number;
-      }[];
-    };
-    business: {
-      name: string;
-      phone: string;
-    }
-  };
-  inventory: {
-    image: string;
-    styleId: {
-      attributes: {
-        _id: string;
-        name: string;
-      }[];
-    };
-    attrs: any;
-  };
-  product: {
-    name: string;
-    image: string;
-    soldByUnit: string;
-    deliveryTypes: string[];
-    subscription?: {
-      iscsa: boolean;
-      frequencies: string[];
-      discount: number;
-      csa: {
-        frequency: string;
-        duration: number;
-        startDate?: number;
-        endDate?: number;
-      }
-    };
-  };
-  price: number;
-  quantity: number;
-  image: string;
-  deliveryType?: string;
-  personalization: {
-    message: string;
-  };
-  buymode: string;
-  subscription?: {
-    iscsa: boolean;
-    frequencies: string[];
-    subscribe?: string;
-    discount: number;
-    csa: {
-      frequency: string;
-      duration: number;
-      startDate?: string;
-      endDate?: string;
-    }
-  };
-  pickuplocation?: {
-    name: string;
-    address: string;
-    charge: number;
-    instruction: string;
-    pickupDate: string;
-    pickupTime: {
-      from: string;
-      to: string;
-    }
-  };
-  fulfillday?: {
-    day: string;
-    from: string;
-    to: string;
-  };
-  gift: any;
 }
 
 export function MyCart({
   isLogin,
   onNextStep,
-  setCartItems,
   donation,
   setDonation,
 }: IMyCartProps) {
-  const { cartItems } = useContext(CartContext);
-
-  const [isShippingForm, setIsShippingForm] = useState(false);
-  const [currentCartID, setCurrentCartID] = useState('');
-  const [addressList, setAddressList] = useState<IAddress[]>([]);
+  const { cartItems, setCartItems } = useContext(CartContext);
 
   const onRemoveCartClick = (id: string) => () => {
     setCartItems(cartItems.filter(item => item._id !== id));
   };
 
-  const onSubscribeChange = (id: string) => (subscription: any) => {
-    setCartItems((cartItems: ICartItem[]) => {
-      return cartItems.map((item: ICartItem) =>
-        item._id === id
-          ? {
-            ...item,
-            subscription
-          }
-          : item,
-      )
-    }
-    );
+  const onSubscribeChange = (id: string) => (value: string) => {
+    setCartItems(cartItems.map(item =>
+      item._id === id ? ({ ...item, subscription: { ...(item.subscription || {}), subscribe: value } }) : item
+    ));
   };
 
   const onGiftChange = (id: string) => (gift: any) => {
@@ -177,26 +53,28 @@ export function MyCart({
   };
 
   const onDeliveryChange = (id: string) => (_option: string) => {
-    let option = _option;
+    let option = _option, params: any = { deliveryType: option };
     const cartItem = cartItems.find(item => item._id === id && item.deliveryType === _option);
     if (cartItem) {
       option = '';
-    } else {
-      if (_option === 'Home Delivery' || _option === 'Shipping') {
-        setIsShippingForm(true);
-        setCurrentCartID(id);
-      }
+      params = { deliveryType: '', shipping: {} }
     }
-    setCartItems(
-      cartItems.map(item =>
-        item._id === id
-          ? {
-            ...item,
-            deliveryType: option,
-          }
-          : item,
-      ),
-    );
+    HttpService.put(`/cart/${id}`, params)
+      .then(response => {
+        const { status } = response;
+        if (status === 200) {
+          setCartItems(
+            cartItems.map(item =>
+              item._id === id
+                ? {
+                  ...item,
+                  ...params
+                }
+                : item,
+            ),
+          );
+        }
+      });
   };
 
   const onPickupLocationChange = (id: string) => ({ location, fulfillday, instruction }: any) => {
@@ -221,12 +99,10 @@ export function MyCart({
     );
   };
 
-  const onCurrentDeliveryChange = (delivery: IDelivery) => {
-    setCartItems(cartItems.map(item => item._id === currentCartID ? { ...item, delivery } : item));
-  }
-
-  const onCurrentRecipientChange = (recipient: IRecipient) => {
-    setCartItems(cartItems.map(item => item._id === currentCartID ? { ...item, recipient } : item));
+  const onDeliveryInfoChange = (id: string) => ({ recipient, delivery }: { recipient: IRecipient, delivery: IDelivery }) => {
+    setCartItems(cartItems.map(item =>
+      item._id === id ? ({ ...item, recipient, delivery, deliveryType: 'Shipping' }) : item
+    ));
   }
 
   const onQuantityChange = (id: string) => (quantity: number) => {
@@ -239,6 +115,19 @@ export function MyCart({
     setCartItems(cartItems.map(item => item._id === id ? { ...item, buymode: mode } : item));
   }
 
+  const onShippingRatesChange = (id: string) => (rates: any[]) => {
+    console.log(rates);
+    setCartItems([...cartItems.map(item => item._id === id
+      ? ({ ...item, shipping: { ...item.shipping, rates }, deliveryType: 'Shipping' })
+      : item)]);
+  }
+
+  const onShippingServiceChange = (id: string) => (shipping: any) => {
+    setCartItems(cartItems.map(item => item._id === id
+      ? ({ ...item, shipping })
+      : item))
+  }
+
   const onCheckoutClick = () => {
     if (!isLogin) {
       window.scrollTo(0, 0);
@@ -246,32 +135,6 @@ export function MyCart({
       onNextStep();
     }
   };
-
-  const getItemDelivery = () => {
-    const item = cartItems.find(item => item._id === currentCartID);
-    if (item?.gift) {
-      return item.gift.delivery;
-    }
-    return item?.delivery;
-  }
-
-  const getItemRecipient = () => {
-    const item = cartItems.find(item => item._id === currentCartID);
-    if (item?.gift) {
-      return item.gift.receiver;
-    }
-    return item?.recipient;
-  }
-
-  useEffect(() => {
-    if (!isLogin) {
-      setAddressList([]);
-    } else {
-      HttpService.get('/user/customer/address').then(response => {
-        setAddressList(response || []);
-      });
-    }
-  }, [isLogin]);
 
   return (
     <div className={styles.root}>
@@ -281,40 +144,21 @@ export function MyCart({
           {cartItems.map((cartItem: ICartItem) => (
             <CartItem
               key={cartItem.orderId}
-              cartId={cartItem._id}
-              orderID={cartItem.orderId}
-              vendor={cartItem.vendorId}
-              inventory={cartItem.inventoryId}
-              product={cartItem.productId}
-              price={cartItem.price}
-              quantity={cartItem.quantity}
-              image={cartItem.image}
-              personalization={cartItem.personalization}
-              buymode={cartItem.buymode}
-              subscription={cartItem.subscription}
-              deliveryType={cartItem.deliveryType}
-              pickuplocation={cartItem.pickuplocation}
-              fulfillday={cartItem.fulfillday}
-              gift={cartItem.gift}
+              onDeliveryInfoChange={onDeliveryInfoChange(cartItem._id)}
               onSubscribeChange={onSubscribeChange(cartItem._id)}
+              onShippingRatesChange={onShippingRatesChange(cartItem._id)}
+              onShippingServiceChange={onShippingServiceChange(cartItem._id)}
               onBuymodeChange={onBuymodeChange(cartItem._id)}
               onGiftChange={onGiftChange(cartItem._id)}
               onDeleteCart={onRemoveCartClick(cartItem._id)}
               onDeliveryToggle={onDeliveryChange(cartItem._id)}
               onPickupLocationChange={onPickupLocationChange(cartItem._id)}
               onQuantityChange={onQuantityChange(cartItem._id)}
-              addressList={addressList}
+              {...cartItem}
             />
           ))}
         </div>
       </div>
-      {isShippingForm && <AddressPanel
-        addressList={addressList}
-        recipient={getItemRecipient()}
-        setRecipient={onCurrentRecipientChange}
-        delivery={getItemDelivery()}
-        setDelivery={onCurrentDeliveryChange}
-      />}
       <Donation donation={donation} setDonation={setDonation} />
       <Button
         className={clsx(

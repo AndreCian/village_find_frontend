@@ -3,6 +3,7 @@ import { FaMapMarkerAlt } from 'react-icons/fa';
 import { PiUsersFill } from 'react-icons/pi';
 import { FaMinus, FaPlus, FaPhone } from 'react-icons/fa6';
 import { enqueueSnackbar } from 'notistack';
+import { omit } from 'lodash';
 import clsx from 'clsx';
 
 import { SERVER_URL } from '@/config/global';
@@ -12,11 +13,13 @@ import { GiftDialog } from '@/components/customer/common/GiftDialog';
 import {
   PickDateDialog,
   PickupLocationDialog,
+  ShippingDialog
 } from '@/components/customer/common';
-import { IAddress, IOrder } from './MyCart';
+import { ICartItem } from '@/providers';
 
 import GiftIcon from '/assets/customer/svgs/gift.svg';
 import styles from './CartItem.module.scss';
+import { HttpService } from '@/services';
 
 const frequencyOpts = [
   { name: 'Weekly', value: '1-week' },
@@ -64,10 +67,10 @@ function convertTime24to12(time24: string) {
 }
 
 export function CartItem({
-  cartId,
-  orderID,
-  vendor,
-  product,
+  _id: cartId,
+  orderId: orderID,
+  vendorId: vendor,
+  productId: product,
   price,
   quantity,
   image,
@@ -76,39 +79,60 @@ export function CartItem({
   subscription,
   deliveryType,
   pickuplocation,
+  shipping,
+  shippingRates = [],
   fulfillday,
   gift,
-  addressList,
+  recipient,
+  delivery,
   onDeleteCart,
   onSubscribeChange,
   onGiftChange,
   onDeliveryToggle,
+  onDeliveryInfoChange,
   onPickupLocationChange,
   onQuantityChange,
-  onBuymodeChange
-}: IOrder & {
-  addressList: IAddress[];
+  onBuymodeChange,
+  onShippingRatesChange,
+  onShippingServiceChange
+}: ICartItem & {
   onDeleteCart: () => void;
-  onSubscribeChange: (subscribe: any) => void;
+  onSubscribeChange: (subscribe: string) => void;
   onGiftChange: (gift: any) => void;
+  onDeliveryInfoChange: (deliveryInfo: any) => void;
   onDeliveryToggle: (option: string) => void;
   onPickupLocationChange: (data: any) => void;
   onQuantityChange: (quantity: number) => void;
   onBuymodeChange: (mode: string) => void;
+  onShippingRatesChange: (rates: any[]) => void;
+  onShippingServiceChange: (shipping: any) => void;
 }) {
   const [isGiftDialog, setIsGiftDialog] = useState(false);
   const [isPickupLocationDialog, setIsPickupLocationDialog] = useState(false);
   const [isDeliveryDateDialog, setIsDeliveryDateDialog] = useState(false);
   const [isSafePickupDateDialog, setIsSafePickupDateDialog] = useState(false);
+  const [isShippingDialog, setIsShippingDialog] = useState(false);
   const [deliveryDate, setDeliveryDate] = useState(new Date());
   const [safePickupDate, setSafePickupDate] = useState(new Date());
+
+  useEffect(() => {
+    console.log(shipping);
+  }, [shipping])
 
   const csaCycle = useMemo(() => {
     if (!subscription?.iscsa) return 0;
     const duration = subscription?.csa.duration || 0;
     const period = getFrequencyPeriod(subscription?.csa.frequency || '');
     return Math.floor(duration / period);
-  }, [subscription]);
+  }, [subscription, getFrequencyPeriod]);
+
+  const subscFrequencyOpts = useMemo(() => {
+    const options = subscription.frequencies;
+    return options.reduce((total: any, item: string) => {
+      const option = frequencyOpts.find(opt => opt.value === item);
+      return option ? [...total, option] : total;
+    }, [])
+  }, [subscription.frequencies, frequencyOpts]);
 
   const isDaySame = (day1: Date, day2: Date) => {
     return (
@@ -214,66 +238,100 @@ export function CartItem({
 
   const onMinusClick = (quantity: number) => () => {
     if (quantity === 0) return;
-    // HttpService.put(`/cart/${cartId}`, {
-    //   quantity: quantity - 1,
-    // }).then(response => {
-    //   const { status } = response;
-    //   if (status === 200) {
-    onQuantityChange(quantity - 1);
-    // enqueueSnackbar('Quantity updated.', { variant: 'success' });
-    // }
-    // });
+    HttpService.put(`/cart/${cartId}`, {
+      quantity: quantity - 1,
+    }).then(response => {
+      const { status } = response;
+      if (status === 200) {
+        onQuantityChange(quantity - 1);
+        enqueueSnackbar('Quantity updated.', { variant: 'success' });
+      }
+    });
   };
 
   const onPlusClick = (quantity: number) => () => {
-    // HttpService.put(`/cart/${cartId}`, {
-    //   quantity: quantity + 1,
-    // }).then(response => {
-    //   const { status } = response;
-    //   if (status === 200) {
-    onQuantityChange(quantity + 1);
-    //     enqueueSnackbar('Quantity updated.', { variant: 'success' });
-    //   }
-    // });
+    HttpService.put(`/cart/${cartId}`, {
+      quantity: quantity + 1,
+    }).then(response => {
+      const { status } = response;
+      if (status === 200) {
+        onQuantityChange(quantity + 1);
+        enqueueSnackbar('Quantity updated.', { variant: 'success' });
+      }
+    });
   };
 
   const onRemoveCartClick = () => {
-    // HttpService.delete(`/cart/${cartId}`).then(response => {
-    //   const { status } = response;
-    //   if (status === 200) {
-    onDeleteCart();
-    //     enqueueSnackbar('Cart item deleted.', { variant: 'success' });
-    //   }
-    // });
+    HttpService.delete(`/cart/${cartId}`).then(response => {
+      const { status } = response;
+      if (status === 200) {
+        onDeleteCart();
+        enqueueSnackbar('Cart item deleted.', { variant: 'success' });
+      }
+    });
   };
 
   const onFrequencyChange = (value: string) => {
-    // HttpService.put(`/cart/${cartId}`, {
-    //   subscription: { ...subscription, subscribe: value },
-    // }).then(response => {
-    //   const { status } = response;
-    //   if (status === 200) {
-    onSubscribeChange({ ...subscription, subscribe: value });
-    onBuymodeChange('recurring');
-    //     enqueueSnackbar('Subscription frequency updated.', {
-    //       variant: 'success',
-    //     });
-    //   }
-    // });
+    HttpService.put(`/cart/${cartId}`, {
+      subscription: { ...subscription, subscribe: value },
+    }).then(response => {
+      const { status } = response;
+      if (status === 200) {
+        onSubscribeChange(value);
+        onBuymodeChange('recurring');
+        enqueueSnackbar('Subscription frequency updated.', {
+          variant: 'success',
+        });
+      }
+    });
   };
 
+  const onShippingMethodChange = (value: string) => {
+    const rates = shipping.rates;
+    console.log(rates);
+    const rateItem = rates.find(item => item.serviceLevelToken === value);
+    const reqJson = { ...shipping, charge: Number(rateItem.amount), serviceLevelToken: value, carrierAccount: rateItem.carrierAccount };
+    HttpService.put(`/cart/${cartId}`, { shipping: reqJson }).then(response => {
+      const { status } = response;
+      if (status === 200) {
+        onShippingServiceChange(reqJson);
+        enqueueSnackbar('Shipping method changed.', { variant: 'success' });
+      }
+    })
+  }
+
   const onGiftApply = (gift: any) => {
-    // HttpService.put(`/cart/${cartId}`, {
-    //   gift,
-    // }).then(response => {
-    //   const { status } = response;
-    //   if (status === 200) {
-    onGiftChange(gift);
-    //     enqueueSnackbar('Gift information saved.', { variant: 'success' });
-    //   }
-    // });
+    HttpService.put(`/cart/${cartId}`, {
+      gift,
+    }).then(response => {
+      const { status } = response;
+      if (status === 200) {
+        onGiftChange(gift);
+        enqueueSnackbar('Gift information saved.', { variant: 'success' });
+      }
+    });
     setIsGiftDialog(false);
   };
+
+  const onShippingApply = (deliveryInfo: any) => {
+    HttpService.post('/cart/shipping',
+      {
+        ...deliveryInfo,
+        delivery: {
+          ...omit(deliveryInfo.delivery, ['street', 'zipcode']),
+          street1: deliveryInfo.delivery.street,
+          zip: `${deliveryInfo.delivery.zipcode}`
+        },
+      },
+      { id: cartId })
+      .then(response => {
+        const { status, rates } = response;
+        if (status === 200) {
+          onShippingRatesChange(rates);
+          onDeliveryInfoChange({ recipient, delivery });
+        }
+      });
+  }
 
   const onDeliveryOptionClick = (option: string) => () => {
     if (option === 'Pickup Location' && deliveryType !== option) {
@@ -282,80 +340,76 @@ export function CartItem({
     } else if (option === 'Home Delivery' && deliveryType !== option) {
       setIsDeliveryDateDialog(true);
       return;
+    } else if (option === 'Shipping' && deliveryType !== option) {
+      setIsShippingDialog(true);
+      return;
     }
-    // HttpService.put(`/cart/${cartId}`, { deliveryType: option }).then(
-    //   response => {
-    //     const { status } = response;
-    //     if (status === 200) {
     onDeliveryToggle(option);
-    //     enqueueSnackbar(`Delivery option updated.`, { variant: 'success' });
-    //   }
-    // },
-    // );
   };
 
   const onPickupLocationUpdate = (data: any) => {
-    // HttpService.put(`/cart/${cartId}`, {
-    //   pickuplocation: data.location,
-    //   fulfillday: data.fulfillday,
-    //   deliveryType: 'Pickup Location',
-    // }).then(response => {
-    //   const { status } = response;
-    //   if (status === 200) {
-    //     console.log('Pickup Location update', data);
-    onPickupLocationChange(data);
-    setIsPickupLocationDialog(false);
-    //     enqueueSnackbar('Pickup Location updated.', { variant: 'success' });
-    //   }
-    // });
+    HttpService.put(`/cart/${cartId}`, {
+      pickuplocation: data.location,
+      fulfillday: data.fulfillday,
+      deliveryType: 'Pickup Location',
+    }).then(response => {
+      const { status } = response;
+      if (status === 200) {
+        console.log('Pickup Location update', data);
+        onPickupLocationChange(data);
+        setIsPickupLocationDialog(false);
+        enqueueSnackbar('Pickup Location updated.', { variant: 'success' });
+      }
+    });
   };
 
   const onDeliveryDateUpdate = (date: Date) => {
-    // const deliveryDates = vendor.fulfillment.pickup.days;
-    // const currentDate = deliveryDates.find(
-    //   item => (item.weekday + 1) % 7 === date.getDay(),
-    // );
-    // HttpService.put(`/cart/${cartId}`, {
-    //   fulfillday: {
-    //     day: date,
-    //     from: currentDate?.from,
-    //     to: currentDate?.to,
-    //   },
-    //   deliveryType: 'Home Delivery',
-    // }).then(response => {
-    //   const { status } = response;
-    //   if (status === 200) {
-    onDeliveryToggle('Home Delivery');
-    setIsDeliveryDateDialog(false);
-    // enqueueSnackbar('Delivery pickup date updated.', {
-    //   variant: 'success',
-    // });
-    //   }
-    // });
+    const deliveryDates = vendor.fulfillment.pickup.days;
+    const currentDate = deliveryDates.find(
+      item => (item.weekday + 1) % 7 === date.getDay(),
+    );
+    HttpService.put(`/cart/${cartId}`, {
+      fulfillday: {
+        day: date,
+        from: currentDate?.from,
+        to: currentDate?.to,
+      },
+      deliveryType: 'Home Delivery',
+    }).then(response => {
+      const { status } = response;
+      if (status === 200) {
+        onDeliveryToggle('Home Delivery');
+        setIsDeliveryDateDialog(false);
+        setIsShippingDialog(true);
+        enqueueSnackbar('Delivery pickup date updated.', {
+          variant: 'success',
+        });
+      }
+    });
   };
 
   const onSafePickupDateUpdate = (date: Date) => {
-    // const safePickupDates = vendor.fulfillment.pickup.days;
-    // const currentDate = safePickupDates.find(
-    //   item => (item.weekday + 1) % 7 === date.getDay(),
-    // );
-    // HttpService.put(`/cart/${cartId}`, {
-    //   fulfillday: {
-    //     day: date,
-    //     from: currentDate?.from,
-    //     to: currentDate?.to,
-    //   },
-    //   deliveryType: 'Safe Pickup',
-    // }).then(response => {
-    //   const { status } = response;
-    //   if (status === 200) {
-    onDeliveryToggle('Safe Pickup');
-    setIsDeliveryDateDialog(false);
-    //     enqueueSnackbar('Safe pickup date updated.', {
-    //       variant: 'success',
-    //     });
-    //   }
-    // });
+    const safePickupDates = vendor.fulfillment.pickup.days;
+    const currentDate = safePickupDates.find(
+      item => (item.weekday + 1) % 7 === date.getDay(),
+    );
+    HttpService.put(`/cart/${cartId}`, {
+      fulfillday: {
+        day: date,
+        from: currentDate?.from,
+        to: currentDate?.to,
+      },
+      deliveryType: 'Safe Pickup',
+    }).then(response => {
+      const { status } = response;
+      if (status === 200) {
+        onDeliveryToggle('Safe Pickup');
+        setIsDeliveryDateDialog(false);
+        enqueueSnackbar('Safe pickup date updated.', {
+          variant: 'success',
+        });
+      }
+    });
   };
 
   return (
@@ -423,10 +477,10 @@ export function CartItem({
                     {subscription && (
                       <Select
                         value={subscription.subscribe}
-                        options={getFrequencyOpts(subscription.frequencies)}
+                        options={subscFrequencyOpts}
                         placeholder="Subscribe"
                         className={styles.subscSelect}
-                        updateValue={onFrequencyChange}
+                        updateValue={(value: string) => onFrequencyChange(value)}
                       />
                     )}
                   </div>
@@ -524,18 +578,30 @@ export function CartItem({
       </div>
       <div className={styles.footer}>
         <p className={styles.title}>Delivery Options</p>
-        <div className={styles.buttons}>
-          {getDeliveryOptions().map((item: string, index: number) => (
-            <button
-              key={index}
-              className={clsx({
-                [styles.active]: item === deliveryType,
-              })}
-              onClick={onDeliveryOptionClick(item)}
-            >
-              {item}
-            </button>
-          ))}
+        <div className={styles.options}>
+          <div className={styles.buttons}>
+            {getDeliveryOptions().map((item: string, index: number) => (
+              <button
+                key={index}
+                className={clsx({
+                  [styles.active]: item === deliveryType,
+                })}
+                onClick={onDeliveryOptionClick(item)}
+              >
+                {item}
+              </button>
+            ))}
+          </div>
+          {deliveryType === 'Shipping' &&
+            <Select
+              placeholder='Shipping method'
+              value={shipping.serviceLevelToken}
+              options={shipping.rates.map(item => ({
+                name: item.name, value: item.serviceLevelToken
+              }))}
+              updateValue={onShippingMethodChange}
+              className={styles.shipment} />
+          }
         </div>
         {deliveryType === 'Pickup Location' ||
           deliveryType === 'Safe Pickup' ? (
@@ -619,6 +685,13 @@ export function CartItem({
         dates={getAvailableDates('pickup').map(item => item.date)}
         onUpdate={onSafePickupDateUpdate}
         onClose={() => setIsSafePickupDateDialog(false)}
+      />
+      <ShippingDialog
+        open={isShippingDialog}
+        onClose={() => setIsShippingDialog(false)}
+        onApply={onShippingApply}
+        recipient={recipient}
+        delivery={delivery}
       />
     </div>
   );

@@ -1,6 +1,8 @@
 .root {
+  @apply space-y-4;
+
   .container {
-    @apply w-full space-y-12 lg:w-2/3;
+    @apply w-full space-y-8 lg:w-2/3;
 
     & > p {
       @apply text-xs;
@@ -9,12 +11,28 @@
 
   .control {
     @apply flex flex-col gap-y-2;
-    >p {
+    > p {
       @apply font-medium;
     }
   }
 
   .horizon {
     @apply grid grid-cols-1 gap-x-4 lg:grid-cols-3;
+  }
+
+  .buttons {
+    @apply flex justify-end gap-x-3;
+
+    .update {
+      @apply rounded-full bg-dark;
+    }
+
+    .cancel {
+      @apply rounded-full border-1 border-primary bg-white text-dark;
+    }
+
+    button {
+      @apply px-8 py-2 text-base font-medium;
+    }
   }
 }

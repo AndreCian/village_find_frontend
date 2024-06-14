@@ -1,0 +1,31 @@
+.root {
+  @apply fixed left-0 top-0 z-[50] flex h-screen w-screen items-center justify-center bg-black/30;
+
+  .container {
+    @apply relative flex w-full max-w-[450px] flex-col gap-y-10 rounded-lg bg-white px-4 py-10 shadow-lg;
+
+    .buttons {
+      @apply flex justify-end gap-x-3;
+
+      .button {
+        @apply w-[120px] py-2.5;
+      }
+
+      .updateBtn {
+        @apply bg-dark;
+      }
+
+      .cancelBtn {
+        @apply border-1 border-primary bg-white text-dark;
+      }
+    }
+
+    .closeBtn {
+      @apply absolute right-2.5 top-2 flex h-12 w-12 cursor-pointer items-center justify-center rounded-full shadow-md;
+    }
+  }
+}
+
+.hide {
+  @apply hidden;
+}

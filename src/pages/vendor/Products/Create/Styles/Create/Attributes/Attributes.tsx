@@ -6,9 +6,11 @@ import { enqueueSnackbar } from 'notistack';
 import { StyleCreateContext } from '../Layout';
 import { ProductContext } from '../../../Provider';
 import { Button, Input, Select, TableBody } from '@/components';
+import { ParcelDialog } from '@/components/vendor';
 import { ChangeInputEvent } from '@/interfaces';
 import { HttpService } from '@/services';
 import { IAttribute, updateStyle } from '@/redux/reducers';
+import { IParcel } from '@/components/vendor';
 import { SERVER_URL } from '@/config/global';
 
 import styles from './Attributes.module.scss';
@@ -49,6 +51,7 @@ export function Attributes() {
   const [rows, setRows] = useState<any[]>([]);
   const [images, setImages] = useState<(File | null)[]>([]);
   const [imageSrcs, setImageSrcs] = useState<string[]>([]);
+  const [addParcelID, setAddParcelID] = useState(-1);
 
   const onRowChange = (id: number) => (e: ChangeInputEvent) => {
     setRows(rows => rows.map((row: any) =>
@@ -172,7 +175,7 @@ export function Attributes() {
                 || `${SERVER_URL}/${row.image}`}
               alt="inventory"
             />
-            <span>+</span>
+            <span onClick={() => setAddParcelID(row.index)}>+</span>
           </div>
         ),
       },
@@ -228,6 +231,12 @@ export function Attributes() {
     }
   };
 
+  const onParcelApply = (parcel: IParcel) => {
+    console.log('parcel apply', parcel);
+    const results = rows.map(row => row.index === addParcelID ? ({ ...row, parcel }) : row);
+    setRows(results);
+  }
+
   useEffect(() => {
     if (productId === 'create') {
       const updateStyleID = styleId === 'create' ? currentStyleID : Number(styleId);
@@ -251,6 +260,7 @@ export function Attributes() {
             setImages(Array(resultRows.length).fill(null));
             setImageSrcs(Array(resultRows.length).fill(null));
           } else {
+            console.log(inventories);
             setRows(
               inventories.map((inventory: any, index: number) => ({
                 ...inventory,
@@ -278,6 +288,12 @@ export function Attributes() {
           {productId === 'create' ? 'Save' : 'Update'}
         </Button>
       </div>
+      <ParcelDialog
+        open={addParcelID !== -1}
+        parcel={rows[addParcelID]?.parcel}
+        onClose={() => setAddParcelID(-1)}
+        onApply={onParcelApply}
+      />
     </div>
   );
 }

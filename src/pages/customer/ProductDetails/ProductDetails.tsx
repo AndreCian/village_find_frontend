@@ -58,6 +58,7 @@ export interface IOrderDetail {
     image: string;
     price: number;
     styleId: string;
+    parcel: any;
   }[];
   iscustomizable: boolean;
   customization?: {

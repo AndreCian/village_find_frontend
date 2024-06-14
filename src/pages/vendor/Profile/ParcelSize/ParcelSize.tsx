@@ -10,7 +10,7 @@ import { HttpService } from '@/services';
 import styles from './ParcelSize.module.scss';
 
 const sizeUnitList = ['In'];
-const massUnitList = ['Lbs'];
+const massUnitList = ['Lb'];
 
 export function ParcelSize() {
   const navigate = useNavigate();
@@ -78,7 +78,7 @@ export function ParcelSize() {
   };
 
   const onDeleteClick = (id: string) => () => {
-    HttpService.delete(`/user/vendor/profile/shipping/parcel/${id}`).then(
+    HttpService.delete(`/parcel/${id}`).then(
       response => {
         const { status } = response;
         if (status === 200) {
@@ -90,7 +90,7 @@ export function ParcelSize() {
   };
 
   useEffect(() => {
-    HttpService.get('/user/vendor/profile/shipping/parcel').then(response => {
+    HttpService.get('/parcel').then(response => {
       setParcels(response || []);
     });
   }, []);

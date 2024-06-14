@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { enqueueSnackbar } from 'notistack';
 import clsx from 'clsx';
 
 import { Card } from '@/components/common';
 import { Input, Select } from '@/components/forms';
+import { HttpService } from '@/services';
+import { ChangeInputEvent } from '@/interfaces';
 
 import styles from './ParcelCreate.module.scss';
-import { ChangeInputEvent } from '@/interfaces';
-import { HttpService } from '@/services';
-import { enqueueSnackbar } from 'notistack';
 
 interface IParcel {
   name: string;
@@ -35,7 +35,7 @@ const initialParcel: IParcel = {
 };
 
 const sizeUnitList = ['In'];
-const massUnitList = ['Lbs'];
+const massUnitList = ['Lb'];
 const BACK_PATH = '/vendor/profile/parcel-size';
 
 export function ParcelCreate() {
@@ -53,23 +53,38 @@ export function ParcelCreate() {
   };
 
   const onUpdateClick = () => {
-    HttpService.put('/user/vendor/profile/shipping/parcel', parcel).then(
-      response => {
-        const { status } = response;
-        if (status === 200) {
-          enqueueSnackbar('Parcel created.', { variant: 'success' });
-          navigate(BACK_PATH);
-        }
-      },
-    );
+    if (actionID === 'create') {
+      HttpService.post('/parcel', parcel).then(
+        response => {
+          const { status } = response;
+          if (status === 200) {
+            enqueueSnackbar('Parcel created.', { variant: 'success' });
+            navigate(BACK_PATH);
+          }
+        },
+      );
+    } else {
+      HttpService.put(`/parcel/${actionID}`, parcel).then(
+        response => {
+          const { status } = response;
+          if (status === 200) {
+            enqueueSnackbar('Parcel updated.', { variant: 'success' });
+            navigate(BACK_PATH);
+          }
+        },
+      );
+    }
   };
 
   useEffect(() => {
     if (actionID === 'create') return;
-    HttpService.get('/user/vendor/profile/shipping/parcel', {
-      id: actionID,
-    }).then(response => {
-      setParcel(response || initialParcel);
+    HttpService.get(`/parcel/${actionID}`).then(response => {
+      const { status, parcel } = response;
+      if (status === 404) {
+        enqueueSnackbar('Parcel not found.', { variant: 'warning' });
+      } else if (status === 200 && parcel) {
+        setParcel(parcel);
+      }
     });
   }, [actionID]);
 
@@ -186,7 +201,7 @@ export function ParcelCreate() {
               rounded="full"
               border="none"
               bgcolor="primary"
-              placeholder="In"
+              placeholder="Size Unit"
               value={parcel.sizeUnit}
               updateValue={(value: string) =>
                 setParcel({ ...parcel, sizeUnit: value })
@@ -203,7 +218,7 @@ export function ParcelCreate() {
               rounded="full"
               border="none"
               bgcolor="primary"
-              placeholder="Lbs"
+              placeholder="Mass Unit"
               value={parcel.massUnit}
               updateValue={(value: string) =>
                 setParcel({ ...parcel, massUnit: value })

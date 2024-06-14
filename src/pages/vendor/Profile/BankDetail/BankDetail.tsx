@@ -7,6 +7,7 @@ import { HttpService } from '@/services';
 
 import StripeLogo from '/assets/customer/logos/stripe.png';
 import styles from './BankDetail.module.scss';
+import clsx from 'clsx';
 
 export function BankDetail() {
   const [searchParams] = useSearchParams();
@@ -25,22 +26,6 @@ export function BankDetail() {
       }
     });
   };
-
-  useEffect(() => {
-    const accountID = searchParams.get('accountID');
-    if (!accountID) return;
-    HttpService.get('/user/vendor/profile/bank-detail/verify', {
-      accountID,
-    }).then(response => {
-      const { status } = response;
-      if (status === 200) {
-        enqueueSnackbar('Bank detail verified.', { variant: 'success' });
-        setIsBankActive(true);
-      } else {
-        enqueueSnackbar('Bank not verified.', { variant: 'warning' });
-      }
-    });
-  }, [searchParams]);
 
   useEffect(() => {
     HttpService.get('/user/vendor/profile/bank-detail/verified').then(
@@ -95,7 +80,7 @@ export function BankDetail() {
         <div className={styles.panel}>
           <img src={StripeLogo} alt="Stripe Logo" />
           <p>Click the button to connect your store to Stripe.</p>
-          <button onClick={onConnectClick}>Click Here</button>
+          <button onClick={onConnectClick} disabled={isBankActive}>Click Here</button>
         </div>
       </div>
     </Card>

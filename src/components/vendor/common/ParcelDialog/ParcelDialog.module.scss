@@ -1,0 +1,54 @@
+.root {
+  @apply fixed left-0 top-0 z-[50] flex h-screen w-screen items-center justify-center bg-black/30;
+
+  .container {
+    @apply relative flex w-full max-w-screen-md flex-col rounded-lg bg-white px-8 py-10 shadow-lg;
+
+    .title {
+      @apply mb-4 text-[20px] font-bold leading-[30px];
+    }
+
+    .description {
+      @apply mb-3 font-medium text-success;
+    }
+
+    .horizon {
+      @apply mb-4 flex gap-x-3;
+
+      > .control {
+        @apply grow;
+      }
+    }
+
+    .control {
+      @apply space-y-2;
+      > p {
+        @apply font-medium;
+      }
+    }
+
+    .buttons {
+      @apply flex justify-end gap-x-4;
+
+      .button {
+        @apply px-10 py-2;
+      }
+
+      .update {
+        @apply rounded-full bg-dark text-white;
+      }
+
+      .cancel {
+        @apply rounded-full border-1 border-primary bg-white;
+      }
+    }
+
+    .closeBtn {
+      @apply absolute right-2.5 top-2 flex h-12 w-12 cursor-pointer items-center justify-center rounded-full shadow-md;
+    }
+  }
+}
+
+.hide {
+  @apply hidden;
+}
