@@ -40,10 +40,9 @@ export function MyCart({
     setCartItems(cartItems.filter(item => item._id !== id));
   };
 
-  const onSubscribeChange = (id: string) => (value: string) => {
-    setCartItems(cartItems.map(item =>
-      item._id === id ? ({ ...item, subscription: { ...(item.subscription || {}), subscribe: value } }) : item
-    ));
+  const onSubscribeChange = (id: string) => (subscription: any) => {
+    setCartItems(
+      cartItems.map(item => item._id === id ? ({ ...item, subscription, buymode: 'recurring' }) : item));
   };
 
   const onGiftChange = (id: string) => (gift: any) => {
@@ -148,7 +147,6 @@ export function MyCart({
               onSubscribeChange={onSubscribeChange(cartItem._id)}
               onShippingRatesChange={onShippingRatesChange(cartItem._id)}
               onShippingServiceChange={onShippingServiceChange(cartItem._id)}
-              onBuymodeChange={onBuymodeChange(cartItem._id)}
               onGiftChange={onGiftChange(cartItem._id)}
               onDeleteCart={onRemoveCartClick(cartItem._id)}
               onDeliveryToggle={onDeliveryChange(cartItem._id)}

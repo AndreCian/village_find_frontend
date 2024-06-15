@@ -35,7 +35,7 @@ interface ILinkImage {
 interface IShopVCommunity {
   name: string;
   detail: string;
-  category: string;
+  categories: string[];
   image: string;
   slug: string;
 }
@@ -257,9 +257,15 @@ export function AboutCommunity({ community, ready }: IAboutCommunityProps) {
                       {shopVCommunity.detail}
                     </span>
                     <p className={styles.catLabel}>Category</p>
-                    <span className={styles.category}>
-                      {shopVCommunity.category}
-                    </span>
+                    {categories
+                      .filter(item =>
+                        shopVCommunity.categories.includes(item.name.toLowerCase()),
+                      )
+                      .map((item: any, index: number) => (
+                        <span key={index} className={styles.category}>
+                          {item.name}
+                        </span>
+                      ))}
                   </div>
                 </div>
               ),

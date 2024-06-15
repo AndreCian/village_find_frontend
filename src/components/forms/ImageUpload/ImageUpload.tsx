@@ -30,6 +30,7 @@ export function ImageUpload({
 }: IImageUploadProps) {
   const [imageSrc, setImageSrc] = useState<string>('');
   const [imagePath, setImagePath] = useState<string>('');
+  const [isFileEmpty, setIsFileEmpty] = useState<boolean>(true);
   const imgInputRef = useRef<HTMLInputElement>(null);
 
   const classes = clsx(styles.root, rounded ? styles.rounded : '', className);
@@ -49,13 +50,14 @@ export function ImageUpload({
 
     uploadImage(e.target.files[0]);
     updateBaseImage(e.target.files[0]);
+    setIsFileEmpty(false);
   };
 
   const onUploadCancel = () => {
     setImageSrc('');
     if (imgInputRef.current) {
-      console.log('Upload Cancel');
       imgInputRef.current.value = '';
+      setIsFileEmpty(true);
     }
   };
 
@@ -72,7 +74,7 @@ export function ImageUpload({
       )}
       <div className={styles.body}>
         <div className={styles.imgSelector}>
-          <Input type="file" updateValue={onUploadChange} ref={imgInputRef} />
+          <Input type="file" updateValue={onUploadChange} fileEmpty={isFileEmpty} ref={imgInputRef} />
           {imageSrc !== '' && <CancelIcon onClick={onUploadCancel} />}
         </div>
         {imageSrc !== '' ? (

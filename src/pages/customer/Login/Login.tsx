@@ -11,6 +11,7 @@ import { setupToken } from '@/utils';
 
 import LoginImage from '/assets/customer/backs/login.png';
 import styles from './Login.module.scss';
+import { useAppSelector } from '@/redux/store';
 
 interface IUser {
   email: string;
@@ -27,6 +28,7 @@ export function Login() {
   const location = useLocation();
   const pathname = location.pathname;
 
+  const guestId = useAppSelector(state => state.guest.guestID);
   const { setAccount, setIsLogin } = useContext(AuthContext);
   const [currentUser, setCurrentUser] = useState<IUser>(initialUser);
 
@@ -53,14 +55,19 @@ export function Login() {
       .then(response => {
         const { status, token, profile } = response;
         if (status === 200) {
-          setIsLogin(true);
-          setAccount({
-            role: role as RoleType,
-            profile,
-          });
           setupToken(token, role);
-          enqueueSnackbar('Login successfully!', { variant: 'success' });
-          navigate(role === 'vendor' ? '/vendor' : '/');
+          HttpService.post(`/cart/migrate`, { guestId }).then(response => {
+            const { status } = response;
+            if (status === 200) {
+              setIsLogin(true);
+              setAccount({
+                role: 'customer',
+                profile,
+              });
+              enqueueSnackbar('Login successfully!', { variant: 'success' });
+              navigate(role === 'vendor' ? '/vendor' : '/');
+            }
+          });
         } else if (status === 400) {
           enqueueSnackbar('Invalid credentials!', { variant: 'error' });
         } else if (status === 404) {

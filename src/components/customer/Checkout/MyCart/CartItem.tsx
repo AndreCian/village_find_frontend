@@ -51,13 +51,6 @@ const getFrequencyLabel = (frequency: string) => {
   return interval === 1 ? `Every ${unit}` : `Every ${interval} ${unit}s`;
 };
 
-const getFrequencyOpts = (options: string[]) => {
-  return options.reduce((total: any, item: string) => {
-    const option = frequencyOpts.find(opt => opt.value === item);
-    return option ? [...total, option] : total;
-  }, []);
-}
-
 function convertTime24to12(time24: string) {
   if (!time24) return '';
   const [hours, minutes] = time24.split(':');
@@ -80,7 +73,6 @@ export function CartItem({
   deliveryType,
   pickuplocation,
   shipping,
-  shippingRates = [],
   fulfillday,
   gift,
   recipient,
@@ -92,21 +84,21 @@ export function CartItem({
   onDeliveryInfoChange,
   onPickupLocationChange,
   onQuantityChange,
-  onBuymodeChange,
   onShippingRatesChange,
   onShippingServiceChange
 }: ICartItem & {
   onDeleteCart: () => void;
-  onSubscribeChange: (subscribe: string) => void;
+  onSubscribeChange: (subscription: any) => void;
   onGiftChange: (gift: any) => void;
   onDeliveryInfoChange: (deliveryInfo: any) => void;
   onDeliveryToggle: (option: string) => void;
   onPickupLocationChange: (data: any) => void;
   onQuantityChange: (quantity: number) => void;
-  onBuymodeChange: (mode: string) => void;
   onShippingRatesChange: (rates: any[]) => void;
   onShippingServiceChange: (shipping: any) => void;
 }) {
+  console.log('CartItem rerendered', cartId, subscription);
+
   const [isGiftDialog, setIsGiftDialog] = useState(false);
   const [isPickupLocationDialog, setIsPickupLocationDialog] = useState(false);
   const [isDeliveryDateDialog, setIsDeliveryDateDialog] = useState(false);
@@ -114,10 +106,6 @@ export function CartItem({
   const [isShippingDialog, setIsShippingDialog] = useState(false);
   const [deliveryDate, setDeliveryDate] = useState(new Date());
   const [safePickupDate, setSafePickupDate] = useState(new Date());
-
-  useEffect(() => {
-    console.log(shipping);
-  }, [shipping])
 
   const csaCycle = useMemo(() => {
     if (!subscription?.iscsa) return 0;
@@ -274,11 +262,11 @@ export function CartItem({
   const onFrequencyChange = (value: string) => {
     HttpService.put(`/cart/${cartId}`, {
       subscription: { ...subscription, subscribe: value },
+      buymode: 'recurring'
     }).then(response => {
       const { status } = response;
       if (status === 200) {
-        onSubscribeChange(value);
-        onBuymodeChange('recurring');
+        onSubscribeChange({ ...subscription, subscribe: value });
         enqueueSnackbar('Subscription frequency updated.', {
           variant: 'success',
         });
@@ -288,7 +276,6 @@ export function CartItem({
 
   const onShippingMethodChange = (value: string) => {
     const rates = shipping.rates;
-    console.log(rates);
     const rateItem = rates.find(item => item.serviceLevelToken === value);
     const reqJson = { ...shipping, charge: Number(rateItem.amount), serviceLevelToken: value, carrierAccount: rateItem.carrierAccount };
     HttpService.put(`/cart/${cartId}`, { shipping: reqJson }).then(response => {

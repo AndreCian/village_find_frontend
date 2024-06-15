@@ -37,6 +37,7 @@ export function Products() {
   const [sortValue, setSortValue] = useState('');
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
+  const [zipcode, setZipcode] = useState('');
 
   useEffect(() => {
     const params: any = {};
@@ -100,7 +101,10 @@ export function Products() {
         <div className={styles.zipcode}>
           <p>Find items near you!</p>
           <Input
+            name='zipcode'
             placeholder="Enter Zipcode"
+            value={zipcode}
+            updateValue={(e: ChangeInputEvent) => setZipcode(e.target.value)}
             adornment={{ position: 'right', content: <MagnifierIcon /> }}
           />
         </div>

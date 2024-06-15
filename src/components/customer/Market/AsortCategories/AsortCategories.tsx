@@ -9,9 +9,9 @@ export function AsortCategories() {
   const [products, setProducts] = useState<any[]>([]);
 
   useEffect(() => {
-    HttpService.get('/products/public').then(response => {
-      
-    })
+    // HttpService.get('/products/public').then(response => {
+
+    // })
   }, []);
 
   return (

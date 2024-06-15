@@ -43,6 +43,7 @@ export interface IInputProps {
   className?: string;
   disabled?: boolean;
   error?: string;
+  fileEmpty?: boolean;
   valueVisible?: boolean;
 
   onClick?: () => void;
@@ -68,6 +69,7 @@ export const Input = forwardRef((props: IInputProps, ref: any) => {
     adornment = null,
     defaultValue = '',
     error = '',
+    fileEmpty = true,
     updateValue = () => { },
     onClick = () => { },
     onBlur = () => { },
@@ -124,6 +126,12 @@ export const Input = forwardRef((props: IInputProps, ref: any) => {
     }
   };
 
+  useEffect(() => {
+    if (type === 'file') {
+      console.log('File input updated.');
+    }
+  }, [value, type]);
+
   return (
     <div className={classes} onClick={onChooseClick}>
       <input
@@ -145,7 +153,7 @@ export const Input = forwardRef((props: IInputProps, ref: any) => {
         <>
           <button>Choose file</button>
           <p className={styles.fileText}>
-            <strong>{fileName || 'No file selected'}</strong>
+            <strong>{(fileEmpty || !fileName) ? 'No file selected' : fileName}</strong>
           </p>
         </>
       )}

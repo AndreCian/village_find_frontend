@@ -84,7 +84,7 @@ export function ProductInfo({
   const selectedInvent = useMemo(() => {
     if (!cartProduct.styleID) return null;
     return inventories.find((item: any) => item._id === selectedInventID);
-  }, [selectedInventID]);
+  }, [selectedInventID, cartProduct.styleID]);
 
   const productPrice = useMemo(() => {
     return (selectedInvent && selectedInvent.price) || price;
@@ -118,6 +118,7 @@ export function ProductInfo({
   };
 
   const onStyleChange = (id: string) => {
+    console.log(id);
     const style = variants.find(item => item._id === id);
     setCartProduct({ ...cartProduct, styleID: id });
     setAttributes(Array(style?.attributes.length).fill(''));
@@ -275,7 +276,7 @@ export function ProductInfo({
           {variants.length !== 0 && <div className={styles.style}>
             <Select
               placeholder="Style"
-              options={variants.map((style: { _id: string; name: string }) => ({
+              options={[{ _id: '', name: 'None' }, ...variants].map((style: { _id: string; name: string }) => ({
                 ...style,
                 value: style._id,
               }))}

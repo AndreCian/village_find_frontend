@@ -1,11 +1,13 @@
+import { useContext, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Container } from '@/components/layout/customer';
+
+import { HttpService } from '@/services';
+import { CategoryContext } from '@/providers';
+import { SERVER_URL } from '@/config/global';
 
 import ShopVComImage from '/assets/customer/backs/shopvcom.png';
 import styles from './VCommunities.module.scss';
-import { useContext, useEffect, useState } from 'react';
-import { HttpService } from '@/services';
-import { Link, useNavigate } from 'react-router-dom';
-import { CategoryContext } from '@/providers';
 
 const initialCommunities = [
   {
@@ -75,7 +77,7 @@ export function VCommunities() {
               className={styles.shopvcom}
               onClick={() => navigate(`/communities/${community.slug}`)}
             >
-              <img src={community.images?.logoUrl} />
+              <img src={`${SERVER_URL}/${community.images?.logoUrl}`} />
               <div className={styles.vcomText}>
                 <p className={styles.name}>{community.name}</p>
                 <span className={styles.detail}>{community.shortDesc}</span>
