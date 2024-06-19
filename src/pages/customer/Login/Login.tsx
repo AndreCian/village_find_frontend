@@ -56,18 +56,28 @@ export function Login() {
         const { status, token, profile } = response;
         if (status === 200) {
           setupToken(token, role);
-          HttpService.post(`/cart/migrate`, { guestId }).then(response => {
-            const { status } = response;
-            if (status === 200) {
-              setIsLogin(true);
-              setAccount({
-                role: 'customer',
-                profile,
-              });
-              enqueueSnackbar('Login successfully!', { variant: 'success' });
-              navigate(role === 'vendor' ? '/vendor' : '/');
-            }
-          });
+          if (role === 'customer') {
+            HttpService.post(`/cart/migrate`, { guestId }).then(response => {
+              const { status } = response;
+              if (status === 200) {
+                setIsLogin(true);
+                setAccount({
+                  role: 'customer',
+                  profile,
+                });
+                enqueueSnackbar('Login successfully!', { variant: 'success' });
+                navigate('/');
+              }
+            });
+          } else {
+            setIsLogin(true);
+            setAccount({
+              role: 'vendor',
+              profile
+            });
+            enqueueSnackbar('Login successfully!', { variant: 'success' });
+            navigate('/vendor');
+          }
         } else if (status === 400) {
           enqueueSnackbar('Invalid credentials!', { variant: 'error' });
         } else if (status === 404) {
