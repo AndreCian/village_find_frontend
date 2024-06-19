@@ -148,7 +148,7 @@ export function Vendor() {
               <button onClick={onAboutClick}>About</button>
             </div>
           </div>
-          <div className={styles.community}>
+          {community && <div className={styles.community}>
             <p>Vendor Community</p>
             <div>
               <p onClick={() => navigate(`/communities/${community.slug}`)}>
@@ -159,7 +159,7 @@ export function Vendor() {
                 alt="Community logo"
               />
             </div>
-          </div>
+          </div>}
         </div>
         <div className={styles.announcement}>
           <div className={styles.container}>
@@ -194,7 +194,7 @@ export function Vendor() {
               })),
             ]}
             vendor={''}
-            changeVendor={() => {}}
+            changeVendor={() => { }}
             vendors={[]}
             minPrice={minPrice}
             maxPrice={maxPrice}
@@ -207,7 +207,7 @@ export function Vendor() {
             vendors={[]}
             openFindProductDialog={() => showFindProductDialog(true)}
             openFilterSortDialog={() => showSortFilterDialog(true)}
-            openMobileSettingDialog={() => {}}
+            openMobileSettingDialog={() => { }}
           />
         </div>
         <div className={styles.pagination}>
