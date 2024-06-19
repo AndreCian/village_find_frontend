@@ -1,7 +1,7 @@
 import { createContext, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 
-import { IAttribute } from '..';
+import { IAttribute } from '@/redux/reducers';
 
 interface IStyleContext {
   styleName: string;
@@ -12,9 +12,9 @@ interface IStyleContext {
 
 export const StyleCreateContext = createContext<IStyleContext>({
   styleName: '',
-  setStyleName: () => {},
+  setStyleName: () => { },
   attributes: [],
-  setAttributes: () => {},
+  setAttributes: () => { },
 });
 
 export function StyleCreateLayout() {

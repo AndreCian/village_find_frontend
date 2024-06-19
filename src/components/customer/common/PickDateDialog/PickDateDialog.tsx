@@ -20,10 +20,10 @@ interface IPickDateDialogProps {
 export function PickDateDialog({
   open,
   dates = [],
-  onUpdate = () => {},
-  onClose = () => {},
+  onUpdate = () => { },
+  onClose = () => { },
   selectedDay = new Date(),
-  setSelectedDay = () => {},
+  setSelectedDay = () => { },
 }: IPickDateDialogProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
 
@@ -45,7 +45,7 @@ export function PickDateDialog({
   }, []);
 
   return (
-    open && (
+    open ? (
       <div className={styles.root}>
         <div className={styles.container} ref={dialogRef}>
           <p className={styles.title}>Choose a fulfillment date</p>
@@ -65,6 +65,6 @@ export function PickDateDialog({
           </span>
         </div>
       </div>
-    )
+    ) : <></>
   );
 }
