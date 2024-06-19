@@ -35,7 +35,7 @@ export interface IOrderDetail {
     shopName: string;
   };
   community: {
-    _id: string;
+    _id: string | null;
     name: string;
     slug: string;
     images: {

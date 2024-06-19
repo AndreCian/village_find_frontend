@@ -218,7 +218,7 @@ export function ProductInfo({
         <p className={styles.toVendor} onClick={onVendorClick}>
           {vendor.shopName}
         </p>
-        <div className={styles.comInfo}>
+        {community._id && <div className={styles.comInfo}>
           <p className={styles.toCommunity} onClick={onCommunityClick}>
             {community.name}
           </p>
@@ -226,7 +226,7 @@ export function ProductInfo({
             src={`${SERVER_URL}/${community.images.logoUrl}`}
             alt="Community Logo"
           />
-        </div>
+        </div>}
       </div>
       <div className={styles.blank}></div>
       <div className={styles.images}>
