@@ -60,7 +60,7 @@ export function FeaturedItems({ items }: { items: IFeaturedItem[] }) {
                     />
                   ))}
               {items.length > 0 && (
-                <ProductCard isLoadMore={true} product={items.reverse()[0]} />
+                <ProductCard isLoadMore={true} />
               )}
             </div>
           </>
