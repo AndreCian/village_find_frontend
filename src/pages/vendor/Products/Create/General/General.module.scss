@@ -53,7 +53,7 @@
       }
 
       .form {
-        @apply space-y-4;
+        @apply flex flex-col gap-y-4;
 
         .control {
           @apply space-y-2;
@@ -80,6 +80,16 @@
 
           .textInput span {
             @apply bg-success;
+          }
+        }
+
+        .control.dimension  {
+          @apply flex gap-x-2 items-center;
+          > span {
+            @apply rounded-full bg-success w-8 h-8 flex items-center justify-center cursor-pointer;
+            >svg {
+              @apply text-white fill-white; 
+            }
           }
         }
       }

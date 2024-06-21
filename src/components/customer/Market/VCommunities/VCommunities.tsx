@@ -6,7 +6,35 @@ import { HttpService } from '@/services';
 import { CategoryContext } from '@/providers';
 import { SERVER_URL } from '@/config/global';
 
+import ShopVComImage from '/assets/customer/backs/shopvcom.png';
 import styles from './VCommunities.module.scss';
+
+const initialCommunities = [
+  {
+    name: 'Field Of Artisans',
+    detail: 'Over 600 artisans making unique one-of-a-kind items.',
+    category: 'Wood Working',
+    image: ShopVComImage,
+  },
+  {
+    name: 'Field Of Artisans',
+    detail: 'Over 600 artisans making unique one-of-a-kind items.',
+    category: 'Wood Working',
+    image: ShopVComImage,
+  },
+  {
+    name: 'Field Of Artisans',
+    detail: 'Over 600 artisans making unique one-of-a-kind items.',
+    category: 'Wood Working',
+    image: ShopVComImage,
+  },
+  {
+    name: 'Field Of Artisans',
+    detail: 'Over 600 artisans making unique one-of-a-kind items.',
+    category: 'Wood Working',
+    image: ShopVComImage,
+  },
+];
 
 interface ICommunity {
   name: string;

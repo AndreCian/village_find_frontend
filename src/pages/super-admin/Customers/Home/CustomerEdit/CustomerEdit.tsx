@@ -15,7 +15,6 @@ import styles from './CustomerEdit.module.scss';
 
 const initialCustomer: ICustomer = {
   name: '',
-  fullName: '',
   email: '',
   phone: '',
   address: '',

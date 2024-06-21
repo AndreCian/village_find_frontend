@@ -72,8 +72,8 @@ export function Login() {
           } else {
             setIsLogin(true);
             setAccount({
-              role: 'vendor',
-              profile
+              profile,
+              role: 'vendor'
             });
             enqueueSnackbar('Login successfully!', { variant: 'success' });
             navigate('/vendor');

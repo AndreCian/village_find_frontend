@@ -1,4 +1,5 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
+import { IParcel } from '@/components/vendor';
 
 export interface IAttribute {
   name: string;
@@ -24,6 +25,7 @@ export interface IGeneral {
   quantity: number;
   soldByUnit: string;
   tax: number;
+  parcel?: IParcel;
 }
 
 type IUpdateGeneral = Partial<IGeneral>;

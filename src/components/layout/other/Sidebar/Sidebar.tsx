@@ -81,7 +81,7 @@ export function Sidebar() {
         <p>Sackett River Company</p>
       </div>
       <div className={styles.navbar}>
-        {(roleRoutes as IRouteItem[])
+        {roleRoutes
           .filter((route: any) => !route.hide)
           .map((route: any, index: number) => (
             <div key={`${route.path}-${index}`} className={styles.navItem}>

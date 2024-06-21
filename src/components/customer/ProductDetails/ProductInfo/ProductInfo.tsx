@@ -57,11 +57,9 @@ export function ProductInfo({
   customization = { fee: 0, customText: '' },
   subscription,
   soldByUnit,
-  deliveryTypes,
+  parcel
 }: IOrderDetail) {
   const navigate = useNavigate();
-
-  console.log(inventories);
 
   const { isLogin, account } = useContext(AuthContext);
   const { cartItems, setCartItems } = useContext(CartContext);
@@ -74,7 +72,7 @@ export function ProductInfo({
   });
   const [selectedInventID, setSelectedInventID] = useState<string>('main');
   const [attributes, setAttributes] = useState<string[]>([]);
-  const [isPersonalized, setIsPersonalized] = useState<Boolean>(false);
+  const [isPersonalized, setIsPersonalized] = useState<boolean>(false);
   const [customMessage, setCustomMessage] = useState('');
 
   const selectedStyle = useMemo(() => {
@@ -151,11 +149,12 @@ export function ProductInfo({
     };
     if (subscription) reqJson.subscription = subscription;
     if (selectedStyle && selectedInvent) {
-      console.log(selectedInvent);
       reqJson.attributes =
         selectedStyle.attributes
           .map((item, index) => ({ name: item.name, value: attributes[index] }))
       if (selectedInvent.parcel) reqJson.parcel = selectedInvent.parcel;
+    } else {
+      if (parcel) reqJson.parcel = parcel;
     }
 
     const params: any = {};
@@ -218,7 +217,7 @@ export function ProductInfo({
         <p className={styles.toVendor} onClick={onVendorClick}>
           {vendor.shopName}
         </p>
-        {community._id && <div className={styles.comInfo}>
+        <div className={styles.comInfo}>
           <p className={styles.toCommunity} onClick={onCommunityClick}>
             {community.name}
           </p>
@@ -226,7 +225,7 @@ export function ProductInfo({
             src={`${SERVER_URL}/${community.images.logoUrl}`}
             alt="Community Logo"
           />
-        </div>}
+        </div>
       </div>
       <div className={styles.blank}></div>
       <div className={styles.images}>

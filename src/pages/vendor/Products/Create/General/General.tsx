@@ -1,5 +1,6 @@
 import { ChangeEvent, useContext, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { FaPlus } from 'react-icons/fa6';
 import { enqueueSnackbar } from 'notistack';
 import clsx from 'clsx';
 
@@ -10,8 +11,9 @@ import {
   Select,
   TextField,
 } from '@/components/forms';
-import { AIDialog } from '@/components/super-admin/common';
+import { AIDialog, IParcel } from '@/components/vendor/common';
 import { MagicIcon } from '@/components/icons';
+import { ParcelDialog } from '@/components/vendor';
 import { CategoryContext } from '@/providers';
 import { ProductContext } from '../Provider';
 import { useAppDispatch, useAppSelector } from '@/redux/store';
@@ -20,6 +22,7 @@ import { HttpService } from '@/services';
 import { ChangeInputEvent } from '@/interfaces';
 
 import styles from './General.module.scss';
+import { FaEdit } from 'react-icons/fa';
 
 type PayType = 'Shipping' | 'Near By' | 'Local Subscriptions';
 type TopicType =
@@ -57,6 +60,7 @@ export function General() {
   const [generalInfo, setGeneralInfo] =
     useState<IGeneral>(initialInfo);
   const [dialogTopic, setDialogTopic] = useState<TopicType>('product name');
+  const [isParcelDialog, setIsParcelDialog] = useState<boolean>(false);
 
   const onAnswerSelect = (answer: string) => {
     setGeneralInfo({
@@ -140,6 +144,7 @@ export function General() {
       formData.append('price', generalInfo.price.toString());
       formData.append('quantity', generalInfo.quantity.toString());
       formData.append('tax', `${generalInfo.tax}`);
+      formData.append('parcel', JSON.stringify(generalInfo.parcel));
       if (nutrition) formData.append('nutrition', nutrition);
       if (image) formData.append('image', image);
       HttpService.put(`/products/${productId}`, formData).then(response => {
@@ -150,6 +155,15 @@ export function General() {
       })
     }
   };
+
+  const onEditClick = () => {
+    setIsParcelDialog(true);
+  }
+
+  const onParcelApply = (parcel: IParcel) => {
+    console.log(parcel)
+    setGeneralInfo({...generalInfo, parcel})
+  }
 
   useEffect(() => {
     if (productId === 'create') {
@@ -368,6 +382,10 @@ export function General() {
                 updateValue={onProductChange}
               />
             </div>
+            <div className={clsx(styles.control, styles.dimension)}>
+              <p>Dimension</p>
+              <span onClick={onEditClick}>{generalInfo.parcel ? <FaEdit /> : <FaPlus />}</span>
+            </div>
           </div>
           <div className={styles.buttonBar}>
             <button className={styles.button} onClick={onCancelClick}>
@@ -389,6 +407,12 @@ export function General() {
         onClose={() => setProductDialogOpen(false)}
         onSelect={onAnswerSelect}
       />
+      <ParcelDialog 
+        open={isParcelDialog}
+        onClose={() => setIsParcelDialog(false)}
+        parcel={generalInfo.parcel || null}
+        onApply={onParcelApply}
+       />
     </div>
   );
 }

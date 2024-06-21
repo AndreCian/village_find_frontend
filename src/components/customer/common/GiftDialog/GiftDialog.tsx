@@ -125,7 +125,7 @@ export function GiftDialog({
   }, []);
 
   return (
-    open ? (
+    open && (
       <div className={styles.root}>
         <div className={styles.container} ref={dialogRef}>
           <p className={styles.title}>
@@ -365,6 +365,6 @@ export function GiftDialog({
           </span>
         </div>
       </div>
-    ) : <></>
+    )
   );
 }

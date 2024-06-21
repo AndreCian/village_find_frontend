@@ -106,7 +106,8 @@ export function RegisterFormDialog({
     }
   }, [open]);
 
-  return open ? (
+  if (!open) return;
+  return (
     <div className={styles.root}>
       <div className={styles.container}>
         <div className={styles.header}>
@@ -123,7 +124,7 @@ export function RegisterFormDialog({
               <p className={styles.month}>
                 {
                   initialMonthLabels[
-                  new Date(event.fulfillment.date).getMonth()
+                    new Date(event.fulfillment.date).getMonth()
                   ]
                 }
               </p>
@@ -161,5 +162,5 @@ export function RegisterFormDialog({
         </span>
       </div>
     </div>
-  ) : <></>
+  );
 }

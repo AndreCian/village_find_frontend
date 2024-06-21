@@ -9,6 +9,7 @@ import {
   ProductsAndCommunities,
 } from '@/components/customer/ProductDetails';
 import { HttpService } from '@/services';
+import { IParcel } from '@/components/vendor';
 
 import styles from './ProductDetails.module.scss';
 
@@ -35,7 +36,7 @@ export interface IOrderDetail {
     shopName: string;
   };
   community: {
-    _id: string | null;
+    _id: string;
     name: string;
     slug: string;
     images: {
@@ -78,6 +79,7 @@ export interface IOrderDetail {
   };
   soldByUnit: string;
   deliveryTypes: string[];
+  parcel?: IParcel;
 }
 
 const initialMoreDetail: IMoreDetail = {
