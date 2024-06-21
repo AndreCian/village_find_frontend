@@ -1,12 +1,11 @@
-import { useContext, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { enqueueSnackbar } from 'notistack';
 import clsx from 'clsx';
 
 import { Input, Select } from '@/components';
 import { useAppDispatch, useAppSelector } from '@/redux/store';
-import { updateSubscription, ISubscription, updateGeneral } from '@/redux/reducers';
-import { ProductContext } from '../Provider';
+import { updateSubscription, ISubscription } from '@/redux/reducers';
 import { HttpService } from '@/services';
 import { ChangeInputEvent } from '@/interfaces';
 import { getBubbleObject } from '@/utils';
@@ -35,20 +34,14 @@ export function Subscription() {
   const { productId } = useParams();
 
   const storeSubscription = useAppSelector(state => state.product.subscription);
-  const { deliveryTypes, setDeliveryTypes } = useContext(ProductContext);
+  const deliveryTypes = useAppSelector(state => state.product.general.deliveryTypes);
 
   const [subscription, setSubscription] =
-    useState<ISubscription>(initialSubscription);
+    useState<ISubscription | null>(storeSubscription || null);
 
   const isCsa = useMemo(() => {
-    if (deliveryTypes.length > 0) {
-      const result = deliveryTypes.includes('Local Subscriptions');
-      setSubscription({ ...subscription, iscsa: result });
-      return result;
-    } else {
-      return subscription.iscsa;
-    }
-  }, [deliveryTypes, subscription]);
+    return deliveryTypes.includes('Local Subscriptions');
+  }, [deliveryTypes]);
 
   const onCancelClick = () => {
     navigate(`${PRODUCT_PATH}/${productId}`);
@@ -59,22 +52,22 @@ export function Subscription() {
   };
 
   const onSubscFrequencyChange = (value: string) => {
-    if (subscription.frequencies.includes(value)) {
+    if (subscription?.frequencies.includes(value)) {
       setSubscription({
-        ...subscription, frequencies: subscription.frequencies.filter(item => item !== value)
+        ...(subscription || initialSubscription), frequencies: subscription?.frequencies.filter(item => item !== value) || []
       });
     } else {
-      setSubscription({ ...subscription, frequencies: [...subscription.frequencies, value] });
+      setSubscription({ ...(subscription || initialSubscription), frequencies: [...subscription?.frequencies || [], value] });
     }
   };
 
   const onCsaSubscFrequencyChange = (value: string) => {
-    setSubscription({ ...subscription, csa: { duration: 1, ...subscription.csa, frequency: value } })
+    setSubscription({ ...(subscription || initialSubscription), csa: { duration: 1, ...subscription?.csa, frequency: value } })
   }
 
   const onUpdateClick = () => {
     if (productId === 'create') {
-      dispatch(updateSubscription(subscription));
+      dispatch(updateSubscription(subscription as ISubscription));
       navigate(`${PRODUCT_PATH}/${productId}`);
     } else {
       HttpService.post(`/products/${productId}/subscription`, subscription).then(response => {
@@ -88,7 +81,7 @@ export function Subscription() {
 
   useEffect(() => {
     if (productId === 'create') {
-      setSubscription(storeSubscription);
+      setSubscription(storeSubscription || null);
     } else {
       HttpService.get(`/products/vendor/${productId}`).then(response => {
         const { status, product } = response;
@@ -116,7 +109,7 @@ export function Subscription() {
                 border="none"
                 bgcolor="primary"
                 placeholder="Select frequency"
-                value={subscription.frequencies}
+                value={subscription?.frequencies}
                 multiple={true}
                 updateValue={onSubscFrequencyChange}
                 options={frequencyOpts}
@@ -132,7 +125,7 @@ export function Subscription() {
                 bgcolor="secondary"
                 adornment={{ position: 'left', content: '%' }}
                 placeholder="Subscription Discount"
-                value={(!isCsa && subscription.discount) || ''}
+                value={(!isCsa && subscription?.discount) || ''}
                 updateValue={onSubscInputChange}
                 disabled={isCsa}
               />
@@ -149,7 +142,7 @@ export function Subscription() {
                 border="none"
                 bgcolor="primary"
                 placeholder="Select frequency"
-                value={subscription.csa?.frequency}
+                value={subscription?.csa?.frequency}
                 updateValue={onCsaSubscFrequencyChange}
                 disabled={!isCsa}
                 options={frequencyOpts}
@@ -164,7 +157,7 @@ export function Subscription() {
                 bgcolor="secondary"
                 adornment={{ position: 'left', content: '%' }}
                 placeholder="Subscription Discount"
-                value={(isCsa && subscription.discount) || ''}
+                value={(isCsa && subscription?.discount) || ''}
                 updateValue={onSubscInputChange}
                 disabled={!isCsa}
               />
@@ -179,7 +172,7 @@ export function Subscription() {
                 bgcolor="secondary"
                 adornment={{ position: 'right', content: 'Weeks' }}
                 placeholder="Number"
-                value={(isCsa && subscription.csa?.duration) || ''}
+                value={(isCsa && subscription?.csa?.duration) || ''}
                 updateValue={onSubscInputChange}
                 disabled={!isCsa}
               />
@@ -198,7 +191,7 @@ export function Subscription() {
                 border="none"
                 bgcolor="secondary"
                 placeholder="--/--/----"
-                value={subscription.csa?.startDate}
+                value={subscription?.csa?.startDate}
                 updateValue={onSubscInputChange}
                 disabled={!isCsa}
               />
@@ -212,7 +205,7 @@ export function Subscription() {
                 border="none"
                 bgcolor="secondary"
                 placeholder="--/--/----"
-                value={subscription.csa?.endDate}
+                value={subscription?.csa?.endDate}
                 updateValue={onSubscInputChange}
                 disabled={!isCsa}
               />

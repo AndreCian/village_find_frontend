@@ -21,16 +21,29 @@
     }
 
     .inputs {
-      @apply flex flex-col gap-y-4;
+      @apply flex flex-col gap-y-4 max-w-[640px];
 
-      .input {
+      >.control {
+        @apply flex gap-x-4;
+
+        >.input {
+          @apply grow shrink-0;
+        }
+      }
+
+      >.input {
         @apply w-full xl:w-1/2;
 
         input {
           @apply border-1 border-primary focus:border-3 focus:border-danger;
         }
       }
+
+      >.input.password {
+        @apply w-full;
+      }
     }
+
 
     .buttons {
       .cancel {

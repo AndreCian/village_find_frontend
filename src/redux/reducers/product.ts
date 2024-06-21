@@ -74,7 +74,7 @@ interface ProductState {
   specifications: ISpecification[];
   iscustomizable: boolean;
   customization: ICustomization;
-  subscription: ISubscription;
+  subscription?: ISubscription;
   currentStyleID: number;
 }
 
@@ -98,11 +98,6 @@ const initialState: ProductState = {
     customText: '',
     fee: 0,
   },
-  subscription: {
-    iscsa: false,
-    frequencies: [],
-    discount: 0,
-  },
   currentStyleID: -1,
 };
 
@@ -125,8 +120,9 @@ export const productReducer = createSlice({
     ) => {
       state.general = { ...state.general, ...action.payload };
       const deliveryTypes = action.payload.deliveryTypes;
-      state.subscription.iscsa =
-        deliveryTypes?.includes('Local Subscriptions') || false;
+      if (state.subscription) {
+        state.subscription.iscsa = deliveryTypes?.includes('Local Subscriptions') || false
+      }
     },
     createStyle: (state: ProductState, action: PayloadAction<IStyle>) => {
       const count = state.styles.length;
@@ -181,6 +177,9 @@ export const productReducer = createSlice({
       action: PayloadAction<ISubscription>,
     ) => {
       state.subscription = action.payload;
+      if (state.subscription.csa) {
+        state.subscription.iscsa = true;
+      }
     },
   },
 });
