@@ -32,11 +32,10 @@ const initialForms = [
 ];
 
 export function FormViewDialog({ open, onClose, form }: IFormViewDialogProps) {
-  if (!form) return;
 
   return (
-    open &&
-    form && (
+    (open &&
+    form) ? (
       <div className={styles.root}>
         <div className={styles.panel}>
           <div className={styles.actions}>
@@ -91,6 +90,6 @@ export function FormViewDialog({ open, onClose, form }: IFormViewDialogProps) {
           </span>
         </div>
       </div>
-    )
+    ) : null
   );
 }

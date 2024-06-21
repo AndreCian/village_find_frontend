@@ -28,7 +28,7 @@ export function Sidebar() {
     return (
       routes.find((route: any) => prefixPath.endsWith(route.path))?.children ||
       customerRoutes
-    );
+    ) as IRouteItem[];
   }, [prefixPath]);
 
   const [active, setActive] = useState('');

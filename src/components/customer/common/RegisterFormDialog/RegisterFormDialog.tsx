@@ -106,8 +106,7 @@ export function RegisterFormDialog({
     }
   }, [open]);
 
-  if (!open) return;
-  return (
+  return open ? (
     <div className={styles.root}>
       <div className={styles.container}>
         <div className={styles.header}>
@@ -162,5 +161,5 @@ export function RegisterFormDialog({
         </span>
       </div>
     </div>
-  );
+  ) : null;
 }

@@ -45,7 +45,7 @@ export function PickDateDialog({
   }, []);
 
   return (
-    open && (
+    open ? (
       <div className={styles.root}>
         <div className={styles.container} ref={dialogRef}>
           <p className={styles.title}>Choose a fulfillment date</p>
@@ -65,6 +65,6 @@ export function PickDateDialog({
           </span>
         </div>
       </div>
-    )
+    ) : null
   );
 }

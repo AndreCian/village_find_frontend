@@ -6,10 +6,8 @@ import { Card, Input } from '@/components';
 import { SupportCenter } from '@/components/super-admin';
 
 import { CustomerService } from '@/services';
-
-import { ICustomer } from '@/interfaces';
-
 import { formatNumber } from '@/utils';
+import { ICustomer } from '@/interfaces';
 
 import styles from './CustomerEdit.module.scss';
 

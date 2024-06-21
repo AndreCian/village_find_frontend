@@ -1,5 +1,6 @@
 import { ChangeEvent, useContext, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { FaEdit } from 'react-icons/fa';
 import { FaPlus } from 'react-icons/fa6';
 import { enqueueSnackbar } from 'notistack';
 import clsx from 'clsx';
@@ -22,7 +23,6 @@ import { HttpService } from '@/services';
 import { ChangeInputEvent } from '@/interfaces';
 
 import styles from './General.module.scss';
-import { FaEdit } from 'react-icons/fa';
 
 type PayType = 'Shipping' | 'Near By' | 'Local Subscriptions';
 type TopicType =

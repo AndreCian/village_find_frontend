@@ -1,7 +1,7 @@
 import { createContext, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 
-import { IAttribute } from '..';
+import { IAttribute } from '@/redux/reducers';
 
 interface IStyleContext {
   styleName: string;

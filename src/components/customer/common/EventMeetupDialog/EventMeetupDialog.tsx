@@ -91,8 +91,7 @@ export function EventMeetupDialog({
     setIsRegFormOpen(true);
   };
 
-  if (!open) return;
-  return (
+  return open ? (
     <>
       <div className={styles.root}>
         <div className={styles.container}>
@@ -173,5 +172,5 @@ export function EventMeetupDialog({
         />
       )}
     </>
-  );
+  ) : null;
 }
